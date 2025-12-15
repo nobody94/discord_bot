@@ -1,9 +1,13 @@
 require("dotenv").config();
 const { Client, GatewayIntentBits } = require("discord.js");
 const fs = require("fs");
+const path = require("path");
+
+const GameManager = require("./game/wordchain-vi");
+const { getGameChannelId } = require("./game/game_settings");
 
 const Token = process.env.BOT_TOKEN;
-
+const PREFIX = "!";
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -11,37 +15,21 @@ const client = new Client({
     GatewayIntentBits.MessageContent,
   ],
 });
+client.commands = new Collection();
 
-let gameActive = false;
-let currentLastWord = null;
-const wordHistory = new Set();
-const prefix = '!';
+const commandsPath = path.join(__dirname, "commands");
+const commandFiles = fs
+  .readdirSync(commandsPath)
+  .filter((file) => file.endsWith(".js"));
 
-const listWord = new Set(
-  fs
-    .readFileSync("Viet74K.txt", "utf8")
-    .split("\n")
-    .map((w) => w.trim().toLowerCase())
-    .filter(Boolean)
-);
-
-const dictionary = Array.from(listWord).filter(
-  (phrase) => phrase.split(" ").length === 2
-);
-
-//lấy 2 từ ngẫu nhiên
-function getRandomWords() {
-  const words = Array.from(dictionary);
-  const finalWord = words[Math.floor(Math.random() * words.length)];
-
-  return finalWord;
-}
-
-function isValidWord(word) {
-  return dictionary.includes(word.toLowerCase());
-  // console.log(word);
-
-  // return true
+for (const file of commandFiles) {
+  const filePath = path.join(commandsPath, file);
+  const command = require(filePath);
+  if (command.name && command.execute) {
+    client.commands.set(command.name, command);
+  } else {
+    console.log(`[Cảnh báo] Lệnh tại ${filePath} thiếu 'name' hoặc 'execute'.`);
+  }
 }
 
 client.on("ready", () => {
@@ -52,100 +40,67 @@ client.on("messageCreate", async (message) => {
   // Bỏ qua tin nhắn của bot
   if (message.author.bot) return;
 
-  const content = message.content.trim().toLowerCase();
-  const parts = content.split(/\s+/);
-  const command = parts[0];
-  const [firstWord, secondWord] = parts;
-  const isCommand = command.startsWith(prefix);
+  // Lấy ID kênh đã thiết lập
+  const gameChannelId = getGameChannelId(message.guildId);
 
-  if (command == "!startgame") {    
-    if (gameActive) {
-      return message.reply(
-        `Trò chơi đang diễn ra. Từ nối tiếp cần bắt đầu: **${currentLastWord}**.`
+  const content = message.content.trim();
+  //xử lý lệnh
+  if (content.startsWith(PREFIX)) {
+    const args = content.slice(PREFIX.length).trim().split(/\s+/);
+    const commandName = args.shift().toLowerCase();
+
+    const command =
+      client.commands.get(commandName) ||
+      client.commands.find(
+        (cmd) => cmd.aliases && cmd.aliases.includes(commandName)
       );
+
+    if (!command) return;
+
+    // Kiểm tra quyền (nếu lệnh có yêu cầu)
+    if (
+      command.userPermissions &&
+      !message.member.permissions.has(command.userPermissions)
+    ) {
+      return message.reply({
+        content: "❌ Bạn không có quyền thực hiện lệnh này.",
+        allowedMentions: { repliedUser: false },
+      });
     }
 
-    gameActive = true;    
-    wordHistory.clear();
-
-    //Từ ngẫu nhiên khi bắt đầu game
-    const firstPhrase = getRandomWords();    
-    const [firstWordPhase, secondWordPhase] = firstPhrase.split(' ');
-    currentLastWord = secondWordPhase;
-    wordHistory.add(firstPhrase);    
-    await message.reply(
-      `🎮 **Bắt đầu trò chơi nối từ tiếng Việt!**\nTừ bắt đầu:${firstPhrase}`
-    );
-  }
-  
-  if (command == "!stopgame") {
-    if (!gameActive) {
-      return message.reply("Hiện không có trò chơi nào đang diễn ra.");
+    try {
+      await command.execute(message, args);
+    } catch (error) {
+      console.error(error);
+      message.reply("Đã xảy ra lỗi khi thực thi lệnh này!");
     }
-
-    gameActive = false;
-    const totalWords = wordHistory.size;
-    currentLastWord = null;
-    wordHistory.clear();
-    return message.channel.send(
-      `Trò chơi nối từ đã kết thúc! Tổng cộng **${totalWords}** từ đã được sử dụng.`
-    );
+    return; // Dừng xử lý sau khi xử lý lệnh
   }
 
-  if (!isCommand && gameActive) {
-    // Phải có 2 từ
-    if (parts.length !== 2) {
-      message.reply("❌ Bạn phải nhập cụm 2 từ");
-      return;
+  //xử lý game
+  if (!content.startsWith(PREFIX) && GameManager.isGameActive()) {
+    if (gameChannelId && message.channelId !== gameChannelId) {
+      return; // Bỏ qua nếu tin nhắn không ở đúng kênh game
     }
-    // Lấy tất cả cụm 2 từ chưa dùng và bắt đầu bằng secondWord
-    
-    const nextOptions =  dictionary.filter((p) => {
-      if (wordHistory.has(p)) return false;
-      return secondWord ?  p.split(" ")[0] === secondWord : p.split(" ")[0] === currentLastWord;
-    });   
+    const result = GameManager.gameProcess(content);
 
-    //hết từ nối
-    if (nextOptions.length === 0) {
-      gameActive = false;
-      currentLastWord = null;
-      wordHistory.clear();
-      message.reply(`⚠️ Không còn từ nối tiếp hợp lệ! Game kết thúc.`);
-      return;
-    }
-
-    // Kiểm tra hợp lệ theo từ điển
-    if (!isValidWord(content)) {
-      message.reply("❌ Từ này không có trong từ điển!");
-      return;
-    }
-    // Không lặp cụm
-    if (wordHistory.has(content)) {
-      message.reply("❌ Cụm này đã dùng rồi, hãy nhập cụm khác!");
-      return;
-    }
-    // Nếu là cụm đầu tiên
-    if (!currentLastWord) {
-      currentLastWord = secondWord;
-      wordHistory.add(content);
-      message.reply(
-        `✔ Bắt đầu với **${content}**\nCụm tiếp theo phải bắt đầu bằng **"${secondWord}"**`
+    if (result.success) {
+      await message.channel.send(
+        `✅ **Từ hợp lệ\n` +
+          `Từ tiếp theo phải bắt đầu bằng **"${result.nextRequiredWord}"**.`
       );
-      return;
-    }
-    // Kiểm tra xem từ thứ nhất phải bằng từ thứ 2 trước đó
-    if (firstWord !== currentLastWord) {
-      message.reply(
-        `❌ Sai rồi! Cụm từ phải bắt đầu bằng **"${currentLastWord}"**.`
-      );
-      return;
-    }
+    } else {
+      let replyMessage = result.message;    
 
-    // Hợp lệ → cập nhật
-    wordHistory.add(content);
-    currentLastWord = secondWord;
-
-    message.reply(`✔ Hợp lệ! Từ kế tiếp phải bắt đầu bằng **"${secondWord}"**`);
+      await message.reply({
+        content: replyMessage,
+        allowedMentions: { repliedUser: false },
+      });
+      await message.reply({
+        content: replyMessage,
+        allowedMentions: { repliedUser: false },
+      });
+    }
   }
 });
 
