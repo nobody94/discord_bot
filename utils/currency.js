@@ -43,7 +43,7 @@ async function removeMoney(userId, amount) {
 //     await db.set(`money_${userId}`, amount);
 // }
 
-const currency = 'xu'
+const currency = '<:nMoney:1450423722828894289>'
 
 module.exports = {
     getBalance,

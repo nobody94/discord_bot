@@ -5,7 +5,7 @@ const {
   ModalBuilder,
   TextInputBuilder,
   TextInputStyle,
-  InteractionType
+  InteractionType,
 } = require("discord.js");
 
 const {
@@ -50,6 +50,9 @@ function rollDice() {
   let result = "";
   const isTriple = roll1 === roll2 && roll2 === roll3;
 
+  // Thêm kiểm tra Chẵn/Lẻ (trên tổng điểm)
+  const isEven = total % 2 === 0;
+
   if (isTriple) {
     result = "bão";
   } else if (total >= 11 && total <= 17) {
@@ -58,13 +61,13 @@ function rollDice() {
     result = "xỉu"; // Xỉu: 4, 5, 6, 7, 8, 9, 10
   }
 
-  return { rolls: [roll1, roll2, roll3], total, result, isTriple };
+  return { rolls: [roll1, roll2, roll3], total, result, isTriple, isEven };
 }
 
 // Xử lý sự kiện nhấn nút
 async function handleButton(interaction) {
   if (!interaction.isButton()) return;
-   
+
   const userId = interaction.user.id;
   const choice = interaction.customId.split("_")[1]; // Lấy 'tai' hoặc 'xiu'
 
@@ -94,7 +97,7 @@ async function handleButton(interaction) {
   await interaction.showModal(modal);
 }
 
-async function handleModalSubmit(interaction) {   
+async function handleModalSubmit(interaction) {
   if (interaction.type !== InteractionType.ModalSubmit) return;
 
   const userId = interaction.user.id;
@@ -116,9 +119,6 @@ async function handleModalSubmit(interaction) {
       });
     }
 
-    // 3. Hoãn phản hồi (để có thời gian tính toán DB)
-    // await interaction.deferReply();
-
     // 4. Kiểm tra số dư lần cuối
     const currentBalance = await getBalance(userId);
     if (betAmount > currentBalance) {
@@ -126,10 +126,8 @@ async function handleModalSubmit(interaction) {
         `💸 | Bạn không có đủ **${betAmount}** ${currency}. Số dư hiện tại: **${currentBalance}** ${currency}.`
       );
     }
-    // console.log('betAmount',betAmount,typeof betAmount)
-    // const newBalance = currentBalance - betAmount;
+
     // 5. Trừ tiền cược
-    console.log('removeMoney',userId,betAmount)
     const success = await removeMoney(userId, betAmount);
     if (!success) {
       return interaction.editReply(
@@ -176,7 +174,7 @@ async function handleModalSubmit(interaction) {
     }
 
     // 6. Tung xúc xắc và xử lý kết quả
-    const { rolls, total, result, isTriple } = rollDice();
+    const { rolls, total, result, isTriple,isEven } = rollDice();
 
     let resultMessage = `🎲 **KẾT QUẢ TÀI XỈU** 🎲\n`;
     resultMessage += `**Lựa chọn:** ${choice.toUpperCase()} | **Cược:** ${betAmount} ${currency}\n`;
@@ -188,15 +186,34 @@ async function handleModalSubmit(interaction) {
     if (isTriple) {
       // TRƯỜNG HỢP BÃO: Người chơi Tài/Xỉu đều thua
       outcome = `🌩️ **BÃO!** (3 con ${rolls[0]}) Kết quả này khiến **Tài và Xỉu đều thua**.\n😔 Bạn đã mất **${betAmount}** ${currency}.`;
-    } else if (choice === result) {
-      // TRƯỜNG HỢP THẮNG
-      const winAmount = betAmount * 2;
-      await addMoney(userId, winAmount);
-      outcome = `🎉 **THẮNG!** Kết quả là **${result.toUpperCase()}**. Bạn đã thắng **${betAmount}** ${currency}.`;
     } else {
-      // TRƯỜNG HỢP THUA
-      outcome = `😔 **THUA!** Kết quả là **${result.toUpperCase()}**. Bạn đã mất **${betAmount}** ${currency}.`;
-    }
+        // 2. Xử lý Chẵn/Lẻ
+        if (choice === 'chan' && isEven) {
+            outcome = `🎉 **THẮNG CHẴN!** (Tổng: ${total}). Bạn đã thắng **${betAmount}** ${currency}.`;
+        } else if (choice === 'le' && !isEven) {
+            outcome = `🎉 **THẮNG LẺ!** (Tổng: ${total}). Bạn đã thắng **${betAmount}** ${currency}.`;
+        
+        // 3. Xử lý Tài/Xỉu
+        } else if (choice === result) { // result là 'tài' hoặc 'xỉu'
+            outcome = `🎉 **THẮNG ${result.toUpperCase()}!** (Tổng: ${total}). Bạn đã thắng **${betAmount}** ${currency}.`;
+
+        } else {
+            // THUA (bao gồm cả trường hợp Tài/Xỉu thua và Chẵn/Lẻ thua)
+            outcome = `😔 **THUA!** Kết quả là **${isEven ? 'CHẴN' : 'LẺ'}** | **${result.toUpperCase()}** (Tổng: ${total}). Bạn đã mất **${betAmount}** ${currency}.`;
+            winMultiplier = 0; // Đặt về 0 để logic tính tiền chạy đúng
+        }
+
+        // 4. Tính toán tiền thắng/thua
+        if (winMultiplier > 0) {
+            // Chỉ chạy nếu thắng (winMultiplier = 2)
+            const winAmount = betAmount * winMultiplier;
+            await addMoney(userId, winAmount);
+            finalBalance = currentBalance + betAmount; // Số dư mới = Số dư cũ + Tiền thắng ròng
+        } else {
+             // Thua hoặc Bão (đã xử lý tiền ở bước 1)
+             finalBalance = currentBalance - betAmount;
+        }
+    }    
 
     // 7. Gửi kết quả
     resultMessage += outcome;
@@ -204,10 +221,14 @@ async function handleModalSubmit(interaction) {
     await interaction.editReply(resultMessage);
   } catch (error) {
     console.error("LỖI XỬ LÝ TÀI XỈU:", error);
-    await interaction.editReply(`❌ Đã xảy ra lỗi nghiêm trọng trong trò chơi! Lỗi: ${error.message}`).catch(e => {
-             // Nếu ngay cả editReply cũng thất bại, in ra log.
-             console.error("Không thể gửi thông báo lỗi cho người dùng:", e);
-        });
+    await interaction
+      .editReply(
+        `❌ Đã xảy ra lỗi nghiêm trọng trong trò chơi! Lỗi: ${error.message}`
+      )
+      .catch((e) => {
+        // Nếu ngay cả editReply cũng thất bại, in ra log.
+        console.error("Không thể gửi thông báo lỗi cho người dùng:", e);
+      });
   }
 }
 
@@ -220,7 +241,6 @@ module.exports = {
   // Export hàm xử lý nút để xử lý trong index
   handleButton,
   handleModalSubmit,
-  
 
   // Hàm execute ban đầu: Gửi tin nhắn và các nút
   async execute(message, args) {
@@ -235,12 +255,23 @@ module.exports = {
       .setLabel("Đặt Xỉu (4-10)")
       .setStyle(ButtonStyle.Danger);
 
-    const row = new ActionRowBuilder().addComponents(taiButton, xiuButton);
+    const chanButton = new ButtonBuilder()
+      .setCustomId("tx_chan")
+      .setLabel("Đặt CHẴN")
+      .setStyle(ButtonStyle.Success);
+
+    const leButton = new ButtonBuilder()
+      .setCustomId("tx_le")
+      .setLabel("Đặt LẺ")
+      .setStyle(ButtonStyle.Danger);
+
+    const row1 = new ActionRowBuilder().addComponents(taiButton, xiuButton);
+    const row2 = new ActionRowBuilder().addComponents(chanButton, leButton);
 
     // 2. Gửi tin nhắn nút
     message.channel.send({
       content: "🎲 **BẮT ĐẦU TÀI XỈU** 🎲\nNhấn nút lựa chọn của bạn:",
-      components: [row],
+      components: [row1,row2],
     });
   },
 };
