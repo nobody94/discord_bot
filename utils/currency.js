@@ -3,9 +3,14 @@ const db = new QuickDB();
 
 // Hàm: Lấy số tiền hiện tại của người dùng.
 async function getBalance(userId) {
-    // db.get(key) sẽ trả về giá trị được lưu trữ.
-    // Nếu không có, ta mặc định là 0.
-    return await db.get(`money_${userId}`) || 0; 
+    const key = `money_${userId}`;
+    const rawBalance = await db.get(key);
+    
+    // Ép kiểu: chuyển rawBalance sang Number. Nếu nó là null/undefined/string rỗng,
+    // thì Number() sẽ ra 0. Nếu nó là chuỗi "100", sẽ ra 100.
+    const balance = Number(rawBalance) || 0; 
+    
+    return balance;
 }
 
 // Hàm: Cộng thêm một lượng tiền vào số dư.
@@ -18,15 +23,32 @@ async function addMoney(userId, amount) {
 // Hàm: Trừ một lượng tiền hoặc đặt lại số tiền.
 async function removeMoney(userId, amount) {
     // db.sub(key, value) sẽ trừ giá trị khỏi số hiện tại.
-    await db.sub(`money_${userId}`, amount);
+    if (typeof amount !== 'number' || amount <= 0) return false;
+
+    const currentBalance = await getBalance(userId);   
+
+    if (amount > currentBalance) {       
+        return false; // Bot đang trả về false tại đây!
+    }
+
+    const newBalance = currentBalance - amount; 
+    await db.set(`money_${userId}`, newBalance);     
+   
+    return true;
+    // await db.sub(`money_${userId}`, amount);
 }
+
+// async function setMoney(userId, amount) {
+//     // db.sub(key, value) sẽ trừ giá trị khỏi số hiện tại.
+//     await db.set(`money_${userId}`, amount);
+// }
 
 const currency = 'xu'
 
 module.exports = {
     getBalance,
     addMoney,
-    removeMoney,
+    removeMoney,    
     db,
     currency
 };

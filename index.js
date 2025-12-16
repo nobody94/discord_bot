@@ -1,11 +1,17 @@
-require('dotenv').config();
-const { Client,Collection, GatewayIntentBits } = require("discord.js");
+require("dotenv").config();
+const {
+  Client,
+  Collection,
+  GatewayIntentBits,
+  InteractionType,
+} = require("discord.js");
 const fs = require("fs");
 const path = require("path");
 
 const GameManager = require("./game/wordchain-vi");
 const { getGameChannelId } = require("./game/game_settings");
-const Money = require('./utils/currency');
+const Money = require("./utils/currency");
+const taixiuCommand = require("./cmd/taixiu");
 
 const Token = process.env.BOT_TOKEN;
 const PREFIX = "!";
@@ -17,6 +23,7 @@ const client = new Client({
   ],
 });
 client.commands = new Collection();
+const userBetState = taixiuCommand.userBetState;
 
 const commandsPath = path.join(__dirname, "cmd");
 const commandFiles = fs
@@ -96,11 +103,74 @@ client.on("messageCreate", async (message) => {
           `Từ tiếp theo phải bắt đầu bằng **"${result.nextRequiredWord}".`
       );
     } else {
-      let replyMessage = result.message;  
+      let replyMessage = result.message;
       await message.reply({
         content: replyMessage,
         allowedMentions: { repliedUser: false },
       });
+    }
+  }
+});
+
+// 🖱️ Xử lý Tương tác Nút (Button Interaction Handler)
+client.on("interactionCreate", async (interaction) => {
+  // Chỉ xử lý các tương tác nút (Buttons)
+  // if (!interaction.isButton()) return;
+
+  //  Xử lý Modal Submit (Khi người dùng gửi form nhập tiền)
+  if (interaction.type === InteractionType.ModalSubmit) {
+    // 1. Kiểm tra xem đây có phải là Modal Tài Xỉu không
+    if (interaction.customId.startsWith("taixiu_bet_modal_")) {
+      // const userId = interaction.user.id;
+      // const choice = userBetState.get(userId); // Lấy lựa chọn đã lưu
+
+      // 2. Lấy giá trị từ trường nhập liệu
+      // const betInput = interaction.fields.getTextInputValue("betAmountInput");
+      // const betAmount = parseInt(betInput);
+
+      // // 3. Phản hồi Interaction (BẮT BUỘC)
+      await interaction.deferReply().catch((e) => {
+        // Nếu đã defer hoặc reply rồi, catch lỗi nhưng KHÔNG THOÁT
+        console.warn("Đã cố gắng Defer/Reply lại một tương tác đã xử lý.");
+        return;
+      });
+
+      // Xóa trạng thái ngay lập tức
+      // userBetState.delete(userId);
+
+    //  if (!choice || isNaN(betAmount) || betAmount <= 0) {
+    //     // PHẢI dùng editReply vì đã defer ở trên
+    //     return interaction.editReply('❌ | Lựa chọn hoặc số tiền cược không hợp lệ. Giao dịch bị hủy.');
+    // }
+      // 4. Thực thi Logic Game
+      const command = client.commands.get("taixiu");
+
+      try {
+        if (command && command.handleModalSubmit) {
+          // Truyền betAmount và choice thay vì lấy lại từ interaction
+          // await command.handleModalSubmit(interaction, choice, betAmount);
+          await command.handleModalSubmit(interaction);
+        }
+      } catch (error) {
+        console.error("LỖI TRONG handleModalSubmit SAU DEFER:", error);
+        // Gửi thông báo lỗi chung nếu logic game thất bại
+        // interaction.editReply(
+        //   `❌ Đã xảy ra lỗi hệ thống nghiêm trọng. Vui lòng kiểm tra console.`
+        // );
+      }
+    }
+  }
+
+  // Xử lý nút Tài Xỉu
+  if (interaction.type === InteractionType.MessageComponent) {
+    if (interaction.isButton()) {
+      if (interaction.customId.startsWith("tx_")) {
+        const command = client.commands.get("taixiu");
+        if (command) {
+          command.handleButton(interaction);
+          return; // Rất quan trọng: Ngăn chặn code tiếp theo chạy
+        }
+      }
     }
   }
 });
