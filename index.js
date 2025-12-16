@@ -5,6 +5,7 @@ const path = require("path");
 
 const GameManager = require("./game/wordchain-vi");
 const { getGameChannelId } = require("./game/game_settings");
+const Money = require('./utils/currency');
 
 const Token = process.env.BOT_TOKEN;
 const PREFIX = "!";
@@ -38,6 +39,7 @@ client.on("ready", () => {
 
 client.on("messageCreate", async (message) => {
   // Bỏ qua tin nhắn của bot
+  if (!message) return;
   if (message.author.bot) return;
 
   // Lấy ID kênh đã thiết lập
@@ -85,9 +87,13 @@ client.on("messageCreate", async (message) => {
     const result = GameManager.gameProcess(content);
 
     if (result.success) {
+      const userId = message.author.id;
+      const tienThuong = 100;
+      await Money.addMoney(userId, tienThuong);
+
       await message.channel.send(
-        `✅ **Từ hợp lệ\n` +
-          `Từ tiếp theo phải bắt đầu bằng **"${result.nextRequiredWord}"**.`
+        `✅ Từ hợp lệ bạn được thưởng 100 ${Money.currency}\n` +
+          `Từ tiếp theo phải bắt đầu bằng **"${result.nextRequiredWord}".`
       );
     } else {
       let replyMessage = result.message;  

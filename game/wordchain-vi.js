@@ -108,6 +108,7 @@ function gameProcess(newWord) {
   wordHistory.add(currentWord);
   currentWord = newWord;
   const nextRequiredWord = getSecondPart(newWord);
+
   return {
     success:true,
     nextRequiredWord:nextRequiredWord,
