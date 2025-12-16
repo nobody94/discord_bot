@@ -1,5 +1,5 @@
-require("dotenv").config();
-const { Client, GatewayIntentBits } = require("discord.js");
+require('dotenv').config();
+const { Client,Collection, GatewayIntentBits } = require("discord.js");
 const fs = require("fs");
 const path = require("path");
 
@@ -17,7 +17,7 @@ const client = new Client({
 });
 client.commands = new Collection();
 
-const commandsPath = path.join(__dirname, "commands");
+const commandsPath = path.join(__dirname, "cmd");
 const commandFiles = fs
   .readdirSync(commandsPath)
   .filter((file) => file.endsWith(".js"));
@@ -90,12 +90,7 @@ client.on("messageCreate", async (message) => {
           `Từ tiếp theo phải bắt đầu bằng **"${result.nextRequiredWord}"**.`
       );
     } else {
-      let replyMessage = result.message;    
-
-      await message.reply({
-        content: replyMessage,
-        allowedMentions: { repliedUser: false },
-      });
+      let replyMessage = result.message;  
       await message.reply({
         content: replyMessage,
         allowedMentions: { repliedUser: false },

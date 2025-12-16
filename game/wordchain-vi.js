@@ -87,11 +87,11 @@ function gameProcess(newWord) {
     currentWord = null;
     wordHistory.clear();
 
-    return { success: false, reason: "OUT_OF_WORD",message:"Hết từ để nối tiếp" };
+    return { success: false, reason: "OUT_OF_WORD",message:"Hết từ để nối tiếp \n!start để bắt đầu trò nối từ mới" };
   }
 
   // Kiểm tra hợp lệ theo từ điển
-  if (!isValidWord(newWord)) {
+  if (!isValidWord(newWord)) {   
     return { success: false, reason: "WORD_NOT_VALID" ,message:`❌ Từ này không có trong từ điển`};
   }
   // Không lặp cụm
@@ -105,7 +105,7 @@ function gameProcess(newWord) {
   }
 
   // Hợp lệ → cập nhật
-  wordHistory.add(content);
+  wordHistory.add(currentWord);
   currentWord = newWord;
   const nextRequiredWord = getSecondPart(newWord);
   return {

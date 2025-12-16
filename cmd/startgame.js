@@ -1,6 +1,5 @@
 const GameManager = require("../game/wordchain-vi");
 const { getGameChannelId } = require("../game/game_settings");
-const { aliases, description, execute } = require("../test");
 
 module.exports = {
   name: "startgame",
