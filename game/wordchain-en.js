@@ -29,7 +29,7 @@ function getHint() {
 
   const matches = Array.from(dictionary).filter((word) => {
     const wLower = word.toLowerCase();
-    return wLower.startsWith(secondPart + " ") && !wordHistory.has(wLower);
+    return wLower.startsWith(secondPart) && !wordHistory.has(wLower);
   });
 
   if (matches.length === 0) return null;

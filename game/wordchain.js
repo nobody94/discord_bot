@@ -4,7 +4,7 @@ const EnWordchain = require('./wordchain-en');
 const { getGameChannelId } = require("./game_settings");
 
 async function gameProcess(message, wordchain) {
-  // console.log('message',message);
+  // console.log('wordchain',wordchain.isGameActive);
   const gameChannelId = getGameChannelId(message.guildId);
   const content = message.content.trim();
   const userId = message.author.id;
@@ -59,7 +59,7 @@ async function gameProcess(message, wordchain) {
   }
 }
 
-function WordChain(message) {
+function WordChain(message) {  
   if (ViWordchain.isGameActive()) {
     gameProcess(message, ViWordchain);
   }

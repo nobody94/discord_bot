@@ -65,8 +65,7 @@ function startGame(startingWord) {
   wordHistory.clear();
 
   //Từ ngẫu nhiên khi bắt đầu game
-  const firstPhrase = startingWord;
-  //   const [firstWordPhase, secondWordPhase] = firstPhrase.split(" ");
+  const firstPhrase = startingWord;  
   currentWord = firstPhrase;
   wordHistory.add(firstPhrase);
 
