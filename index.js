@@ -15,8 +15,10 @@ const app = express();
 app.get('/', (req, res) => {
   res.send('Server is running!');
 });
-app.listen(3000, () => {
-  console.log('Bot is ready!');
+const port = process.env.PORT || 3000;
+
+app.listen(port, '0.0.0.0', () => {
+  console.log(`Server is running on port ${port}`);
 });
 // const keep_alive = require('./keep_alive.js');
 
