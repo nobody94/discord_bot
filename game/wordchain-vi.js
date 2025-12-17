@@ -19,13 +19,32 @@ function isValidWord(word) {
 }
 
 function getSecondPart(word) {
-    const parts = word.split(/\s+/);
-    // Nếu có 2 từ trở lên, trả về từ thứ hai (index 1)
-    if (parts.length >= 2) {
-        return parts[1]; 
-    }
-    // Nếu chỉ có 1 từ, trả về từ đó (trường hợp từ bắt đầu game)
-    return parts[0];
+  const parts = word.split(/\s+/);
+  // Nếu có 2 từ trở lên, trả về từ thứ hai (index 1)
+  if (parts.length >= 2) {
+    return parts[1];
+  }
+  // Nếu chỉ có 1 từ, trả về từ đó (trường hợp từ bắt đầu game)
+  return parts[0];
+}
+
+function getHint() {
+  if (!gameActive || !currentWord) return null;
+
+  const secondPart = getSecondPart(currentWord).toLowerCase();
+
+  const matches = Array.from(dictionary).filter((word) => {
+    const wLower = word.toLowerCase();
+    return wLower.startsWith(secondPart + " ") && !wordHistory.has(wLower);
+  });
+
+  if (matches.length === 0) return null;
+
+  // Trộn ngẫu nhiên danh sách kết quả
+  const shuffled = matches.sort(() => 0.5 - Math.random());
+
+  // Lấy tối đa 3 từ
+  return shuffled.slice(0, 3);
 }
 
 function isGameActive() {
@@ -69,22 +88,31 @@ function stopGame() {
 }
 
 function isRepeatPlayer(userId) {
-    return lastUserId === userId; //
+  return lastUserId === userId; //
 }
 
 function setLastUser(userId) {
-    lastUserId = userId; //
+  lastUserId = userId; //
 }
 
 /*Xử lý lượt chơi và kiểm tra luật chơi*/
 
 function gameProcess(newWord) {
-  if (!gameActive) return { success: false, reason: "NOT_ACTIVE" ,message:"Game chưa hoạt động"};
+  if (!gameActive)
+    return {
+      success: false,
+      reason: "NOT_ACTIVE",
+      message: "Game chưa hoạt động",
+    };
   const parts = newWord.split(/\s+/);
   const [firstWord, secondWord] = parts;
   // check độ dài
   if (parts.length < 2) {
-    return { success: false, reason: "WORD_TOO_SHORT",message:"❌ Từ phải là cụm 2 từ" };
+    return {
+      success: false,
+      reason: "WORD_TOO_SHORT",
+      message: "❌ Từ phải là cụm 2 từ",
+    };
   }
   // Lấy tất cả cụm 2 từ chưa dùng và bắt đầu bằng secondWord
   const nextOptions = dictionary.filter((p) => {
@@ -98,21 +126,37 @@ function gameProcess(newWord) {
     currentWord = null;
     wordHistory.clear();
 
-    return { success: false, reason: "OUT_OF_WORD",message:"Hết từ để nối tiếp" };
+    return {
+      success: false,
+      reason: "OUT_OF_WORD",
+      message: "Hết từ để nối tiếp",
+    };
   }
 
   // Kiểm tra hợp lệ theo từ điển
-  if (!isValidWord(newWord)) {   
-    return { success: false, reason: "WORD_NOT_VALID" ,message:`❌ Từ này không có trong từ điển`};
+  if (!isValidWord(newWord)) {
+    return {
+      success: false,
+      reason: "WORD_NOT_VALID",
+      message: `❌ Từ này không có trong từ điển`,
+    };
   }
   // Không lặp cụm
   if (wordHistory.has(newWord)) {
-    return { success: false, reason: "WORD_DUPLICATE" ,message:"❌ Từ này đã được sử dụng"};
+    return {
+      success: false,
+      reason: "WORD_DUPLICATE",
+      message: "❌ Từ này đã được sử dụng",
+    };
   }
   // Kiểm tra xem từ thứ nhất phải bằng từ thứ 2 trước đó
-  const  currentLastWord = getSecondPart(currentWord);
+  const currentLastWord = getSecondPart(currentWord);
   if (firstWord !== currentLastWord) {
-    return { success: false, reason: "WRONG_START_WORD" ,message:`❌ Từ cần bắt đầu bằng ${currentLastWord}`};
+    return {
+      success: false,
+      reason: "WRONG_START_WORD",
+      message: `❌ Từ cần bắt đầu bằng ${currentLastWord}`,
+    };
   }
 
   // Hợp lệ → cập nhật
@@ -121,20 +165,21 @@ function gameProcess(newWord) {
   const nextRequiredWord = getSecondPart(newWord);
 
   return {
-    success:true,
-    nextRequiredWord:nextRequiredWord,
-    currentWord:currentWord
-  }
+    success: true,
+    nextRequiredWord: nextRequiredWord,
+    currentWord: currentWord,
+  };
 }
 
-module.exports={
-    isGameActive,
-    getCurrentWord,
-    startGame,
-    stopGame,
-    gameProcess,
-    getSecondPart,
-    getRandomWords,
-    setLastUser,
-    isRepeatPlayer
-}
+module.exports = {
+  isGameActive,
+  getCurrentWord,
+  startGame,
+  stopGame,
+  gameProcess,
+  getSecondPart,
+  getRandomWords,
+  setLastUser,
+  isRepeatPlayer,
+  getHint,
+};

@@ -43,8 +43,8 @@ module.exports = {
     const spinningMsg = await message.reply(`🎰 **TÍCH CỰC GACHA VẬN MAY SẼ ĐẾN** 🎰\n[ 🔄 | 🔄 | 🔄 ]\n*Đang quay...*`);
 
     // Hiệu ứng quay
-    for (let i = 0; i < 3; i++) {
-        await sleep(600);
+    for (let i = 0; i < 5; i++) {
+        await sleep(200);
         await spinningMsg.edit(`🎰 **TÍCH CỰC GACHA VẬN MAY SẼ ĐẾN** 🎰\n[ ${getRandomSymbol()} | ${getRandomSymbol()} | ${getRandomSymbol()} ]\n*Đang quay...*`);
     }
 
