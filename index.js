@@ -12,7 +12,6 @@ const path = require("path");
 const GameManager = require("./game/wordchain-vi");
 const { getGameChannelId } = require("./game/game_settings");
 const Money = require("./utils/currency");
-const taixiuCommand = require("./cmd/taixiu");
 
 const Token = process.env.BOT_TEST_TOKEN;
 const PREFIX = ".";
@@ -24,7 +23,6 @@ const client = new Client({
   ],
 });
 client.commands = new Collection();
-const userBetState = taixiuCommand.userBetState;
 
 const commandsPath = path.join(__dirname, "cmd");
 const commandFiles = fs
