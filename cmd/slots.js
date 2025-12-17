@@ -5,16 +5,16 @@ const {
   currencyIcon  
 } = require("../utils/currency");
 
-// Các biểu tượng và tỷ lệ thanh toán
-const symbols = ["🍒", "🔔", "🍋", "7️⃣"]; // Biểu tượng: Cherry, Chuông, Chanh, Bảy may mắn
+const symbols = ["<:cherries:1450752576256475156>", "<:watermelon:1450752616349962250>", "<:lemon:1450752606887477321>", "<:slotmachine:1450752596116635730>"];
 
-// Tỷ lệ thanh toán (Payout multipliers)
 const payouts = {
-  "7️⃣7️⃣7️⃣": 10, // 3 số 7: x10 lần cược
-  "🍒🍒🍒": 5, // 3 Cherries: x5 lần cược
-  "🔔🔔🔔": 3, // 3 Chuông: x3 lần cược
-  "🍋🍋🍋": 2, // 3 Chanh: x2 lần cược
+  "<:slotmachine:1450752596116635730><:slotmachine:1450752596116635730><:slotmachine:1450752596116635730>": 10,
+  "<:cherries:1450752576256475156><:cherries:1450752576256475156><:cherries:1450752576256475156>": 5,
+  "<:watermelon:1450752616349962250><:watermelon:1450752616349962250><:watermelon:1450752616349962250>": 5,
+  "<:lemon:1450752606887477321><:lemon:1450752606887477321><:lemon:1450752606887477321>": 5,
 };
+
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 function getRandomSymbol() {
   return symbols[Math.floor(Math.random() * symbols.length)];
@@ -22,67 +22,62 @@ function getRandomSymbol() {
 
 module.exports = {
   name: "slots",
-  description: "Chơi máy đánh bạc (3 hàng ngang). Cú pháp: .slots [số tiền]",
-  aliases: ["slot",'sl'],
+  description: "TÍCH CỰC GACHA VẬN MAY SẼ ĐẾN (Thưởng cả khi có 2 hình giống nhau).",
+  aliases: ["slot", "sl"],
 
   async execute(message, args) {
     const userId = message.author.id;
-
-    // 1. Kiểm tra tham số đầu vào
     let betAmount = parseInt(args[0]);
 
     if (isNaN(betAmount) || betAmount <= 0) {
-      return message.reply(
-        "❌ | Vui lòng nhập đúng cú pháp: `!slots [số tiền cược]` (Phải là số nguyên dương)."
-      );
+      return message.reply("❌ | Vui lòng nhập đúng cú pháp: `.slots [số tiền cược]`");
     }
 
-    // 2. Kiểm tra số dư
     const currentBalance = await getBalance(userId);
     if (betAmount > currentBalance) {
-      return message.reply(
-        `💸 | Bạn không có đủ **${betAmount}** ${currencyIcon}. Số dư hiện tại: **${currentBalance}** ${currencyIcon}.`
-      );
+      return message.reply(`💸 | Bạn không đủ tiền. Số dư: **${currentBalance}** ${currencyIcon}.`);
     }
 
-    // 3. Thực hiện cược
-    await removeMoney(userId, betAmount); // Trừ tiền cược trước
+    await removeMoney(userId, betAmount);
+    
+    const spinningMsg = await message.reply(`🎰 **TÍCH CỰC GACHA VẬN MAY SẼ ĐẾN** 🎰\n[ 🔄 | 🔄 | 🔄 ]\n*Đang quay...*`);
 
-    // Quay ba cuộn
+    // Hiệu ứng quay
+    for (let i = 0; i < 3; i++) {
+        await sleep(600);
+        await spinningMsg.edit(`🎰 **TÍCH CỰC GACHA VẬN MAY SẼ ĐẾN** 🎰\n[ ${getRandomSymbol()} | ${getRandomSymbol()} | ${getRandomSymbol()} ]\n*Đang quay...*`);
+    }
+
+    // Kết quả cuối cùng
     const roll1 = getRandomSymbol();
     const roll2 = getRandomSymbol();
     const roll3 = getRandomSymbol();
-
     const resultString = roll1 + roll2 + roll3;
 
     let multiplier = 0;
-    let resultMessage = `🎰 **MÁY ĐÁNH BẠC** 🎰\n[ ${roll1} | ${roll2} | ${roll3} ]\n`;
+    let winType = "";
 
-    // 4. Kiểm tra kết quả
+    // 1. Kiểm tra 3 hình giống nhau (Jackpot)
     if (payouts[resultString]) {
       multiplier = payouts[resultString];
-    } else if (roll1 === roll2 && roll2 === roll3) {
-      // Trường hợp 3 biểu tượng không có trong danh sách payouts (chưa định nghĩa)
-      multiplier = 1;
+      winType = "JACKPOT! 🎉";
+    } 
+    // 2. Kiểm tra 2 hình giống nhau (Cặp)
+    else if (roll1 === roll2 || roll1 === roll3 || roll2 === roll3) {
+      multiplier = 2; // Thưởng x2 tiền cược nếu có 2 hình giống nhau
+      winType = "TRÚNG CẶP! ✨";
     }
 
-    // 5. Tính toán và thông báo
-    if (multiplier > 1) {
-      // THẮNG LỚN (Thắng lớn hơn vốn)
+    let resultMessage = `🎰 **TÍCH CỰC GACHA VẬN MAY SẼ ĐẾN** 🎰\n[ ${roll1} | ${roll2} | ${roll3} ]\n`;
+
+    if (multiplier >= 1) {
       const winAmount = betAmount * multiplier;
-      const profit = winAmount - betAmount;
       await addMoney(userId, winAmount);
-
-      resultMessage += `\n🎉 **JACKPOT!** (${multiplier}x) Bạn thắng **${winAmount}** ${currencyIcon}. Tiền lời: **+${profit}** ${currencyIcon}.`;
-    } else if (multiplier === 1) {
-      // HÒA VỐN (Ví dụ: Ba biểu tượng giống nhau nhưng tỷ lệ 1x)
-      await addMoney(userId, betAmount); // Hoàn lại tiền cược
-      resultMessage += `\n👌 **HÒA VỐN!** Bạn lấy lại **${betAmount}** ${currencyIcon}.`;
+      resultMessage += `\n${winType} (${multiplier}x) Bạn nhận được **${winAmount}** ${currencyIcon}.`;
     } else {
-      // THUA
-      resultMessage += `\n😔 **THUA!** Chúc bạn may mắn lần sau. Bạn đã mất **${betAmount}** ${currencyIcon}.`;
+      resultMessage += `\n**THUA!** Bạn đã mất **${betAmount}** ${currencyIcon}.`;
     }
 
-    message.reply(resultMessage);
+    await spinningMsg.edit(resultMessage);
   },
 };

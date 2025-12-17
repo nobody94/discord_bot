@@ -106,7 +106,7 @@ async function finishRound(message) {
   }
 
   // 3. Tiến hành Rolling Animation (cho toàn bộ game)
-  const rollingSymbols = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
+  const rollingSymbols = ["<:dice_one:1450752043747639399>", "<:dice_two:1450752103289979015>", "<:dice_three:1450752140623614082>", "<:dice_four:1450752191886393417>", "<:dice_five:1450752224136269834>", "<:dice_six:1450752253916090539>"];
   const interval = 500;
   let elapsed = 0;
 

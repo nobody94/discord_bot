@@ -7,14 +7,14 @@ const {
 } = require("discord.js");
 const fs = require("fs");
 const path = require("path");
-const keep_alive = require('./keep_alive.js');
+// const keep_alive = require('./keep_alive.js');
 
 const GameManager = require("./game/wordchain-vi");
 const { getGameChannelId } = require("./game/game_settings");
 const Money = require("./utils/currency");
 
-const Token = process.env.BOT_TOKEN;
-// const Token = process.env.BOT_TEST_TOKEN;
+// const Token = process.env.BOT_TOKEN;
+const Token = process.env.BOT_TEST_TOKEN;
 
 const PREFIX = ".";
 const client = new Client({
