@@ -2,7 +2,7 @@ const {
   getBalance,
   addMoney,
   removeMoney,
-  currency,
+  currencyIcon,
 } = require("../utils/currency");
 
 module.exports = {
@@ -36,7 +36,7 @@ module.exports = {
     const currentBalance = await getBalance(userId);
     if (betAmount > currentBalance) {
       return message.reply(
-        `💸 | Bạn không có đủ **${betAmount}** ${currency}. Số dư hiện tại: **${currentBalance}** ${currency}.`
+        `💸 | Bạn không có đủ **${betAmount}** ${currencyIcon}. Số dư hiện tại: **${currentBalance}** ${currencyIcon}.`
       );
     }
 
@@ -54,10 +54,10 @@ module.exports = {
       const winAmount = betAmount * 2; // Thắng gấp đôi tiền cược (lấy lại vốn + tiền lời = 2 * cược)
       await addMoney(userId, winAmount);
 
-      resultMessage += `🎉 **THẮNG!** Bạn đã thắng **${betAmount}** ${currency}.`;
+      resultMessage += `🎉 **THẮNG!** Bạn đã thắng **${betAmount}** ${currencyIcon}.`;
     } else {
       // THUA
-      resultMessage += `😔 **THUA!** Bạn đã mất **${betAmount}** ${currency}.`;
+      resultMessage += `😔 **THUA!** Bạn đã mất **${betAmount}** ${currencyIcon}.`;
     }
 
     message.reply(resultMessage);

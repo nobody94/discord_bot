@@ -1,6 +1,8 @@
 const { QuickDB } = require("quick.db");
 const db = new QuickDB();
 
+const currencyIcon = '<:nMoney:1450423722828894289>';
+
 // Hàm: Lấy số tiền hiện tại của người dùng.
 async function getBalance(userId) {
     const key = `money_${userId}`;
@@ -43,12 +45,10 @@ async function removeMoney(userId, amount) {
 //     await db.set(`money_${userId}`, amount);
 // }
 
-const currency = '<:nMoney:1450423722828894289>'
-
 module.exports = {
     getBalance,
     addMoney,
     removeMoney,    
     db,
-    currency
+    currencyIcon
 };

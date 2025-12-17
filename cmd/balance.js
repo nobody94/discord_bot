@@ -11,6 +11,6 @@ module.exports = {
         // Gọi hàm để lấy số dư
         const currentBalance = await Money.getBalance(userId); 
         
-        message.reply(`💰 | Số tiền hiện tại của bạn là: **${currentBalance}** ${Money.currency}.`);
+        message.reply(`💰 | Số tiền hiện tại của bạn là: **${currentBalance}** ${Money.currencyIcon}.`);
     },
 };

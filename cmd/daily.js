@@ -45,7 +45,7 @@ module.exports = {
 
       // 5. Gửi thông báo thành công
       return message.reply(
-        `🎉 | Chúc mừng! Bạn đã nhận được **${DAILY_REWARD}** ${Money.currency} thưởng hàng ngày.`
+        `🎉 | Chúc mừng! Bạn đã nhận được **${DAILY_REWARD}** ${Money.currencyIcon} thưởng hàng ngày.`
       );
     }
   },

@@ -14,7 +14,7 @@ const Money = require("./utils/currency");
 const taixiuCommand = require("./cmd/taixiu");
 
 const Token = process.env.BOT_TOKEN;
-const PREFIX = "!";
+const PREFIX = ".";
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -99,7 +99,7 @@ client.on("messageCreate", async (message) => {
       await Money.addMoney(userId, tienThuong);
 
       await message.channel.send(
-        `✅ Từ hợp lệ bạn được thưởng 100 ${Money.currency}\n` +
+        `✅ Từ hợp lệ bạn được thưởng 100 ${Money.currencyIcon}\n` +
           `Từ tiếp theo phải bắt đầu bằng **"${result.nextRequiredWord}".`
       );
     } else {
@@ -120,11 +120,11 @@ client.on("interactionCreate", async (interaction) => {
     if (interaction.customId.startsWith("taixiu_bet_modal_")) {
       
       // Phản hồi Interaction (BẮT BUỘC)
-      await interaction.deferReply().catch((e) => {
-        // Nếu đã defer hoặc reply rồi, catch lỗi nhưng KHÔNG THOÁT
-        console.warn("Đã cố gắng Defer/Reply lại một tương tác đã xử lý.");
-        return;
-      });
+      // await interaction.deferReply().catch((e) => {
+      //   // Nếu đã defer hoặc reply rồi, catch lỗi nhưng KHÔNG THOÁT
+      //   console.warn("Đã cố gắng Defer/Reply lại một tương tác đã xử lý.");
+      //   return;
+      // });
      
       // Thực thi Logic Game
       const command = client.commands.get("taixiu");

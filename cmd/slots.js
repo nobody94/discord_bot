@@ -2,7 +2,7 @@ const {
   getBalance,
   addMoney,
   removeMoney,
-  currency,
+  currencyIcon  
 } = require("../utils/currency");
 
 // Các biểu tượng và tỷ lệ thanh toán
@@ -23,7 +23,7 @@ function getRandomSymbol() {
 module.exports = {
   name: "slots",
   description: "Chơi máy đánh bạc (3 hàng ngang). Cú pháp: !slots [số tiền]",
-  aliases: ["slot"],
+  aliases: ["slot",'sl'],
 
   async execute(message, args) {
     const userId = message.author.id;
@@ -41,7 +41,7 @@ module.exports = {
     const currentBalance = await getBalance(userId);
     if (betAmount > currentBalance) {
       return message.reply(
-        `💸 | Bạn không có đủ **${betAmount}** ${currency}. Số dư hiện tại: **${currentBalance}** ${currency}.`
+        `💸 | Bạn không có đủ **${betAmount}** ${currencyIcon}. Số dư hiện tại: **${currentBalance}** ${currencyIcon}.`
       );
     }
 
@@ -73,14 +73,14 @@ module.exports = {
       const profit = winAmount - betAmount;
       await addMoney(userId, winAmount);
 
-      resultMessage += `\n🎉 **JACKPOT!** (${multiplier}x) Bạn thắng **${winAmount}** ${currency}. Tiền lời: **+${profit}** ${currency}.`;
+      resultMessage += `\n🎉 **JACKPOT!** (${multiplier}x) Bạn thắng **${winAmount}** ${currencyIcon}. Tiền lời: **+${profit}** ${currencyIcon}.`;
     } else if (multiplier === 1) {
       // HÒA VỐN (Ví dụ: Ba biểu tượng giống nhau nhưng tỷ lệ 1x)
       await addMoney(userId, betAmount); // Hoàn lại tiền cược
-      resultMessage += `\n👌 **HÒA VỐN!** Bạn lấy lại **${betAmount}** ${currency}.`;
+      resultMessage += `\n👌 **HÒA VỐN!** Bạn lấy lại **${betAmount}** ${currencyIcon}.`;
     } else {
       // THUA
-      resultMessage += `\n😔 **THUA!** Chúc bạn may mắn lần sau. Bạn đã mất **${betAmount}** ${currency}.`;
+      resultMessage += `\n😔 **THUA!** Chúc bạn may mắn lần sau. Bạn đã mất **${betAmount}** ${currencyIcon}.`;
     }
 
     message.reply(resultMessage);
