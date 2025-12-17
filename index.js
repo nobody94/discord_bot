@@ -7,12 +7,21 @@ const {
 } = require("discord.js");
 const fs = require("fs");
 const path = require("path");
+const express = require('express');
+
+const app = express();
+app.get('/', (req, res) => {
+  res.send('Server is running!');
+});
+app.listen(3000, () => {
+  console.log('Bot is ready!');
+});
 // const keep_alive = require('./keep_alive.js');
 
-const ViWordchain = require("./game/wordchain-vi");
+// const ViWordchain = require("./game/wordchain-vi");
 const {WordChain} = require("./game/wordchain");
 const { getGameChannelId } = require("./game/game_settings");
-const Money = require("./utils/currency");
+// const Money = require("./utils/currency");
 
 // const Token = process.env.BOT_TOKEN;
 const Token = process.env.BOT_TEST_TOKEN;
@@ -90,57 +99,58 @@ client.on("messageCreate", async (message) => {
 
   //xử lý game
   if (!content.startsWith(PREFIX)) {
-    if (ViWordchain.isGameActive()) {
-      if (gameChannelId && message.channelId !== gameChannelId) {
-        return; // Bỏ qua nếu tin nhắn không ở đúng kênh game
-      }
+    // if (ViWordchain.isGameActive()) {
+    //   if (gameChannelId && message.channelId !== gameChannelId) {
+    //     return; // Bỏ qua nếu tin nhắn không ở đúng kênh game
+    //   }
 
-      if (ViWordchain.isRepeatPlayer(message.author.id)) {
-        return message.reply({
-          content:
-            "⚠️ Bạn vừa mới trả lời rồi, hãy đợi người khác nối tiếp nhé!",
-          allowedMentions: { repliedUser: false },
-        });
-      }
+    //   if (ViWordchain.isRepeatPlayer(message.author.id)) {
+    //     return message.reply({
+    //       content:
+    //         "⚠️ Bạn vừa mới trả lời rồi, hãy đợi người khác nối tiếp nhé!",
+    //       allowedMentions: { repliedUser: false },
+    //     });
+    //   }
 
-      const result = ViWordchain.gameProcess(content);
+    //   const result = ViWordchain.gameProcess(content);
 
-      if (result.success) {
-        const userId = message.author.id;
-        const tienThuong = 100;
-        ViWordchain.setLastUser(message.author.id);
+    //   if (result.success) {
+    //     const userId = message.author.id;
+    //     const tienThuong = 100;
+    //     ViWordchain.setLastUser(message.author.id);
 
-        await Money.addMoney(userId, tienThuong);
+    //     await Money.addMoney(userId, tienThuong);
 
-        await message.channel.send(
-          `✅ Từ hợp lệ ${message.author.username} được thưởng 100 ${Money.currencyIcon}\n` +
-            `Từ tiếp theo phải bắt đầu bằng **"${result.nextRequiredWord}".`
-        );
-      } else {
-        let replyMessage = result.message;
-        if (result.reason == "OUT_OF_WORD") {
-          const bonusReward = 500;
-          await Money.addMoney(userId, bonusReward);
-          await message.reply({
-            content: `${replyMessage}\n ${message.author.username} được thưởng 500 ${Money.currencyIcon}`,
-            allowedMentions: { repliedUser: false },
-          });
-          ViWordchain.stopGame();
-          setTimeout(() => {
-            const newStart = ViWordchain.getRandomWords();
-            ViWordchain.startGame(newStart);
-            message.channel.send(
-              `🔄 **Ván mới bắt đầu!** Từ bắt đầu: **${newStart}**`
-            );
-          }, 3000);
-        } else {
-          await message.reply({
-            content: replyMessage,
-            allowedMentions: { repliedUser: false },
-          });
-        }
-      }
-    }
+    //     await message.channel.send(
+    //       `✅ Từ hợp lệ ${message.author.username} được thưởng 100 ${Money.currencyIcon}\n` +
+    //         `Từ tiếp theo phải bắt đầu bằng **"${result.nextRequiredWord}".`
+    //     );
+    //   } else {
+    //     let replyMessage = result.message;
+    //     if (result.reason == "OUT_OF_WORD") {
+    //       const bonusReward = 500;
+    //       await Money.addMoney(userId, bonusReward);
+    //       await message.reply({
+    //         content: `${replyMessage}\n ${message.author.username} được thưởng 500 ${Money.currencyIcon}`,
+    //         allowedMentions: { repliedUser: false },
+    //       });
+    //       ViWordchain.stopGame();
+    //       setTimeout(() => {
+    //         const newStart = ViWordchain.getRandomWords();
+    //         ViWordchain.startGame(newStart);
+    //         message.channel.send(
+    //           `🔄 **Ván mới bắt đầu!** Từ bắt đầu: **${newStart}**`
+    //         );
+    //       }, 3000);
+    //     } else {
+    //       await message.reply({
+    //         content: replyMessage,
+    //         allowedMentions: { repliedUser: false },
+    //       });
+    //     }
+    //   }
+    // }
+    WordChain(message);
   }
 });
 

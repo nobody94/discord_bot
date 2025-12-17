@@ -15,9 +15,10 @@ const listViWord = new Set(
 const rawData =fs.readFileSync(pathEnToFile, "utf8");
 const jsonArray = JSON.parse(rawData);  
 const sourceArray = Array.isArray(jsonArray) ? jsonArray : Object.keys(jsonArray);
-const enDictionary = new Set(sourceArray
+const dicFilter = new Set(sourceArray
             .map((w) => w.trim().toLowerCase())
-            .filter((w)=> Boolean(w) && !w.includes('-')));
+            .filter((w)=> Boolean(w) && !w.includes('-')))
+const enDictionary = Array.from(dicFilter).map((d)=> d);
 
 const viDictionary = Array.from(listViWord).filter(
   (phrase) => phrase.split(" ").length === 2
