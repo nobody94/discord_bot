@@ -390,22 +390,22 @@ module.exports = {
     // 3. Tạo các nút (giống hệt code gốc)
     const taiButton = new ButtonBuilder()
       .setCustomId("tx_tai")
-      .setLabel("Đặt Tài (11-17)")
+      .setLabel("Đặt Tài")
       .setStyle(ButtonStyle.Success);
 
     const xiuButton = new ButtonBuilder()
       .setCustomId("tx_xiu")
-      .setLabel("Đặt Xỉu (4-10)")
+      .setLabel("Đặt Xỉu")
       .setStyle(ButtonStyle.Success);
 
     const chanButton = new ButtonBuilder()
       .setCustomId("tx_chan")
-      .setLabel("Đặt CHẴN")
+      .setLabel("Đặt Chẵn")
       .setStyle(ButtonStyle.Danger);
 
     const leButton = new ButtonBuilder()
       .setCustomId("tx_le")
-      .setLabel("Đặt LẺ")
+      .setLabel("Đặt Lẻ")
       .setStyle(ButtonStyle.Danger);
 
     const row1 = new ActionRowBuilder().addComponents(taiButton, xiuButton);
