@@ -3,6 +3,7 @@ const getDic = require("../game/dictionary");
 const dictionary = getDic.viDictionary;
 let gameActive = false;
 let currentWord = null;
+let lastUserId = null;
 const wordHistory = new Set();
 
 //lấy 2 từ ngẫu nhiên
@@ -41,6 +42,7 @@ function startGame(startingWord) {
   }
 
   gameActive = true;
+  lastUserId = null;
   wordHistory.clear();
 
   //Từ ngẫu nhiên khi bắt đầu game
@@ -60,9 +62,18 @@ function stopGame() {
   gameActive = false;
   const totalWords = wordHistory.size;
   currentWord = null;
+  lastUserId = null;
   wordHistory.clear();
 
   return totalWords;
+}
+
+function isRepeatPlayer(userId) {
+    return lastUserId === userId; //
+}
+
+function setLastUser(userId) {
+    lastUserId = userId; //
 }
 
 /*Xử lý lượt chơi và kiểm tra luật chơi*/
@@ -87,7 +98,7 @@ function gameProcess(newWord) {
     currentWord = null;
     wordHistory.clear();
 
-    return { success: false, reason: "OUT_OF_WORD",message:"Hết từ để nối tiếp \n!start để bắt đầu trò nối từ mới" };
+    return { success: false, reason: "OUT_OF_WORD",message:"Hết từ để nối tiếp" };
   }
 
   // Kiểm tra hợp lệ theo từ điển
@@ -123,5 +134,7 @@ module.exports={
     stopGame,
     gameProcess,
     getSecondPart,
-    getRandomWords
+    getRandomWords,
+    setLastUser,
+    isRepeatPlayer
 }

@@ -6,8 +6,28 @@ const interactions = {
   pat: { tag: "pat", color: "#ffcc00", msg: "đã xoa đầu" },
   poke: { tag: "poke", color: "#00ccff", msg: "đã chọc" },
   bite: { tag: "bite", color: "#ff5555", msg: "đã cắn" },
-  punch: { tag: "punch", color: "#880000", msg: "đã đấm" },
-  bonk: { tag: "bonk", color: "#000000", msg: "đã gõ đầu" },
+  punch: {
+    tag: "punch",
+    color: "#880000",
+    msg: "đã đấm",
+    images: [
+      "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExYmE3bDQyeTlwNm9rdnVtZXRjbzQzb2EzeDFkbjYydnZmbTNidzBxZCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/jZln1k7P9dO3g2Dgu4/giphy.gif",
+      "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExYmE3bDQyeTlwNm9rdnVtZXRjbzQzb2EzeDFkbjYydnZmbTNidzBxZCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/qPzZQtsv21zjy/giphy.gif",
+      "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExYmE3bDQyeTlwNm9rdnVtZXRjbzQzb2EzeDFkbjYydnZmbTNidzBxZCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/OpvUphysvKumQ/giphy.gif",
+      "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExYmE3bDQyeTlwNm9rdnVtZXRjbzQzb2EzeDFkbjYydnZmbTNidzBxZCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/ptmWoT5ZoeStn3PP5v/giphy.gif",
+    ],
+  },
+  bonk: {
+    tag: "bonk",
+    color: "#000000",
+    msg: "đã gõ đầu",
+    images: [
+      "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExeXJneHVpeHoyb2wya3Zzc3Zoem8zdDBvazd2aTdjbW9uM2d6d25lbSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/pPs4HwdYb46fWfnpje/giphy.gif",
+      "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExeXJneHVpeHoyb2wya3Zzc3Zoem8zdDBvazd2aTdjbW9uM2d6d25lbSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/K2PhVaUSgGKkDsXeEa/giphy.gif",
+      "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExeXJneHVpeHoyb2wya3Zzc3Zoem8zdDBvazd2aTdjbW9uM2d6d25lbSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/rfHc3U73N07tKPgCvJ/giphy.gif",
+      "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExeXJneHVpeHoyb2wya3Zzc3Zoem8zdDBvazd2aTdjbW9uM2d6d25lbSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/fsa01PUHKndNNCcadS/giphy.gif"
+    ],
+  },
   slap: { tag: "slap", color: "#ff4500", msg: "đã tát" },
   hug: { tag: "hug", color: "#00ff00", msg: "đã trao một cái ôm ấm áp với" },
   kiss: {
@@ -19,6 +39,11 @@ const interactions = {
     tag: "airkiss",
     color: "#add8e6",
     msg: "đã gửi một nụ hôn gió tới",
+    images: [
+      "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3a2l1eXo2eHZsb3EzbXBsc3RncmltbDJ1cDJuY3lobzRhcnIxYnA4MyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/HN0vI0nbR9jX2/giphy.gif",
+      "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3ZWpsemJ2dXRlYTZsajFiaHc2cmQ0cnVoa3c5enNkZ3B4eW1zNDY5aiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/uAvMPK3narqc8/giphy.gif",
+      "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3ZjZvMGk2N2R4aXp4OW5wd2p4dzFmbDhrYXJ2aDR1OWp2dDVoODdnNSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/9VTe635RMSfEkGaZGd/giphy.gif",
+    ],
   },
   cuddle: {
     tag: "cuddle",
@@ -29,6 +54,13 @@ const interactions = {
     tag: "lick",
     color: "#FF69B4", // Hồng đậm (Hot Pink)
     msg: "đã liếm",
+    images:[
+        "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExZ3AyaXp4ZjFpdDhiMTQwMmk0N2J3NnEweHY4eWMwbGZhcng5eXZsaiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/5cREBFcGOkC2I/giphy.gif",
+        "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExZ3AyaXp4ZjFpdDhiMTQwMmk0N2J3NnEweHY4eWMwbGZhcng5eXZsaiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/8GiREm7aqMwN2/giphy.gif",
+        "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExZ3AyaXp4ZjFpdDhiMTQwMmk0N2J3NnEweHY4eWMwbGZhcng5eXZsaiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/mG8g5NyTfJkqH4xk0d/giphy.gif",
+        "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExZ3AyaXp4ZjFpdDhiMTQwMmk0N2J3NnEweHY4eWMwbGZhcng5eXZsaiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/DTbmKtrYbwUkw1Inyv/giphy.gif",
+        "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3OHJqMnhmdGNqdGd4d3p0Z2cwc2kxY3BudmEwcmdrNXZlbzZkcGlkZCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/bfPYlvbKB4Q1xCczLs/giphy.gif"
+    ]
   },
   kick: {
     tag: "kick",
@@ -44,12 +76,7 @@ const interactions = {
     tag: "stare",
     color: "#4682B4", // Xanh thép (Steel Blue)
     msg: "đang nhìn chằm chằm (phán xét) vào",
-  },
-  bully: {
-    tag: "bully",
-    color: "#4B0082", // Màu chàm (Indigo)
-    msg: "đang bắt nạt",
-  },
+  }  
 };
 
 module.exports = {
@@ -64,6 +91,11 @@ module.exports = {
     if (!target) return message.reply(`Bạn phải tag ai đó để ${config.msg}!`);
 
     let gifUrl = null;
+
+    if (config.images && config.images.length > 0) {
+      gifUrl = config.images[Math.floor(Math.random() * config.images.length)];
+    }
+
     try {
       // THỬ API 1: Nekos.best (Rất ổn định cho các tag tương tác)
       const res = await axios.get(`https://nekos.best/api/v2/${config.tag}`);

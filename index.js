@@ -7,13 +7,15 @@ const {
 } = require("discord.js");
 const fs = require("fs");
 const path = require("path");
-// const keep_alive = require('./keep_alive.js');
+const keep_alive = require('./keep_alive.js');
 
 const GameManager = require("./game/wordchain-vi");
 const { getGameChannelId } = require("./game/game_settings");
 const Money = require("./utils/currency");
 
-const Token = process.env.BOT_TEST_TOKEN;
+const Token = process.env.BOT_TOKEN;
+// const Token = process.env.BOT_TEST_TOKEN;
+
 const PREFIX = ".";
 const client = new Client({
   intents: [
@@ -77,7 +79,7 @@ client.on("messageCreate", async (message) => {
     }
 
     try {
-      await command.execute(message, args,commandName);
+      await command.execute(message, args, commandName);
     } catch (error) {
       console.error(error);
       message.reply("Đã xảy ra lỗi khi thực thi lệnh này!");
@@ -90,23 +92,50 @@ client.on("messageCreate", async (message) => {
     if (gameChannelId && message.channelId !== gameChannelId) {
       return; // Bỏ qua nếu tin nhắn không ở đúng kênh game
     }
+
+    if (GameManager.isRepeatPlayer(message.author.id)) {
+        return message.reply({
+            content: "⚠️ Bạn vừa mới trả lời rồi, hãy đợi người khác nối tiếp nhé!",
+            allowedMentions: { repliedUser: false }
+        });
+    }
+   
     const result = GameManager.gameProcess(content);
 
     if (result.success) {
       const userId = message.author.id;
       const tienThuong = 100;
+      GameManager.setLastUser(message.author.id);
+
       await Money.addMoney(userId, tienThuong);
 
       await message.channel.send(
-        `✅ Từ hợp lệ bạn được thưởng 100 ${Money.currencyIcon}\n` +
+        `✅ Từ hợp lệ ${message.author.username} được thưởng 100 ${Money.currencyIcon}\n` +
           `Từ tiếp theo phải bắt đầu bằng **"${result.nextRequiredWord}".`
       );
     } else {
       let replyMessage = result.message;
-      await message.reply({
-        content: replyMessage,
-        allowedMentions: { repliedUser: false },
-      });
+      if (result.reason == "OUT_OF_WORD") {
+        const bonusReward = 500;
+        await Money.addMoney(userId, bonusReward);
+        await message.reply({
+          content: `${replyMessage}\n ${message.author.username} được thưởng 500 ${Money.currencyIcon}`,
+          allowedMentions: { repliedUser: false },
+        });
+        GameManager.stopGame();
+        setTimeout(() => {
+          const newStart = GameManager.getRandomWords();
+          GameManager.startGame(newStart);
+          message.channel.send(
+            `🔄 **Ván mới bắt đầu!** Từ bắt đầu: **${newStart}**`
+          );
+        }, 3000);
+      } else {
+        await message.reply({
+          content: replyMessage,
+          allowedMentions: { repliedUser: false },
+        });
+      }
     }
   }
 });
@@ -117,19 +146,18 @@ client.on("interactionCreate", async (interaction) => {
   if (interaction.type === InteractionType.ModalSubmit) {
     // 1. Kiểm tra xem đây có phải là Modal Tài Xỉu không
     if (interaction.customId.startsWith("taixiu_bet_modal_")) {
-      
       // Phản hồi Interaction (BẮT BUỘC)
       // await interaction.deferReply().catch((e) => {
       //   // Nếu đã defer hoặc reply rồi, catch lỗi nhưng KHÔNG THOÁT
       //   console.warn("Đã cố gắng Defer/Reply lại một tương tác đã xử lý.");
       //   return;
       // });
-     
+
       // Thực thi Logic Game
       const command = client.commands.get("taixiu");
 
       try {
-        if (command && command.handleModalSubmit) {          
+        if (command && command.handleModalSubmit) {
           await command.handleModalSubmit(interaction);
         }
       } catch (error) {
