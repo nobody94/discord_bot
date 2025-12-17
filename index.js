@@ -21,8 +21,8 @@ app.listen(3000, () => {
 // const keep_alive = require('./keep_alive.js');
 
 
-// const Token = process.env.BOT_TOKEN;
-const Token = process.env.BOT_TEST_TOKEN;
+const Token = process.env.BOT_TOKEN;
+// const Token = process.env.BOT_TEST_TOKEN;
 
 const PREFIX = ".";
 const client = new Client({
