@@ -13,6 +13,7 @@ const { db } = require('./utils/currency');
 
 const app = express();
 app.get('/', (req, res) => {
+  console.log('--- Có tín hiệu Ping từ UptimeRobot! ---');
   res.send('Server is running!');
 });
 const port = process.env.PORT || 3000;
