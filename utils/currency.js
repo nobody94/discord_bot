@@ -2,7 +2,7 @@ const { QuickDB } = require("quick.db");
 const db = new QuickDB();
 
 const currencyIcon = "<:nMoney:1450423722828894289>";
-const currencyKey = "mora";
+const currencyKey = "nobody_bot_mora";
 
 // Hàm: Lấy số tiền hiện tại của người dùng.
 async function getBalance(userId) {

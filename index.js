@@ -77,7 +77,7 @@ client.on("messageCreate", async (message) => {
     }
 
     try {
-      await command.execute(message, args);
+      await command.execute(message, args,commandName);
     } catch (error) {
       console.error(error);
       message.reply("Đã xảy ra lỗi khi thực thi lệnh này!");
