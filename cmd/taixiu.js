@@ -365,7 +365,7 @@ async function handleModalSubmit(interaction) {
 
 module.exports = {
   name: "taixiu",
-  description: "Đặt Tài/Xỉu/Chẵn/Lẻ",
+  description: "Đặt Tài/Xỉu/Chẵn/Lẻ Cú pháp: .tx",
   aliases: ["tx"],
   // State và hàm xử lý được export
   userBetState,

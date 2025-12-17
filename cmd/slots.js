@@ -22,7 +22,7 @@ function getRandomSymbol() {
 
 module.exports = {
   name: "slots",
-  description: "Chơi máy đánh bạc (3 hàng ngang). Cú pháp: !slots [số tiền]",
+  description: "Chơi máy đánh bạc (3 hàng ngang). Cú pháp: .slots [số tiền]",
   aliases: ["slot",'sl'],
 
   async execute(message, args) {
