@@ -6,6 +6,7 @@ const {
   TextInputBuilder,
   TextInputStyle,
   InteractionType,
+  EmbedBuilder
 } = require("discord.js");
 
 const {
@@ -29,6 +30,7 @@ const currentRound = {
   status: "inactive", // 'betting', 'rolling', 'inactive'
   bets: new Map(), // Map<userId, { choice: string, amount: number, username: string }>
   endTime: 0, // Thời điểm kết thúc đặt cược (timestamp)
+  confirmationMsgIds: [],
 };
 
 // Hàm tung xúc xắc và tính toán kết quả
@@ -55,7 +57,7 @@ function rollDice() {
   return { rolls: [roll1, roll2, roll3], total, result, isTriple, isEven };
 }
 
-function getChoiceLabel(choice){
+function getChoiceLabel(choice) {
   const choiceLabel =
     {
       tai: "Tài",
@@ -63,7 +65,7 @@ function getChoiceLabel(choice){
       chan: "Chẵn",
       le: "Lẻ",
     }[choice] || choice.toUpperCase();
-    return choiceLabel
+  return choiceLabel;
 }
 
 // Hàm xử lý kết thúc vòng đấu (sau 40s)
@@ -93,6 +95,15 @@ async function finishRound(message) {
   }
 
   currentRound.status = "rolling";
+  //  XÓA TIN NHẮN XÁC NHẬN ĐẶT CƯỢC (trước khi roll) ---
+  const msgIdsToDelete = currentRound.confirmationMsgIds;
+  if (msgIdsToDelete.length > 0) {
+      // Sử dụng bulk delete (xóa hàng loạt) để xóa nhanh các tin nhắn xác nhận
+      await message.channel.bulkDelete(msgIdsToDelete, true)
+          .then(deleted => console.log(`Đã xóa ${deleted.size} tin nhắn xác nhận cược.`))
+          .catch(error => console.error("LỖI XÓA TIN NHẮN XÁC NHẬN:", error));
+      currentRound.confirmationMsgIds = []; // Dọn dẹp mảng
+  }
 
   // 3. Tiến hành Rolling Animation (cho toàn bộ game)
   const rollingSymbols = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
@@ -128,7 +139,7 @@ async function finishRound(message) {
   let resultMessage = `🎲 **KẾT QUẢ TÀI XỈU** 🎲\n`;
   resultMessage += `Đã tung ra: ${rolls.join(
     " - "
-  )} (Tổng: **${total}**) là **${
+  )} (Tổng: **${total}**) \n **${
     isTriple ? "BÃO" : result.toUpperCase() + " | " + (isEven ? "CHẴN" : "LẺ")
   }**\n\n`;
   resultMessage += `**CHI TIẾT VÒNG ĐẤU:**\n`;
@@ -151,27 +162,29 @@ async function finishRound(message) {
       // Tài/Xỉu Thắng
       winAmount = amount * winMultiplier;
       await addMoney(userId, winAmount);
-      outcomeText = `(Thắng ${getChoiceLabel(choice)}) - Nhận ${winAmount} ${currencyIcon}`;
+      outcomeText = `(Thắng) - Nhận ${amount} ${currencyIcon}`;
       winCount++;
     } else if (choice === "chan" && isEven) {
       // Chẵn Thắng
       winAmount = amount * winMultiplier;
       await addMoney(userId, winAmount);
-      outcomeText = `(Thắng CHẴN) - Nhận ${winAmount} ${currencyIcon}`;
+      outcomeText = `(Thắng) - Nhận ${amount} ${currencyIcon}`;
       winCount++;
     } else if (choice === "le" && !isEven) {
       // Lẻ Thắng
       winAmount = amount * winMultiplier;
       await addMoney(userId, winAmount);
-      outcomeText = `(Thắng LẺ) - Nhận ${winAmount} ${currencyIcon}`;
+      outcomeText = `(Thắng) - Nhận ${amount} ${currencyIcon}`;
       winCount++;
     } else {
       // Thua
-      outcomeText = `(Thua ${getChoiceLabel(choice)}) - Mất ${amount} ${currencyIcon}`;
+      outcomeText = `(Thua) - Mất ${amount} ${currencyIcon}`;
       loseCount++;
     }
 
-    resultMessage += `> **${username}** cược **${amount}** ${currencyIcon} vào **${getChoiceLabel(choice)}**: ${outcomeText}\n`;
+    resultMessage += `> **${username}** cược **${amount}** ${currencyIcon} vào **${getChoiceLabel(
+      choice
+    )}**: ${outcomeText}\n`;
   }
 
   // resultMessage += `\n**TỔNG:** ${currentRound.bets.size} cược. ${winCount} Thắng, ${loseCount} Thua.`;
@@ -200,7 +213,7 @@ async function handleButton(interaction) {
 
   const userId = interaction.user.id;
   const choice = interaction.customId.split("_")[1]; // Lấy 'tai', 'xiu', 'chan' hoặc 'le'
-  const choiceLabel =getChoiceLabel(choice);
+  const choiceLabel = getChoiceLabel(choice);
 
   // 1. Lưu lựa chọn vào state tạm thời
   userBetState.set(userId, choice);
@@ -267,9 +280,9 @@ async function handleModalSubmit(interaction) {
     } else if (currentRound.bets.has(userId)) {
       responseContent = `❌ | Bạn đã đặt cược **${
         currentRound.bets.get(userId).amount
-      }** ${currencyIcon} vào **${getChoiceLabel(currentRound.bets
-        .get(userId)
-        .choice)}** trong vòng này. Bạn chỉ được cược một lần.`;
+      }** ${currencyIcon} vào **${getChoiceLabel(
+        currentRound.bets.get(userId).choice
+      )}** trong vòng này. Bạn chỉ được cược một lần.`;
       isError = true;
     } else {
       const currentBalance = await getBalance(userId);
@@ -283,16 +296,31 @@ async function handleModalSubmit(interaction) {
           responseContent =
             "❌ | Có lỗi xảy ra khi trừ tiền của bạn. Vui lòng kiểm tra số dư.";
           isError = true;
-        } else {
-          // Lưu cược thành công
+        } else {         
+          // 1. Lưu cược vào state
           currentRound.bets.set(userId, {
             choice: choice,
             amount: betAmount,
             username: interaction.user.globalName || interaction.user.username,
           });
 
-          responseContent = `✅ | Bạn đã đặt cược thành công **${betAmount}** ${currencyIcon} vào **${getChoiceLabel(choice)}**. Vui lòng đợi kết quả sau khi hết giờ đếm ngược!`;
-          isError = false;
+          // 2. Xóa phản hồi defer ephemeral ban đầu (tin nhắn "Bot đang làm việc...")
+          await interaction.deleteReply().catch(console.error);
+
+          // 3. Gửi tin nhắn xác nhận KHÔNG PHẢI ephemeral
+          const successMsg = `✅ **[${currentRound.bets.size}]** ${
+            interaction.user.globalName || interaction.user.username
+          } đã đặt cược **${betAmount}** ${currencyIcon} vào **${getChoiceLabel(choice)}**.`;
+          const confirmMessage = await interaction.followUp({
+            content: successMsg,
+            ephemeral: false, // RẤT QUAN TRỌNG: Không phải ephemeral để bot xóa được
+          });
+
+          // 4. LƯU ID TIN NHẮN vào mảng chung
+          currentRound.confirmationMsgIds.push(confirmMessage.id);
+
+          // 5. Kết thúc hàm tại đây.
+          return;
         }
       }
     }
@@ -351,15 +379,12 @@ module.exports = {
       return message.channel.send(
         "❌ | Vòng Tài Xỉu hiện tại đang diễn ra. Vui lòng đợi kết thúc."
       );
-    }
-
-    await message.channel.send(
-      "🎲 **Tài Xỉu Nobody - Nhà cái đến từ Teyvat!** 🎲\n Chọn Tài, Xỉu , Chẵn/Lẻ để đặt cược.\nSau khi chọn, nhập số gold bạn muốn cược\nNếu bot dừng, hãy sử dụng lại lệnh để tiếp tục ván chơi\nTrò chơi sẽ bắt đầu ngay lập tức và đếm ngược 40 giây."
-    );
+    }    
 
     // 2. Thiết lập trạng thái vòng đấu mới
     currentRound.status = "betting";
     currentRound.bets.clear();
+    currentRound.confirmationMsgIds = [];
     currentRound.endTime = Date.now() + BETTING_TIME * 1000;
 
     // 3. Tạo các nút (giống hệt code gốc)
@@ -371,12 +396,12 @@ module.exports = {
     const xiuButton = new ButtonBuilder()
       .setCustomId("tx_xiu")
       .setLabel("Đặt Xỉu (4-10)")
-      .setStyle(ButtonStyle.Danger);
+      .setStyle(ButtonStyle.Success);
 
     const chanButton = new ButtonBuilder()
       .setCustomId("tx_chan")
       .setLabel("Đặt CHẴN")
-      .setStyle(ButtonStyle.Success);
+      .setStyle(ButtonStyle.Danger);
 
     const leButton = new ButtonBuilder()
       .setCustomId("tx_le")
@@ -387,11 +412,17 @@ module.exports = {
     const row2 = new ActionRowBuilder().addComponents(chanButton, leButton);
     const allComponents = [row1, row2];
 
+    const initialEmbed = new EmbedBuilder()
+        .setColor(0x0099ff) 
+        .setTitle('🎲 **Tài Xỉu Nobody - Nhà cái đến từ Teyvat!** 🎲')
+        .setDescription(`Chọn Tài, Xỉu , Chẵn/Lẻ để đặt cược.\nSau khi chọn, nhập số gold bạn muốn cược\nNếu bot dừng, hãy sử dụng lại lệnh để tiếp tục ván chơi\nTrò chơi sẽ bắt đầu ngay lập tức và đếm ngược 40 giây.`)
+
+    await message.channel.send({embeds:[initialEmbed],components: allComponents})
+
     // 4. Gửi tin nhắn nút và lưu lại
     const initialContent = `Nhấn nút lựa chọn của bạn: CÒN ${BETTING_TIME} GIÂY ĐẶT CƯỢC`;
     const gameMessage = await message.channel.send({
       content: initialContent,
-      components: allComponents,
     });
     currentRound.message = gameMessage;
 
@@ -401,24 +432,9 @@ module.exports = {
     while (remainingTime > 0 && currentRound.status === "betting") {
       const title = `Nhấn nút lựa chọn của bạn: CÒN ${remainingTime} GIÂY ĐẶT CƯỢC`;
 
-      let betContent;
-      if (currentRound.bets.size > 0) {
-        // Chỉ lấy tên và số tiền cược cho gọn
-        const betList = Array.from(currentRound.bets.values())
-          .map((b) => {
-            const choiceLabel =getChoiceLabel(b.choice);
-            return `> ${b.username} cược **${b.amount}** ${currencyIcon} vào **${choiceLabel}**`;
-          })
-          .join("\n");
-        betContent = `\n\n**Tổng ${currentRound.bets.size} cược:**\n${betList}`;
-      } else {
-        betContent = "\n\nChưa có ai đặt cược. Hãy là người đầu tiên!";
-      }
-
       await gameMessage
         .edit({
           content: `${title}`,
-          components: allComponents,
         })
         .catch(console.error); // Xử lý lỗi nếu bot mất quyền chỉnh sửa
 
