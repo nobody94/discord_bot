@@ -10,7 +10,7 @@ module.exports = {
 
   async execute(message, args) {
     const userId = message.author.id;
-    const dailyKey = `daily_${userId}`; // Key mới để theo dõi thời gian claim
+    const dailyKey = `nobody_bot_daily_${userId}`; // Key mới để theo dõi thời gian claim
 
     // 2. Lấy thời điểm claim cuối cùng
     const lastDaily = await Money.db.get(dailyKey);
@@ -45,7 +45,7 @@ module.exports = {
 
       // 5. Gửi thông báo thành công
       return message.reply(
-        `🎉 | Chúc mừng! Bạn đã nhận được **${DAILY_REWARD}** ${Money.currencyIcon} thưởng hàng ngày.`
+        `🎉 | Chúc mừng! Bạn đã nhận được **${DAILY_REWARD}** ${Money.getIcon()} thưởng hàng ngày.`
       );
     }
   },

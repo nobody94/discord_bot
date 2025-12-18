@@ -1,8 +1,7 @@
 const GameManager = require("../game/wordchain-en");
 const { setGameChannelId,getGameChannelId } = require('../game/game_settings');
 const { PermissionFlagsBits } = require('discord.js');
-
-const hintTracker = {};
+const { checkHintLimit } = require('../utils/currency');
 
 module.exports = {
     name: "setwordchain-en",
@@ -28,15 +27,10 @@ module.exports = {
             }
 
             const userId = message.author.id;
-            const today = new Date().toISOString().split('T')[0]; // Lấy ngày định dạng YYYY-MM-DD
 
-            // Khởi tạo hoặc reset lượt dùng nếu sang ngày mới
-            if (!hintTracker[userId] || hintTracker[userId].lastUsed !== today) {
-                hintTracker[userId] = { count: 0, lastUsed: today };
-            }
+            const hintStatus = await checkHintLimit('wordchain_vi',userId);
 
-            // Kiểm tra giới hạn 5 lượt
-            if (hintTracker[userId].count >= 5) {
+            if (!hintStatus.canUse) {
                 return message.reply("⚠️ | Bạn đã hết 5 lượt gợi ý miễn phí của ngày hôm nay rồi!");
             }
 

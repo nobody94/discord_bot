@@ -2,7 +2,7 @@ const {
   getBalance,
   addMoney,
   removeMoney,
-  currencyIcon  
+  getIcon  
 } = require("../utils/currency");
 
 const symbols = ["<:cherries:1450752576256475156>", "<:watermelon:1450752616349962250>", "<:lemon:1450752606887477321>", "<:slotmachine:1450752596116635730>"];
@@ -35,7 +35,7 @@ module.exports = {
 
     const currentBalance = await getBalance(userId);
     if (betAmount > currentBalance) {
-      return message.reply(`💸 | Bạn không đủ tiền. Số dư: **${currentBalance}** ${currencyIcon}.`);
+      return message.reply(`💸 | Bạn không đủ tiền. Số dư: **${currentBalance}** ${getIcon()}.`);
     }
 
     await removeMoney(userId, betAmount);
@@ -73,9 +73,9 @@ module.exports = {
     if (multiplier >= 1) {
       const winAmount = betAmount * multiplier;
       await addMoney(userId, winAmount);
-      resultMessage += `\n${winType} (${multiplier}x) Bạn nhận được **${winAmount}** ${currencyIcon}.`;
+      resultMessage += `\n${winType} (${multiplier}x) Bạn nhận được **${winAmount}** ${getIcon()}.`;
     } else {
-      resultMessage += `\n**THUA!** Bạn đã mất **${betAmount}** ${currencyIcon}.`;
+      resultMessage += `\n**THUA!** Bạn đã mất **${betAmount}** ${getIcon()}.`;
     }
 
     await spinningMsg.edit(resultMessage);

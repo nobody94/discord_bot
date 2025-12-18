@@ -13,7 +13,7 @@ const {
   getBalance,
   addMoney,
   removeMoney,
-  currencyIcon,
+  getIcon,
 } = require("../utils/currency");
 
 // --- CẤU HÌNH VÒNG ĐẤU ---
@@ -86,9 +86,9 @@ async function finishRound(message) {
     }
     if (win) {
         await addMoney(userId, bet.amount * 2);
-        resultMessage += `> **${bet.username}**: Thắng +${bet.amount} ${currencyIcon}\n`;
+        resultMessage += `> **${bet.username}**: Thắng +${bet.amount} ${getIcon()}\n`;
     } else {
-        resultMessage += `> **${bet.username}**: Thua -${bet.amount} ${currencyIcon}\n`;
+        resultMessage += `> **${bet.username}**: Thua -${bet.amount} ${getIcon()}\n`;
     }
   }
 
@@ -174,7 +174,7 @@ module.exports = {
       if (currentRound.bets.has(userId)) return interaction.editReply("❌ | Bạn đã cược rồi.");
 
       const balance = await getBalance(userId);
-      if (betAmount > balance) return interaction.editReply(`💸 | Bạn không đủ **${betAmount}** ${currencyIcon}.`);
+      if (betAmount > balance) return interaction.editReply(`💸 | Bạn không đủ **${betAmount}** ${getIcon()}.`);
 
       await removeMoney(userId, betAmount);
       currentRound.bets.set(userId, {
@@ -185,7 +185,7 @@ module.exports = {
 
       await interaction.deleteReply().catch(() => {}); // Xóa defer ephemeral
       const confirm = await interaction.followUp({
-        content: `✅ **${interaction.user.username}** đã cược **${betAmount}** ${currencyIcon} vào **${getChoiceLabel(choice)}**`,
+        content: `✅ **${interaction.user.username}** đã cược **${betAmount}** ${getIcon()} vào **${getChoiceLabel(choice)}**`,
         ephemeral: false 
       });
       currentRound.confirmationMsgIds.push(confirm.id);

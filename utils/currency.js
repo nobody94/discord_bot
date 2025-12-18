@@ -58,4 +58,25 @@ async function removeMoney(userId, amount, type = DEFAULT_TYPE) {
     return true;
 }
 
-module.exports = { getAllBalances,getBalance, addMoney, removeMoney, getIcon, CURRENCIES };
+async function checkHintLimit(key,userId) {
+    const today = new Date().toISOString().split('T')[0];
+    const key = `${dbKey}_${key}_${userId}`;
+    
+    let data = await db.get(key);
+    
+    // Nếu chưa có dữ liệu hoặc sang ngày mới thì reset
+    if (!data || data.lastUsed !== today) {
+        data = { count: 0, lastUsed: today };
+    }
+
+    if (data.count >= 5) {
+        return { canUse: false, remaining: 0 };
+    }
+
+    data.count++;
+    await db.set(key, data);
+    
+    return { canUse: true, remaining: 5 - data.count };
+}
+
+module.exports = { getAllBalances,getBalance, addMoney, removeMoney, getIcon, CURRENCIES,db,checkHintLimit };

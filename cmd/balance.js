@@ -33,7 +33,7 @@ module.exports = {
             const amount = balances[type] || 0;
             const icon = Money.getIcon(type);
             
-            return `${icon} *:** \`${amount.toLocaleString()}\``;
+            return `${icon} : **${amount.toLocaleString()}**`;
         });
 
         const responseEmbed = {

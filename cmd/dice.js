@@ -10,7 +10,7 @@ const {
   getBalance,
   addMoney,
   removeMoney,
-  currencyIcon,
+  getIcon,
 } = require("../utils/currency");
 
 module.exports = {
@@ -67,7 +67,7 @@ module.exports = {
       const currentBalance = await getBalance(userId);
       if (betAmount > currentBalance) {
         return interaction.reply({
-          content: `💸 | Bạn không đủ **${betAmount}** ${currencyIcon}. Dư: **${currentBalance}**`,
+          content: `💸 | Bạn không đủ **${betAmount}** ${getIcon()}. Dư: **${currentBalance}**`,
           ephemeral: true,
         });
       }
@@ -80,9 +80,9 @@ module.exports = {
 
       if (choice === result) {
         await addMoney(userId, betAmount * 2);
-        resultMessage += `🎉 **THẮNG!** Bạn nhận được **${betAmount}** ${currencyIcon}.`;
+        resultMessage += `🎉 **THẮNG!** Bạn nhận được **${betAmount}** ${getIcon()}.`;
       } else {
-        resultMessage += `😔 **THUA!** Bạn đã mất **${betAmount}** ${currencyIcon}.`;
+        resultMessage += `😔 **THUA!** Bạn đã mất **${betAmount}** ${getIcon()}.`;
       }
 
       await interaction.reply(resultMessage);
