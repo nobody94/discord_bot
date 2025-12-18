@@ -1,0 +1,77 @@
+// const { PermissionsBitField } = require('discord.js');
+const { removeMoney, getIcon, CURRENCIES } = require('../utils/currency.js'); 
+
+// 1. Cấu hình ID của bạn (Developer) để có quyền tối cao
+const DEVELOPER_IDS = ['1446889473374683400']; 
+
+module.exports = {
+    name: 'removemoney',
+    description: 'Trừ tiền của người dùng bằng @mention hoặc ID (chỉ dành cho Developer).',   
+    // userPermissions: [PermissionsBitField.Flags.Administrator],
+
+    async execute(message, args) {
+        // 2. Kiểm tra quyền hạn (Phải có trong ID trong danh sách Developer)
+        const isDeveloper = DEVELOPER_IDS.includes(message.author.id);
+
+        if (!isDeveloper ) {
+            return message.reply({ 
+                content: "❌ | Bạn không có quyền sử dụng lệnh này.", 
+                ephemeral: true 
+            });
+        }
+
+        // 3. Kiểm tra tham số đầu vào
+        if (args.length < 2) {
+            return message.reply(`Sử dụng: \`.removemoney <@user hoặc UserID> <SốTiền> [loại tiền]\` \nVí dụ: \`.addmoneyto @Nobody 1000 primo\``);
+        }
+
+        // 4. Xử lý lấy ID từ @mention hoặc ID thuần
+        let targetId = args[0];
+        if (targetId.startsWith('<@') && targetId.endsWith('>')) {
+            targetId = targetId.slice(2, -1);
+            if (targetId.startsWith('!')) targetId = targetId.slice(1);
+            if (targetId.startsWith('&')) targetId = targetId.slice(1); // Hỗ trợ mention role nếu cần
+        }
+
+        const amount = parseInt(args[1]);
+        // Lấy loại tiền từ tham số thứ 3, nếu không nhập mặc định là 'mora'
+        const currencyType = args[2]?.toLowerCase() || 'mora';
+
+        // 5. Kiểm tra tính hợp lệ của dữ liệu
+        if (!/^\d+$/.test(targetId)) {
+            return message.reply(`❌ | Đối tượng "${args[0]}" không hợp lệ. Vui lòng @mention hoặc nhập ID chính xác.`);
+        }
+
+        if (isNaN(amount) || amount <= 0) {
+            return message.reply(`❌ | Số tiền "${args[1]}" không hợp lệ.`);
+        }
+
+        // Kiểm tra xem loại tiền có tồn tại trong currency.js không
+        if (!CURRENCIES[currencyType]) {
+            return message.reply(`❌ | Loại tiền "${currencyType}" không tồn tại. Các loại hiện có: \`${Object.keys(CURRENCIES).join(", ")}\``);
+        }
+
+        // 6. Thực hiện cộng tiền
+        let targetUser;
+        try {
+            targetUser = await message.client.users.fetch(targetId);
+        } catch (error) {
+            targetUser = { tag: `ID:${targetId}` }; 
+        }
+
+        try {
+            const success = await removeMoney(targetId, amount, currencyType);
+
+            if (success) {
+                return message.channel.send({
+                    content: `✅ | Đã trừ thành công **${amount.toLocaleString()}** ${getIcon(currencyType)} của **${targetUser.tag}**.`,
+                });
+            } else {
+                return message.reply("❌ | Lỗi hệ thống khi trừ tiền vào database.");
+            }
+        } catch (error) {
+            console.error("LỖI ADDMONEYTO:", error);
+            return message.reply("❌ | Đã xảy ra lỗi không xác định.");
+        }
+    },
+};
