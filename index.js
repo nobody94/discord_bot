@@ -11,7 +11,7 @@ const express = require('express');
 const { WordChain } = require("./game/wordchain");
 const {db} = require('./utils/currency');
 
-db.connect().then(() => console.log("✅ Đã kết nối MongoDB Atlas!"));
+// db.connect().then(() => console.log("✅ Đã kết nối MongoDB Atlas!"));
 
 const app = express();
 app.get('/', (req, res) => {
@@ -24,8 +24,8 @@ app.listen(port, '0.0.0.0', () => {
   console.log(`Server is running on port ${port}`);
 });
 
-// const Token = process.env.BOT_TOKEN;
-const Token = process.env.BOT_TEST_TOKEN;
+const Token = process.env.BOT_TOKEN;
+// const Token = process.env.BOT_TEST_TOKEN;
 
 const PREFIX = ".";
 const client = new Client({
@@ -175,4 +175,28 @@ client.on("interactionCreate", async (interaction) => {
   }
 });
 
-client.login(Token);
+// client.login(Token);
+
+async function startBot() {
+  try {
+    console.log("⏳ Đang kết nối Database...");
+    // Gọi db.connect() từ file currency đã import
+    await db.connect(); 
+    console.log("✅ Đã kết nối MongoDB thành công!");
+
+    if (!Token) {
+      console.error("❌ LỖI: BOT_TOKEN không tồn tại trong Environment của Render!");
+      return;
+    }
+
+    console.log("🚀 Đang đăng nhập Discord...");
+    await client.login(Token);
+  } catch (error) {
+    console.error("🔴 Lỗi khởi động hệ thống:", error);
+    // Render sẽ tự khởi động lại nếu tiến trình bị exit lỗi
+    process.exit(1); 
+  }
+}
+
+// Chạy hàm khởi động
+startBot();
