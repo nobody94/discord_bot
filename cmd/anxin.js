@@ -15,26 +15,43 @@ module.exports = {
   async execute(message) {
     const requester = message.author;
 
-    const row = new ActionRowBuilder().addComponents(
-      new ButtonBuilder()
-        // Lưu ID người xin vào CustomID để tí nữa biết cộng tiền cho ai
-        .setCustomId(`open_give_modal_${requester.id}`)
-        .setLabel(`Tặng tiền cho ${requester.displayName}`)
-        .setStyle(ButtonStyle.Success)
-    );
+    // 1. Tạo nút bấm ban đầu
+    const button = new ButtonBuilder()
+      .setCustomId(`open_give_modal_${requester.id}`)
+      .setLabel(`Tặng tiền cho ${requester.displayName}`)
+      .setStyle(ButtonStyle.Success);
 
-    await message.channel.send({
-      content: `🙏 **${requester.displayName}** đang gặp khó khăn và cần sự giúp đỡ từ các đại gia!`,
+    const row = new ActionRowBuilder().addComponents(button);
+
+    // 2. Gửi tin nhắn và lưu lại object tin nhắn để xử lý sau này
+    const response = await message.channel.send({
+      content: `🙏 **${requester.displayName}** đang gặp khó khăn và cần sự giúp đỡ từ các đại gia! (Nút có hiệu lực trong 2 phút)`,
       components: [row],
     });
+
+    // 3. Thiết lập thời gian chờ 2 phút (120,000ms) để vô hiệu hóa nút
+    setTimeout(async () => {
+      try {
+        // Tạo nút mới ở trạng thái bị vô hiệu hóa (Disabled)
+        const disabledButton = ButtonBuilder.from(button).setDisabled(true);
+        const disabledRow = new ActionRowBuilder().addComponents(disabledButton);
+
+        // Cập nhật lại tin nhắn để người dùng không bấm được nữa
+        await response.edit({
+          content: `⌛ **Thông báo:** Lời kêu gọi của **${requester.displayName}** đã hết hạn trợ cấp.`,
+          components: [disabledRow],
+        });
+      } catch (err) {
+        console.error("Không thể vô hiệu hóa nút anxin:", err);
+      }
+    }, 120000); // 120,000ms = 2 phút
   },
+
   async handleInteraction(interaction) {
-    if (
-      interaction.isButton() 
-    ) {
+    // 1. Xử lý khi nhấn nút mở Modal
+    if (interaction.isButton()) {
       const requesterId = interaction.customId.split("_")[3];
 
-      // Không cho phép tự cho tiền chính mình
       if (interaction.user.id === requesterId) {
         return interaction.reply({
           content: "❌ Bạn không thể tự tặng tiền cho bản thân!",
@@ -58,16 +75,11 @@ module.exports = {
     }
 
     // 2. Khi người hảo tâm gửi Modal (nhập xong số tiền)
-    if (
-      interaction.isModalSubmit()
-    ) {
+    if (interaction.isModalSubmit()) {
       const requesterId = interaction.customId.split("_")[3];
       const giverId = interaction.user.id;
-      const amount = parseInt(
-        interaction.fields.getTextInputValue("give_amount")
-      );
+      const amount = parseInt(interaction.fields.getTextInputValue("give_amount"));
 
-      // Kiểm tra tính hợp lệ của số tiền
       if (isNaN(amount) || amount <= 0) {
         return interaction.reply({
           content: "❌ Số tiền không hợp lệ!",
@@ -75,7 +87,6 @@ module.exports = {
         });
       }
 
-      // Kiểm tra số dư người cho
       const giverBalance = await Money.getBalance(giverId);
       if (giverBalance < amount) {
         return interaction.reply({
@@ -85,15 +96,15 @@ module.exports = {
       }
 
       try {
-        // Thực hiện chuyển tiền
-        await Money.addMoney(giverId, -amount);
+        await Money.removeMoney(giverId, amount);
         await Money.addMoney(requesterId, amount);
 
         await interaction.reply({
-          content: `✅ **${
-            interaction.user.displayName
-          }** đã tặng **${amount}** ${Money.getIcon()} cho <@${requesterId}>!`,
+          content: `✅ **${interaction.user.displayName}** đã tặng **${amount}** ${Money.getIcon()} cho <@${requesterId}>!`,
         });
+        
+        // (Tùy chọn) Xóa nút ngay sau khi có người tặng thành công
+        // await interaction.message.edit({ components: [] }).catch(() => {});
       } catch (error) {
         console.error(error);
         await interaction.reply({

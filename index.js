@@ -9,6 +9,9 @@ const fs = require("fs");
 const path = require("path");
 const express = require('express');
 const { WordChain } = require("./game/wordchain");
+const {db} = require('./utils/currency');
+
+db.connect().then(() => console.log("✅ Đã kết nối MongoDB Atlas!"));
 
 const app = express();
 app.get('/', (req, res) => {
@@ -21,8 +24,8 @@ app.listen(port, '0.0.0.0', () => {
   console.log(`Server is running on port ${port}`);
 });
 
-const Token = process.env.BOT_TOKEN;
-// const Token = process.env.BOT_TEST_TOKEN;
+// const Token = process.env.BOT_TOKEN;
+const Token = process.env.BOT_TEST_TOKEN;
 
 const PREFIX = ".";
 const client = new Client({

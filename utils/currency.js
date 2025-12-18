@@ -1,5 +1,7 @@
-const { QuickDB } = require("quick.db");
-const db = new QuickDB();
+const { Database } = require("quickmongo");
+
+const mongoUrl = process.env.MONGOURL;
+const db = new Database(mongoUrl);
 
 // Cấu hình các loại tiền
 const CURRENCIES = {

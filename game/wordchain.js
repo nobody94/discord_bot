@@ -17,7 +17,9 @@ async function gameProcess(message, wordchain) {
 
   if (result.success) {
     const tienThuong = 50;
-    wordchain.setLastUser(guildId, message.author.id);
+    const userId = message.author.id;
+    
+    wordchain.setLastUser(guildId, userId);
 
     await Money.addMoney(userId, tienThuong);
 
