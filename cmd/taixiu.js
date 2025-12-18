@@ -75,7 +75,7 @@ async function finishRound(message) {
   }
 
   const { rolls, total, result, isTriple, isEven } = rollDice();
-  let resultMessage = `🎲 **KẾT QUẢ:\n${rolls.map((d)=> rollingSymbols[d-1]).join(" | ")} - TỔNG:${total}**\n**${isTriple ? "BÃO" : result.toUpperCase() + " | " + (isEven ? "CHẴN" : "LẺ")}**\n\n`;
+  let resultMessage = `🎲 **KẾT QUẢ:\n${rolls.map((d)=> rollingSymbols[d-1]).join(" | ")} - TỔNG: ${total}**\n**${isTriple ? "BÃO" : result.toUpperCase() + " | " + (isEven ? "CHẴN" : "LẺ")}**\n\n`;
 
   for (const [userId, bet] of currentRound.bets) {
     let win = false;

@@ -1,9 +1,9 @@
 const Money = require("../utils/currency");
-const ViWordchain = require('./wordchain-vi');
-const EnWordchain = require('./wordchain-en');
+const ViWordchain = require("./wordchain-vi");
+const EnWordchain = require("./wordchain-en");
 const { getGameChannelId } = require("./game_settings");
 
-async function gameProcess(message, wordchain) { 
+async function gameProcess(message, wordchain) {
   const gameChannelId = getGameChannelId(message.guildId);
   const content = message.content.trim();
   const userId = message.author.id;
@@ -13,8 +13,7 @@ async function gameProcess(message, wordchain) {
 
   if (wordchain.isRepeatPlayer(message.author.id)) {
     return message.reply({
-      content:
-        "⚠️ Bạn vừa mới trả lời rồi, hãy đợi người khác nối tiếp nhé!",
+      content: "⚠️ Bạn vừa mới trả lời rồi, hãy đợi người khác nối tiếp nhé!",
       allowedMentions: { repliedUser: false },
     });
   }
@@ -22,15 +21,16 @@ async function gameProcess(message, wordchain) {
   const result = wordchain.gameProcess(content);
 
   if (result.success) {
-
     const tienThuong = 50;
     wordchain.setLastUser(message.author.id);
 
     await Money.addMoney(userId, tienThuong);
 
     await message.channel.send(
-      `✅ Từ hợp lệ ${message.author.username} được thưởng ${tienThuong} ${Money.currencyIcon}\n` +
-      `Từ tiếp theo phải bắt đầu bằng **"${result.nextRequiredWord}".`
+      `✅ Từ hợp lệ ${
+        message.author.username
+      } được thưởng ${tienThuong} ${Money.getIcon()}\n` +
+        `Từ tiếp theo phải bắt đầu bằng **"${result.nextRequiredWord}".`
     );
   } else {
     let replyMessage = result.message;
@@ -38,7 +38,9 @@ async function gameProcess(message, wordchain) {
       const bonusReward = 500;
       await Money.addMoney(userId, bonusReward);
       await message.reply({
-        content: `${replyMessage}\n ${message.author.username} được thưởng ${bonusReward} ${Money.currencyIcon}`,
+        content: `${replyMessage}\n ${
+          message.author.username
+        } được thưởng ${bonusReward} ${Money.getIcon()}`,
         allowedMentions: { repliedUser: false },
       });
       wordchain.stopGame();
@@ -49,16 +51,28 @@ async function gameProcess(message, wordchain) {
           `🔄 **Ván mới bắt đầu!** Từ bắt đầu: **${newStart}**`
         );
       }, 3000);
+    }
+    if (result.reason == "LENGTH_OVER") {
+      return;
     } else {
-      await message.reply({
-        content: replyMessage,
-        allowedMentions: { repliedUser: false },
-      });
+      await message
+        .reply({
+          content: replyMessage,
+          allowedMentions: { repliedUser: false },
+        })
+        .then((msg) => {
+          // Thiết lập thời gian chờ 10 giây (10000ms) trước khi xóa
+          setTimeout(() => {
+            msg
+              .delete()
+              .catch((err) => console.error("Không thể xóa tin nhắn:", err));
+          }, 10000);
+        });
     }
   }
 }
 
-function WordChain(message) {  
+function WordChain(message) {
   if (ViWordchain.isGameActive()) {
     gameProcess(message, ViWordchain);
   }
@@ -68,5 +82,5 @@ function WordChain(message) {
 }
 
 module.exports = {
-  WordChain
-}
+  WordChain,
+};

@@ -8,10 +8,35 @@ const wordHistory = new Set();
 
 //lấy 2 từ ngẫu nhiên
 function getRandomWords() {
-  const words = Array.from(dictionary);
-  const finalWord = words[Math.floor(Math.random() * words.length)];
+  // const words = Array.from(dictionary);
+  // const finalWord = words[Math.floor(Math.random() * words.length)];
 
-  return finalWord;
+  // return finalWord;
+  
+  const words = Array.from(dictionary);
+  let startingWord = "";
+  let isValid = false;
+
+  // Lặp để tìm từ phù hợp
+  while (!isValid) {
+    // Lấy 1 từ ngẫu nhiên từ danh sách
+    startingWord = words[Math.floor(Math.random() * words.length)];
+
+    // Lấy phần cuối của từ này (ví dụ: "nối từ" -> lấy "từ")
+    const secondPart = this.getSecondPart(startingWord);
+
+    // Kiểm tra xem có từ nào trong dictionary bắt đầu bằng 'secondPart' không
+    // Giả sử bạn có hàm check từ bắt đầu hoặc duyệt mảng
+    const canBeFollowed = words.some((word) =>
+      word.startsWith(secondPart + " ")
+    );
+
+    if (canBeFollowed) {
+      isValid = true;
+    }
+  }
+
+  return startingWord;
 }
 
 function isValidWord(word) {
@@ -65,7 +90,7 @@ function startGame(startingWord) {
   wordHistory.clear();
 
   //Từ ngẫu nhiên khi bắt đầu game
-  const firstPhrase = startingWord;  
+  const firstPhrase = startingWord;
   currentWord = firstPhrase;
   wordHistory.add(firstPhrase);
 
@@ -111,6 +136,13 @@ function gameProcess(newWord) {
       success: false,
       reason: "WORD_TOO_SHORT",
       message: "❌ Từ phải là cụm 2 từ",
+    };
+  }
+  if (parts.length > 2) {
+    return {
+      success: false,
+      reason: "LENGTH_OVER",
+      message: "",
     };
   }
   // Lấy tất cả cụm 2 từ chưa dùng và bắt đầu bằng secondWord

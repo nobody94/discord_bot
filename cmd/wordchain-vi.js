@@ -6,17 +6,18 @@ const { checkHintLimit } = require('../utils/currency');
 
 module.exports = {
     name: "setwordchain-vi",
-    aliases: ["noichu-vi", 'ws', 'wc'],
+    aliases: ["noichu-vi", 'ws', 'wc','stop-vi'],
     description: "Thiết lập kênh và bắt đầu trò chơi nối từ.",
 
     async execute(message, args, commandName) {       
          const guildId = message.guildId;
         const currentChannelId = message.channelId;  
         const selectedChannel = message.channel;
+        const gameChannelId = getGameChannelId(guildId);  
+
         //hint
         const isHintShortcut = ["ws", "wc"].includes(commandName);
-        if (isHintShortcut) {   
-            const gameChannelId = getGameChannelId(guildId);  
+        if (isHintShortcut) {              
             if (currentChannelId !== gameChannelId) {
                 return message.reply("❌ | Bạn chỉ có thể dùng lệnh gợi ý trong đúng kênh chơi game!");
             }
@@ -47,6 +48,18 @@ module.exports = {
             });
         }
 
+        const isStop = ['stop-vi'].includes(commandName);
+        
+        if(isStop){
+            if (currentChannelId !== gameChannelId) {
+                return message.reply("❌ | Bạn chỉ có thể dùng lệnh trong đúng kênh chơi game!");
+            }
+             if (!GameManager.isGameActive()) {
+                return message.reply("❌ | Game chưa bắt đầu!");
+            }
+            GameManager.stopGame();
+        }
+
         // 1. Kiểm tra quyền hạn
         if (!message.member.permissions.has(PermissionFlagsBits.ManageChannels)) {
             return message.reply("❌ Bạn cần quyền `Quản lý kênh` để thiết lập trò chơi.");
@@ -56,6 +69,9 @@ module.exports = {
         setGameChannelId(guildId, selectedChannel.id);      
 
         // 3. Kiểm tra nếu game đang chạy thì reset/stop để bắt đầu ván mới hoàn toàn
+        if (currentChannelId !== gameChannelId) {
+                return 
+        }
         if (GameManager.isGameActive()) {
             GameManager.stopGame();
         }

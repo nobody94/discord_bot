@@ -1,5 +1,4 @@
-const {enDictionary} = require('../game/dictionary');
-
+const { enDictionary } = require("../game/dictionary");
 
 const dictionary = enDictionary;
 let gameActive = false;
@@ -15,7 +14,20 @@ function getRandomWords() {
 }
 
 function isValidWord(word) {
-  return dictionary.includes(word.toLowerCase());
+  // return dictionary.includes(word.toLowerCase());
+  
+  
+  // Regex kiểm tra: Chỉ cho phép chữ cái, không cho phép số hoặc ký hiệu
+  // ^: bắt đầu, $: kết thúc, [a-zA-ZÀ-ỹ]: các ký tự chữ cái tiếng Việt và tiếng Anh
+  const onlyLetters = /^[a-z]+$/;
+
+  if (!onlyLetters.test(word)) {
+    return false; // Trả về false nếu có số hoặc ký hiệu dính kèm
+  }
+
+  const lowerWord = word.toLowerCase();
+
+  return dictionary.includes(lowerWord);
 }
 
 function getSecondPart(word) {
@@ -97,9 +109,26 @@ function gameProcess(newWord) {
       reason: "NOT_ACTIVE",
       message: "Game chưa hoạt động",
     };
-  
-  const secondWord = getSecondPart(newWord);  
- 
+
+  const secondWord = getSecondPart(newWord);
+  const parts = newWord.split(/\s+/);
+  if (parts.length > 1) {
+    return {
+      success: false,
+      reason: "LENGTH_OVER",
+      message: "",
+    };
+  }
+
+   // Kiểm tra hợp lệ theo từ điển
+  if (!isValidWord(newWord)) {
+    return {
+      success: false,
+      reason: "WORD_NOT_VALID",
+      message: `❌ Từ này không có trong từ điển`,
+    };
+  }
+
   // Lấy tất cả từ chưa dùng và bắt đầu bằng secondWord
   const nextOptions = dictionary.filter((p) => {
     if (wordHistory.has(p)) return false;
@@ -118,15 +147,7 @@ function gameProcess(newWord) {
       message: "Hết từ để nối tiếp",
     };
   }
-
-  // Kiểm tra hợp lệ theo từ điển
-  if (!isValidWord(newWord)) {
-    return {
-      success: false,
-      reason: "WORD_NOT_VALID",
-      message: `❌ Từ này không có trong từ điển`,
-    };
-  }
+ 
   // Không lặp cụm
   if (wordHistory.has(newWord)) {
     return {

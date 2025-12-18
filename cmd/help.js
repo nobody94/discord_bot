@@ -21,7 +21,12 @@ module.exports = {
                 { 
                     name: '💵 Tiền tệ', 
                     value: '• balance, money, tien, cash: Kiểm tra số tiền hiện có\n• daily, claim, dl: Nhận thưởng daily',
-                    inline:false   
+                    inline:true   
+                },
+                { 
+                    name: invisibleChar, 
+                    value: '• shop: Xem shop\n• balo:Xem balo\n• buy: Mua đồ',
+                    inline:true   
                 },
                 { 
                     name: '❤️ Tương tác',
