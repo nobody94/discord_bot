@@ -144,6 +144,18 @@ client.on("interactionCreate", async (interaction) => {
         }
       }
     }
+
+    // Kiểm tra Modal của lệnh ăn xin
+    if (interaction.customId.startsWith("modal_anxin")) {
+      const command = client.commands.get("anxin");
+      if (command && command.handleInteraction) {
+        try {
+          return await command.handleInteraction(interaction);
+        } catch (error) {
+          console.error("LỖI XỬ LÝ MODAL anxin:", error);
+        }
+      }
+    }
   }
 });
 
