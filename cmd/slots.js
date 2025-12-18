@@ -29,61 +29,60 @@ module.exports = {
     const userId = message.author.id;
     let betAmount = parseInt(args[0]);
 
+    // 1. Kiểm tra định dạng số tiền
     if (isNaN(betAmount) || betAmount <= 0) {
       return message.reply("❌ | Vui lòng nhập đúng cú pháp: `.slots [số tiền cược]`");
     }
 
+    // 2. Chặn cược trên 10.000
     if (betAmount > 10000) {
-      return message.reply("❌ | Số tiền cược quá nhiều`");
+      return message.reply("❌ | Giới hạn cược tối đa là **10.000** " + getIcon());
     }
 
-    if (0 < betAmount <= 10000) {
-      const currentBalance = await getBalance(userId);
-      if (betAmount > currentBalance) {
-        return message.reply(`💸 | Bạn không đủ tiền. Số dư: **${currentBalance}** ${getIcon()}.`);
-      }
-
-      await removeMoney(userId, betAmount);
-
-      const spinningMsg = await message.reply(`🎰 **TÍCH CỰC GACHA VẬN MAY SẼ ĐẾN** 🎰\n[ 🔄 | 🔄 | 🔄 ]\n*Đang quay...*`);
-
-      // Hiệu ứng quay
-      for (let i = 0; i < 5; i++) {
-        await sleep(100);
-        await spinningMsg.edit(`🎰 **TÍCH CỰC GACHA VẬN MAY SẼ ĐẾN** 🎰\n[ ${getRandomSymbol()} | ${getRandomSymbol()} | ${getRandomSymbol()} ]\n*Đang quay...*`);
-      }
-
-      // Kết quả cuối cùng
-      const roll1 = getRandomSymbol();
-      const roll2 = getRandomSymbol();
-      const roll3 = getRandomSymbol();
-      const resultString = roll1 + roll2 + roll3;
-
-      let multiplier = 0;
-      let winType = "";
-
-      // 1. Kiểm tra 3 hình giống nhau (Jackpot)
-      if (payouts[resultString]) {
-        multiplier = payouts[resultString];
-        winType = "JACKPOT! 🎉";
-      }
-      // 2. Kiểm tra 2 hình giống nhau (Cặp)
-      else if (roll1 === roll2 || roll1 === roll3 || roll2 === roll3) {
-        multiplier = 1.5; // Thưởng x2 tiền cược nếu có 2 hình giống nhau
-        winType = "TRÚNG CẶP! ✨";
-      }
-
-      let resultMessage = `🎰 **TÍCH CỰC GACHA VẬN MAY SẼ ĐẾN** 🎰\n[ ${roll1} | ${roll2} | ${roll3} ]\n`;
-
-      if (multiplier >= 1) {
-        const winAmount = betAmount * multiplier;
-        await addMoney(userId, winAmount);
-        resultMessage += `\n${winType} (${multiplier}x) Bạn nhận được **${winAmount}** ${getIcon()}.`;
-      } else {
-        resultMessage += `\n**THUA!** Bạn đã mất **${betAmount}** ${getIcon()}.`;
-      }
-
-      await spinningMsg.edit(resultMessage);
+    // 3. Kiểm tra số dư tài khoản
+    const currentBalance = await getBalance(userId);
+    if (betAmount > currentBalance) {
+      return message.reply(`💸 | Bạn không đủ tiền. Số dư hiện tại: **${currentBalance}** ${getIcon()}.`);
     }
+
+    // --- BẮT ĐẦU XỬ LÝ GAME ---
+    await removeMoney(userId, betAmount);
+
+    const spinningMsg = await message.reply(`🎰 **TÍCH CỰC GACHA VẬN MAY SẼ ĐẾN** 🎰\n[ 🔄 | 🔄 | 🔄 ]\n*Đang quay...*`);
+
+    // Hiệu ứng quay
+    for (let i = 0; i < 5; i++) {
+      await sleep(100);
+      await spinningMsg.edit(`🎰 **TÍCH CỰC GACHA VẬN MAY SẼ ĐẾN** 🎰\n[ ${getRandomSymbol()} | ${getRandomSymbol()} | ${getRandomSymbol()} ]\n*Đang quay...*`);
+    }
+
+    const roll1 = getRandomSymbol();
+    const roll2 = getRandomSymbol();
+    const roll3 = getRandomSymbol();
+    const resultString = roll1 + roll2 + roll3;
+
+    let multiplier = 0;
+    let winType = "";
+
+    if (payouts[resultString]) {
+      multiplier = payouts[resultString];
+      winType = "JACKPOT! 🎉";
+    }
+    else if (roll1 === roll2 || roll1 === roll3 || roll2 === roll3) {
+      multiplier = 1.5; 
+      winType = "TRÚNG CẶP! ✨";
+    }
+
+    let resultMessage = `🎰 **TÍCH CỰC GACHA VẬN MAY SẼ ĐẾN** 🎰\n[ ${roll1} | ${roll2} | ${roll3} ]\n`;
+
+    if (multiplier >= 1) {
+      const winAmount = Math.floor(betAmount * multiplier); // Dùng Math.floor để số tiền ra số tròn
+      await addMoney(userId, winAmount);
+      resultMessage += `\n${winType} (${multiplier}x) Bạn nhận được **${winAmount}** ${getIcon()}.`;
+    } else {
+      resultMessage += `\n**THUA!** Bạn đã mất **${betAmount}** ${getIcon()}.`;
+    }
+
+    await spinningMsg.edit(resultMessage);
   },
 };
