@@ -1,10 +1,26 @@
 const { enDictionary } = require("../game/dictionary");
+const { db, dbKey } = require("../utils/currency");
 
 const dictionary = enDictionary;
-let gameActive = false;
-let currentWord = null;
-let lastUserId = null;
-const wordHistory = new Set();
+
+async function getGameState(guildId) {
+  const key = `${dbKey}_wordchain_en_${guildId}`;
+  return (
+    (await db.get(key)) || {
+      gameActive: false,
+      currentWord: null,
+      lastUserId: null,
+      wordHistory: [],
+      channelId: null,
+    }
+  );
+}
+
+async function updateGameState(guildId, data) {
+  const state = await getGameState(guildId);
+  const key = `${dbKey}_wordchain_en_${guildId}`;
+  await db.set(key, { ...state, ...data });
+}
 
 function getRandomWords() {
   const words = Array.from(dictionary);
@@ -14,9 +30,6 @@ function getRandomWords() {
 }
 
 function isValidWord(word) {
-  // return dictionary.includes(word.toLowerCase());
-  
-  
   // Regex kiểm tra: Chỉ cho phép chữ cái, không cho phép số hoặc ký hiệu
   // ^: bắt đầu, $: kết thúc, [a-zA-ZÀ-ỹ]: các ký tự chữ cái tiếng Việt và tiếng Anh
   const onlyLetters = /^[a-z]+$/;
@@ -34,14 +47,14 @@ function getSecondPart(word) {
   return word.slice(-1);
 }
 
-function getHint() {
-  if (!gameActive || !currentWord) return null;
+function getHint(state) {
+  if (!state.gameActive || !state.currentWord) return null;
 
-  const secondPart = getSecondPart(currentWord).toLowerCase();
+  const secondPart = getSecondPart(state.currentWord).toLowerCase();
 
   const matches = Array.from(dictionary).filter((word) => {
     const wLower = word.toLowerCase();
-    return wLower.startsWith(secondPart) && !wordHistory.has(wLower);
+    return wLower.startsWith(secondPart) && !state.wordHistory.includes(wLower);
   });
 
   if (matches.length === 0) return null;
@@ -53,57 +66,61 @@ function getHint() {
   return shuffled.slice(0, 3);
 }
 
-function isGameActive() {
-  return gameActive;
+async function isGameActive(guildId) {
+  const state = await getGameState(guildId);
+  return state.gameActive;
 }
 
-function getCurrentWord() {
-  return currentWord;
-}
-
-function startGame(startingWord) {
-  if (gameActive) {
+async function startGame(guildId, startingWord) {
+  const state = await getGameState(guildId);
+  if (state.gameActive) {
     return false;
   }
 
-  gameActive = true;
-  lastUserId = null;
-  wordHistory.clear();
-
-  //Từ ngẫu nhiên khi bắt đầu game
-  const firstPhrase = startingWord;
-  currentWord = firstPhrase;
-  wordHistory.add(firstPhrase);
+  await updateGameState(guildId, {
+    gameActive: true,
+    currentWord: startingWord,
+    lastUserId: null,
+    wordHistory: [startingWord],
+  });
 
   return true;
 }
 
-function stopGame() {
-  if (!gameActive) {
+async function stopGame(guildId) {
+  const state = await getGameState(guildId);
+  if (!state.gameActive) {
     return 0;
   }
 
-  gameActive = false;
-  const totalWords = wordHistory.size;
-  currentWord = null;
-  lastUserId = null;
-  wordHistory.clear();
+  await updateGameState(guildId, {
+    gameActive: false,
+    currentWord: null,
+    lastUserId: null,
+    wordHistory: [],
+  });
+
+  const totalWords = state.wordHistory.length;
 
   return totalWords;
 }
 
-function isRepeatPlayer(userId) {
-  return lastUserId === userId; //
+async function isRepeatPlayer(guildId, userId) {
+  const state = await getGameState(guildId);
+  return state.lastUserId === userId; //
 }
 
-function setLastUser(userId) {
-  lastUserId = userId; //
+async function setLastUser(guildId, userId) {
+  await updateGameState(guildId, {
+    lastUserId: userId,
+  });
 }
 
 /*Xử lý lượt chơi và kiểm tra luật chơi*/
 
-function gameProcess(newWord) {
-  if (!gameActive)
+async function gameProcess(guildId, newWord) {
+  const state = await getGameState(guildId);
+  if (!state.gameActive)
     return {
       success: false,
       reason: "NOT_ACTIVE",
@@ -120,7 +137,7 @@ function gameProcess(newWord) {
     };
   }
 
-   // Kiểm tra hợp lệ theo từ điển
+  // Kiểm tra hợp lệ theo từ điển
   if (!isValidWord(newWord)) {
     return {
       success: false,
@@ -131,15 +148,18 @@ function gameProcess(newWord) {
 
   // Lấy tất cả từ chưa dùng và bắt đầu bằng secondWord
   const nextOptions = dictionary.filter((p) => {
-    if (wordHistory.has(p)) return false;
+    if (state.wordHistory.includes(p)) return false;
     return getSecondPart(p) === secondWord;
   });
 
   //hết từ nối
   if (nextOptions.length === 0) {
-    gameActive = false;
-    currentWord = null;
-    wordHistory.clear();
+    await updateGameState(guildId, {
+      gameActive: null,
+      currentWord: null,
+      lastUserId: null,
+      wordHistory: [],
+    });
 
     return {
       success: false,
@@ -147,9 +167,9 @@ function gameProcess(newWord) {
       message: "Hết từ để nối tiếp",
     };
   }
- 
+
   // Không lặp cụm
-  if (wordHistory.has(newWord)) {
+  if (state.wordHistory.includes(newWord)) {
     return {
       success: false,
       reason: "WORD_DUPLICATE",
@@ -157,7 +177,7 @@ function gameProcess(newWord) {
     };
   }
   // Kiểm tra xem từ thứ nhất phải bằng từ thứ 2 trước đó
-  const currentLastWord = getSecondPart(currentWord);
+  const currentLastWord = getSecondPart(state.currentWord);
   if (newWord[0] !== currentLastWord) {
     return {
       success: false,
@@ -167,20 +187,22 @@ function gameProcess(newWord) {
   }
 
   // Hợp lệ → cập nhật
-  wordHistory.add(currentWord);
-  currentWord = newWord;
+  await updateGameState(guildId, {
+    currentWord: newWord,
+    wordHistory: [...state.wordHistory, newWord],
+  });
+
   const nextRequiredWord = getSecondPart(newWord);
 
   return {
     success: true,
     nextRequiredWord: nextRequiredWord,
-    currentWord: currentWord,
+    currentWord: newWord,
   };
 }
 
 module.exports = {
   isGameActive,
-  getCurrentWord,
   startGame,
   stopGame,
   gameProcess,
@@ -189,4 +211,6 @@ module.exports = {
   setLastUser,
   isRepeatPlayer,
   getHint,
+  getGameState,
+  updateGameState,
 };

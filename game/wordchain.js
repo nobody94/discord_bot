@@ -1,28 +1,23 @@
 const Money = require("../utils/currency");
 const ViWordchain = require("./wordchain-vi");
 const EnWordchain = require("./wordchain-en");
-const { getGameChannelId } = require("./game_settings");
 
 async function gameProcess(message, wordchain) {
-  const gameChannelId = getGameChannelId(message.guildId);
+  const guildId = message.guildId;
   const content = message.content.trim();
-  const userId = message.author.id;
-  if (gameChannelId && message.channelId !== gameChannelId) {
-    return; // Bỏ qua nếu tin nhắn không ở đúng kênh game
-  }
 
-  if (wordchain.isRepeatPlayer(message.author.id)) {
+  const result = await wordchain.gameProcess(guildId, content);
+
+  if (wordchain.isRepeatPlayer(guildId, message.author.id)) {
     return message.reply({
       content: "⚠️ Bạn vừa mới trả lời rồi, hãy đợi người khác nối tiếp nhé!",
       allowedMentions: { repliedUser: false },
     });
   }
 
-  const result = wordchain.gameProcess(content);
-
   if (result.success) {
     const tienThuong = 50;
-    wordchain.setLastUser(message.author.id);
+    wordchain.setLastUser(guildId, message.author.id);
 
     await Money.addMoney(userId, tienThuong);
 
@@ -43,10 +38,11 @@ async function gameProcess(message, wordchain) {
         } được thưởng ${bonusReward} ${Money.getIcon()}`,
         allowedMentions: { repliedUser: false },
       });
-      wordchain.stopGame();
+      await wordchain.stopGame(guildId);
+      const startgame = await wordchain.startGame(guildId, newStart);
       setTimeout(() => {
         const newStart = wordchain.getRandomWords();
-        wordchain.startGame(newStart);
+        startgame;
         message.channel.send(
           `🔄 **Ván mới bắt đầu!** Từ bắt đầu: **${newStart}**`
         );
@@ -72,12 +68,16 @@ async function gameProcess(message, wordchain) {
   }
 }
 
-function WordChain(message) {
-  if (ViWordchain.isGameActive()) {
-    gameProcess(message, ViWordchain);
+async function WordChain(message) {
+  const guildId = message.guildId;
+  const viState = await ViWordchain.getGameState(guildId);
+  const enState = await EnWordchain.getGameState(guildId);
+
+  if (viState.gameActive && message.channelId === viState.channelId) {
+    return await gameProcess(message, ViWordchain);
   }
-  if (EnWordchain.isGameActive()) {
-    gameProcess(message, EnWordchain);
+  if (enState.gameActive && message.channelId === enState.channelId) {
+    return await gameProcess(message, EnWordchain);
   }
 }
 
