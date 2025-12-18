@@ -13,6 +13,14 @@ const {
   getIcon,
 } = require("../utils/currency");
 
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+const symbols = ["<:dice1:1451038871440588892>", "<:dice2:1451038882891042988>", "<:dice3:1451038893200642118>", "<:dice4:1451038903547986031>", "<:dice5:1451038914185003082>", "<:dice6:1451038922724610068>"];
+
+function getRandomSymbol() {
+  return symbols[Math.floor(Math.random() * symbols.length)];
+}
+
 module.exports = {
   name: "dice",
   description: "Đặt cược vào xúc xắc (1-3 là Thấp, 4-6 là Cao)",
@@ -64,7 +72,7 @@ module.exports = {
         return interaction.reply({ content: "❌ | Số tiền cược không hợp lệ!", ephemeral: true });
       }
 
-      if(betAmount > 10000){
+      if (betAmount > 10000) {
         return interaction.reply({ content: "❌ | Số tiền cược quá nhiều!", ephemeral: true });
       }
 
@@ -77,6 +85,14 @@ module.exports = {
       }
 
       await removeMoney(userId, betAmount);
+
+      const spinningMsg = await message.reply(`🎰 **TÍCH CỰC GACHA VẬN MAY SẼ ĐẾN** 🎰\n[ 🔄 ]\n*Đang quay...*`);
+
+      // Hiệu ứng quay
+      for (let i = 0; i < 5; i++) {
+        await sleep(100);
+        await spinningMsg.edit(`🎰 **TÍCH CỰC GACHA VẬN MAY SẼ ĐẾN** 🎰\n[ ${getRandomSymbol()} ]\n*Đang quay...*`);
+      }
       const roll = Math.floor(Math.random() * 6) + 1;
       const result = roll >= 4 ? "cao" : "thap";
 
