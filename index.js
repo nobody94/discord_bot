@@ -11,8 +11,6 @@ const express = require('express');
 const { WordChain } = require("./game/wordchain");
 const {db} = require('./utils/currency');
 
-// db.connect().then(() => console.log("✅ Đã kết nối MongoDB Atlas!"));
-
 const app = express();
 app.get('/', (req, res) => {
   console.log('--- Có tín hiệu Ping từ UptimeRobot! ---');
@@ -67,33 +65,49 @@ client.on("messageCreate", async (message) => {
     const args = content.slice(PREFIX.length).trim().split(/\s+/);
     const commandName = args.shift().toLowerCase();
 
-    const command =
-      client.commands.get(commandName) ||
-      client.commands.find(
-        (cmd) => cmd.aliases && cmd.aliases.includes(commandName)
-      );
+    const command = client.commands.get(commandName) || 
+                    client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
 
-    if (!command) return;
-
-    // Kiểm tra quyền (nếu lệnh có yêu cầu)
-    if (
-      command.userPermissions &&
-      !message.member.permissions.has(command.userPermissions)
-    ) {
-      return message.reply({
-        content: "❌ Bạn không có quyền thực hiện lệnh này.",
-        allowedMentions: { repliedUser: false },
-      });
+    if (command) {
+      try {     
+        await command.execute(message, args, commandName);
+      } catch (error) {
+        console.error(error);
+      }
+      return; // BẮT BUỘC: Dừng lại ở đây, không cho chạy xuống dưới nữa
     }
-
-    try {     
-      await command.execute(message, args, commandName);
-    } catch (error) {
-      console.error(error);
-      message.reply("Đã xảy ra lỗi khi thực thi lệnh này!");
-    }
-    return; // Dừng xử lý sau khi xử lý lệnh
   }
+  // if (content.startsWith(PREFIX)) {
+  //   const args = content.slice(PREFIX.length).trim().split(/\s+/);
+  //   const commandName = args.shift().toLowerCase();
+
+  //   const command =
+  //     client.commands.get(commandName) ||
+  //     client.commands.find(
+  //       (cmd) => cmd.aliases && cmd.aliases.includes(commandName)
+  //     );
+
+  //   if (!command) return;
+
+  //   // Kiểm tra quyền (nếu lệnh có yêu cầu)
+  //   if (
+  //     command.userPermissions &&
+  //     !message.member.permissions.has(command.userPermissions)
+  //   ) {
+  //     return message.reply({
+  //       content: "❌ Bạn không có quyền thực hiện lệnh này.",
+  //       allowedMentions: { repliedUser: false },
+  //     });
+  //   }
+
+  //   try {     
+  //     await command.execute(message, args, commandName);
+  //   } catch (error) {
+  //     console.error(error);
+  //     message.reply("Đã xảy ra lỗi khi thực thi lệnh này!");
+  //   }
+  //   return; // Dừng xử lý sau khi xử lý lệnh
+  // }
 
   //xử lý game
   // if (!content.startsWith(PREFIX)) {
@@ -175,25 +189,21 @@ client.on("interactionCreate", async (interaction) => {
   }
 });
 
-// client.login(Token);
-
 async function startBot() {
   try {
-    console.log("⏳ Đang kết nối Database...");
-    // Gọi db.connect() từ file currency đã import
+    // Chỉ nên kết nối DB và Login khi Server Express đã sẵn sàng
     await db.connect(); 
     console.log("✅ Đã kết nối MongoDB thành công!");
 
-    if (!Token) {
-      console.error("❌ LỖI: BOT_TOKEN không tồn tại trong Environment của Render!");
-      return;
-    }
+    if (!Token) return console.error("❌ BOT_TOKEN missing!");
 
-    console.log("🚀 Đang đăng nhập Discord...");
-    await client.login(Token);
+    // Kiểm tra nếu client đã login rồi thì không login lại
+    if (!client.readyAt) {
+      await client.login(Token);
+      console.log("🚀 Bot đã đăng nhập thành công!");
+    }
   } catch (error) {
-    console.error("🔴 Lỗi khởi động hệ thống:", error);
-    // Render sẽ tự khởi động lại nếu tiến trình bị exit lỗi
+    console.error("🔴 Lỗi khởi động:", error);
     process.exit(1); 
   }
 }
