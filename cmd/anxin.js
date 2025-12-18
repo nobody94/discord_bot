@@ -6,47 +6,68 @@ const {
   TextInputBuilder,
   TextInputStyle,
 } = require("discord.js");
+const Money = require("../utils/currency");
 
 module.exports = {
   name: "anxin",
-  description: "Gửi yêu cầu xin tiền bằng popup",
+  description: "Gửi lời kêu gọi trợ cấp từ người hảo tâm",
 
   async execute(message) {
-    // Tạo nút bấm
+    const requester = message.author;
+
     const row = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
-        .setCustomId("button_anxin")
-        .setLabel("Nhấn để xin tiền")
-        .setStyle(ButtonStyle.Primary)
+        // Lưu ID người xin vào CustomID để tí nữa biết cộng tiền cho ai
+        .setCustomId(`open_give_modal_${requester.id}`)
+        .setLabel(`Tặng tiền cho ${requester.displayName}`)
+        .setStyle(ButtonStyle.Success)
     );
 
-    await message.reply({
-      content: "🙏 Bạn đang thiếu thốn? Hãy nhấn nút bên dưới để xin trợ cấp!",
+    await message.channel.send({
+      content: `🙏 **${requester.displayName}** đang gặp khó khăn và cần sự giúp đỡ từ các đại gia!`,
       components: [row],
     });
   },
   async handleInteraction(interaction) {
-    if (interaction.isButton() && interaction.customId === "button_anxin") {
+    if (
+      interaction.isButton() 
+    ) {
+      const requesterId = interaction.customId.split("_")[3];
+
+      // Không cho phép tự cho tiền chính mình
+      if (interaction.user.id === requesterId) {
+        return interaction.reply({
+          content: "❌ Bạn không thể tự tặng tiền cho bản thân!",
+          ephemeral: true,
+        });
+      }
+
       const modal = new ModalBuilder()
-        .setCustomId("modal_anxin")
-        .setTitle("Đơn Xin Trợ Cấp");
+        .setCustomId(`confirm_give_modal_${requesterId}`)
+        .setTitle("Nhập số tiền muốn tặng");
 
       const amountInput = new TextInputBuilder()
-        .setCustomId("amount_anxin")
-        .setLabel("Số tiền bạn muốn xin là bao nhiêu?")
+        .setCustomId("give_amount")
+        .setLabel("Số tiền muốn cho:")
         .setStyle(TextInputStyle.Short)
-        .setPlaceholder("Ví dụ: 100")
+        .setPlaceholder("Ví dụ: 500")
         .setRequired(true);
 
-      const firstActionRow = new ActionRowBuilder().addComponents(amountInput);
-      modal.addComponents(firstActionRow);
-
+      modal.addComponents(new ActionRowBuilder().addComponents(amountInput));
       await interaction.showModal(modal);
     }
-    if (interaction.isModalSubmit() && interaction.customId === "modal_anxin") {
-      const amountStr = interaction.fields.getTextInputValue("amount_anxin");
-      const amount = parseInt(amountStr);
 
+    // 2. Khi người hảo tâm gửi Modal (nhập xong số tiền)
+    if (
+      interaction.isModalSubmit()
+    ) {
+      const requesterId = interaction.customId.split("_")[3];
+      const giverId = interaction.user.id;
+      const amount = parseInt(
+        interaction.fields.getTextInputValue("give_amount")
+      );
+
+      // Kiểm tra tính hợp lệ của số tiền
       if (isNaN(amount) || amount <= 0) {
         return interaction.reply({
           content: "❌ Số tiền không hợp lệ!",
@@ -54,24 +75,32 @@ module.exports = {
         });
       }
 
-      // Giới hạn xin tối đa để tránh lạm dụng (Ví dụ: 200)
-      if (amount > 200) {
+      // Kiểm tra số dư người cho
+      const giverBalance = await Money.getBalance(giverId);
+      if (giverBalance < amount) {
         return interaction.reply({
-          content: "❌ Bạn tham quá! Chỉ xin được tối đa 200 thôi.",
+          content: `❌ Bạn không đủ tiền! Số dư hiện tại: ${giverBalance} ${Money.getIcon()}`,
           ephemeral: true,
         });
       }
 
-      const userId = interaction.user.id;
+      try {
+        // Thực hiện chuyển tiền
+        await Money.addMoney(giverId, -amount);
+        await Money.addMoney(requesterId, amount);
 
-      // Cộng tiền vào Database
-      await Money.addMoney(userId, amount);
-
-      await interaction.reply({
-        content: `✅ Hệ thống đã duyệt đơn! **${
-          interaction.user.username
-        }** vừa xin được **${amount}** ${Money.getIcon()}!`,
-      });
+        await interaction.reply({
+          content: `✅ **${
+            interaction.user.displayName
+          }** đã tặng **${amount}** ${Money.getIcon()} cho <@${requesterId}>!`,
+        });
+      } catch (error) {
+        console.error(error);
+        await interaction.reply({
+          content: "❌ Lỗi hệ thống khi chuyển tiền.",
+          ephemeral: true,
+        });
+      }
     }
   },
 };
