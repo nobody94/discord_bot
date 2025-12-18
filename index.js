@@ -96,9 +96,9 @@ client.on("messageCreate", async (message) => {
   }
 
   //xử lý game
-  if (!content.startsWith(PREFIX)) {
-    WordChain(message);
-  }
+  // if (!content.startsWith(PREFIX)) {
+  //   WordChain(message);
+  // }
 });
 
 // 🖱️ Xử lý Tương tác (Button, Modal, Select Menu, v.v.)
