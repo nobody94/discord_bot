@@ -64,6 +64,10 @@ module.exports = {
         return interaction.reply({ content: "❌ | Số tiền cược không hợp lệ!", ephemeral: true });
       }
 
+      if(betAmount > 10000){
+        return interaction.reply({ content: "❌ | Số tiền cược quá nhiều!", ephemeral: true });
+      }
+
       const currentBalance = await getBalance(userId);
       if (betAmount > currentBalance) {
         return interaction.reply({

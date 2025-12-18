@@ -8,10 +8,10 @@ const {
 const symbols = ["<:cherries:1450752576256475156>", "<:watermelon:1450752616349962250>", "<:lemon:1450752606887477321>", "<:slotmachine:1450752596116635730>"];
 
 const payouts = {
-  "<:slotmachine:1450752596116635730><:slotmachine:1450752596116635730><:slotmachine:1450752596116635730>": 10,
-  "<:cherries:1450752576256475156><:cherries:1450752576256475156><:cherries:1450752576256475156>": 5,
-  "<:watermelon:1450752616349962250><:watermelon:1450752616349962250><:watermelon:1450752616349962250>": 5,
-  "<:lemon:1450752606887477321><:lemon:1450752606887477321><:lemon:1450752606887477321>": 5,
+  "<:slotmachine:1450752596116635730><:slotmachine:1450752596116635730><:slotmachine:1450752596116635730>": 3,
+  "<:cherries:1450752576256475156><:cherries:1450752576256475156><:cherries:1450752576256475156>": 2,
+  "<:watermelon:1450752616349962250><:watermelon:1450752616349962250><:watermelon:1450752616349962250>": 2,
+  "<:lemon:1450752606887477321><:lemon:1450752606887477321><:lemon:1450752606887477321>": 2,
 };
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -31,6 +31,10 @@ module.exports = {
 
     if (isNaN(betAmount) || betAmount <= 0) {
       return message.reply("❌ | Vui lòng nhập đúng cú pháp: `.slots [số tiền cược]`");
+    }
+
+    if (betAmount > 10000) {
+      return message.reply("❌ | Số tiền cược quá nhiều`");
     }
 
     const currentBalance = await getBalance(userId);
@@ -64,7 +68,7 @@ module.exports = {
     } 
     // 2. Kiểm tra 2 hình giống nhau (Cặp)
     else if (roll1 === roll2 || roll1 === roll3 || roll2 === roll3) {
-      multiplier = 2; // Thưởng x2 tiền cược nếu có 2 hình giống nhau
+      multiplier = 1.5; // Thưởng x2 tiền cược nếu có 2 hình giống nhau
       winType = "TRÚNG CẶP! ✨";
     }
 
