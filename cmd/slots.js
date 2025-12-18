@@ -44,7 +44,7 @@ module.exports = {
 
     // Hiệu ứng quay
     for (let i = 0; i < 5; i++) {
-        await sleep(200);
+        await sleep(100);
         await spinningMsg.edit(`🎰 **TÍCH CỰC GACHA VẬN MAY SẼ ĐẾN** 🎰\n[ ${getRandomSymbol()} | ${getRandomSymbol()} | ${getRandomSymbol()} ]\n*Đang quay...*`);
     }
 

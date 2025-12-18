@@ -10,7 +10,6 @@ const path = require("path");
 const express = require('express');
 const { WordChain } = require("./game/wordchain");
 
-
 const app = express();
 app.get('/', (req, res) => {
   console.log('--- Có tín hiệu Ping từ UptimeRobot! ---');
@@ -22,8 +21,8 @@ app.listen(port, '0.0.0.0', () => {
   console.log(`Server is running on port ${port}`);
 });
 
-// const Token = process.env.BOT_TOKEN;
-const Token = process.env.BOT_TEST_TOKEN;
+const Token = process.env.BOT_TOKEN;
+// const Token = process.env.BOT_TEST_TOKEN;
 
 const PREFIX = ".";
 const client = new Client({
@@ -34,7 +33,6 @@ const client = new Client({
   ],
 });
 client.commands = new Collection();
-// client.db = db;
 
 const commandsPath = path.join(__dirname, "cmd");
 const commandFiles = fs

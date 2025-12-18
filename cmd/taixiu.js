@@ -67,7 +67,7 @@ async function finishRound(message) {
     currentRound.confirmationMsgIds = [];
   }
 
-  const rollingSymbols = ["<:dice_one:1450752043747639399>", "<:dice_two:1450752103289979015>", "<:dice_three:1450752140623614082>", "<:dice_four:1450752191886393417>", "<:dice_five:1450752224136269834>", "<:dice_six:1450752253916090539>"];
+  const rollingSymbols = ["<:dice1:1451038871440588892>", "<:dice2:1451038882891042988>", "<:dice3:1451038893200642118>", "<:dice4:1451038903547986031>", "<:dice5:1451038914185003082>", "<:dice6:1451038922724610068>"];
   for (let i = 0; i < ROLLING_TIME * 2; i++) {
     const rolling = [rollingSymbols[Math.floor(Math.random()*6)], rollingSymbols[Math.floor(Math.random()*6)], rollingSymbols[Math.floor(Math.random()*6)]];
     await message.edit({ content: `🎲 **ĐANG QUAY...**\n[ ${rolling.join(" | ")} ]` }).catch(() => {});

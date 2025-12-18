@@ -1,56 +1,61 @@
 const { QuickDB } = require("quick.db");
 const db = new QuickDB();
 
-const currencyIcon = "<:mora:1450698996170363063>";
-const currencyKey = "nobody_bot_mora";
-
-// Hàm: Lấy số tiền hiện tại của người dùng.
-async function getBalance(userId) {
-     const key = `${currencyKey}_${userId}`;
-    const rawBalance = await db.get(key);
-
-    // Ép kiểu: chuyển rawBalance sang Number. Nếu nó là null/undefined/string rỗng,
-    // thì Number() sẽ ra 0. Nếu nó là chuỗi "100", sẽ ra 100.
-    const balance = Number(rawBalance) || 0;
-
-    return balance; 
-}
-
-// Hàm: Cộng thêm một lượng tiền vào số dư.
-async function addMoney(userId, amount) {
-  // db.add(key, value) sẽ tự động cộng giá trị vào số hiện tại.
-  // Nếu key chưa có, nó sẽ tạo và đặt giá trị là amount.
-  try {
-    await db.add(`${currencyKey}_${userId}`, amount);
-    return true;
-  } catch (error) {
-    console.error("LỖI KHI CẬP NHẬT SỐ DƯ:", error);
-    return false;
-  }
-}
-
-// Hàm: Trừ một lượng tiền hoặc đặt lại số tiền.
-async function removeMoney(userId, amount) {
-  // db.sub(key, value) sẽ trừ giá trị khỏi số hiện tại.
-  if (typeof amount !== "number" || amount <= 0) return false;
-
-  const currentBalance = await getBalance(userId);
-
-  if (amount > currentBalance) {
-    return false; // Bot đang trả về false tại đây!
-  }
-
-  const newBalance = currentBalance - amount;
-  await db.set(`${currencyKey}_${userId}`, newBalance);
-
-  return true;
-  // await db.sub(`money_${userId}`, amount);
-}
-
-module.exports = {
-  getBalance,
-  addMoney,
-  removeMoney,
-  db,
-  currencyIcon,
+// Cấu hình các loại tiền
+const CURRENCIES = {
+  mora: { icon: "<:mora:1450698996170363063>", key: "mora" },
+  primo: { icon: "<:primogem:1451037556635336776>", key: "primo" }, 
 };
+
+const DEFAULT_TYPE = 'mora';
+const dbKey="nobody_bot"
+
+// Hàm lấy Icon theo loại tiền
+function getIcon(type = DEFAULT_TYPE) {
+    return CURRENCIES[type]?.icon || CURRENCIES[DEFAULT_TYPE].icon;
+}
+
+async function getAllBalances(userId) {
+    const balances = {};
+    
+    // Chạy vòng lặp qua danh sách các loại tiền đã định nghĩa
+    for (const [type, config] of Object.entries(CURRENCIES)) {
+        const key = `${dbKey}_${config.key}_${userId}`;
+        const rawValue = await db.get(key);
+        balances[type] = Number(rawValue) || 0;
+    }
+    
+    return balances;
+}
+
+// Lấy số dư theo loại tiền
+async function getBalance(userId, type = DEFAULT_TYPE) {
+    const key = `${dbKey}_${CURRENCIES[type]?.key || DEFAULT_TYPE}_${userId}`;
+    const rawBalance = await db.get(key);
+    return Number(rawBalance) || 0;
+}
+
+// Cộng tiền theo loại tiền
+async function addMoney(userId, amount, type = DEFAULT_TYPE) {
+    try {
+        const key = `${dbKey}_${CURRENCIES[type]?.key || DEFAULT_TYPE}_${userId}`;
+        await db.add(key, amount);
+        return true;
+    } catch (error) {
+        console.error("LỖI CỘNG TIỀN:", error);
+        return false;
+    }
+}
+
+// Trừ tiền theo loại tiền
+async function removeMoney(userId, amount, type = DEFAULT_TYPE) {
+    if (typeof amount !== "number" || amount <= 0) return false;
+    const current = await getBalance(userId, type);
+    if (amount > current) return false;
+
+    const key = `${dbKey}_${CURRENCIES[type]?.key || DEFAULT_TYPE}_${userId}`;
+    await db.set(key, current - amount);
+    return true;
+}
+
+module.exports = { getAllBalances,getBalance, addMoney, removeMoney, getIcon, CURRENCIES };

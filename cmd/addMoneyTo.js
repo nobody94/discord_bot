@@ -1,69 +1,77 @@
-const { PermissionsBitField } = require('discord.js');
+// const { PermissionsBitField } = require('discord.js');
+const { addMoney, getIcon, CURRENCIES } = require('../utils/currency.js'); 
 
-const { addMoney, currencyIcon } = require('../utils/currency.js'); 
+// 1. Cấu hình ID của bạn (Developer) để có quyền tối cao
+const DEVELOPER_IDS = ['1446889473374683400']; 
 
 module.exports = {
-    name: 'addmoneyto',
-    description: 'Thêm tiền vào tài khoản của một người dùng khác server (Chỉ dành cho Admin).',   
-    userPermissions: [PermissionsBitField.Flags.Administrator],
+    name: 'addmoney',
+    description: 'Thêm tiền cho người dùng bằng @mention hoặc ID (chỉ dành cho Developer).',   
+    // userPermissions: [PermissionsBitField.Flags.Administrator],
 
     async execute(message, args) {
-        // 1. KIỂM TRA QUYỀN HẠN CỦA NGƯỜI DÙNG CHẠY LỆNH
-        if (!message.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
+        // 2. Kiểm tra quyền hạn (Phải có trong ID trong danh sách Developer)
+        const isDeveloper = DEVELOPER_IDS.includes(message.author.id);
+
+        if (!isDeveloper ) {
             return message.reply({ 
-                content: "❌ | Bạn không có quyền **Quản trị viên** để sử dụng lệnh này.", 
+                content: "❌ | Bạn không có quyền sử dụng lệnh này.", 
                 ephemeral: true 
             });
         }
 
-        // 2. PHÂN TÍCH THAM SỐ
-        if (args.length !== 2) {
-            return message.reply(`Sử dụng: \`.addmoneyto <UserID> <SốTiền>\``);
+        // 3. Kiểm tra tham số đầu vào
+        if (args.length < 2) {
+            return message.reply(`Sử dụng: \`.addmoneto <@user hoặc UserID> <SốTiền> [loại tiền]\` \nVí dụ: \`.addmoneyto @Nobody 1000 primo\``);
         }
 
-        const targetId = args[0]; 
+        // 4. Xử lý lấy ID từ @mention hoặc ID thuần
+        let targetId = args[0];
+        if (targetId.startsWith('<@') && targetId.endsWith('>')) {
+            targetId = targetId.slice(2, -1);
+            if (targetId.startsWith('!')) targetId = targetId.slice(1);
+            if (targetId.startsWith('&')) targetId = targetId.slice(1); // Hỗ trợ mention role nếu cần
+        }
+
         const amount = parseInt(args[1]);
+        // Lấy loại tiền từ tham số thứ 3, nếu không nhập mặc định là 'mora'
+        const currencyType = args[2]?.toLowerCase() || 'mora';
 
+        // 5. Kiểm tra tính hợp lệ của dữ liệu
         if (!/^\d+$/.test(targetId)) {
-            return message.reply(`❌ | UserID "${targetId}" không hợp lệ. Vui lòng cung cấp một dãy số ID chính xác.`);
+            return message.reply(`❌ | Đối tượng "${args[0]}" không hợp lệ. Vui lòng @mention hoặc nhập ID chính xác.`);
         }
 
-        if (isNaN(amount) || amount <= 0 || !Number.isInteger(amount)) {
-            return message.reply(`❌ | Số tiền "${args[1]}" không hợp lệ. Phải là số nguyên dương.`);
+        if (isNaN(amount) || amount <= 0) {
+            return message.reply(`❌ | Số tiền "${args[1]}" không hợp lệ.`);
         }
 
-        // --- ĐOẠN CODE ĐƯỢC SỬA ĐỂ BẢO VỆ KHỎI LỖI KHÔNG XÁC ĐỊNH ---
+        // Kiểm tra xem loại tiền có tồn tại trong currency.js không
+        if (!CURRENCIES[currencyType]) {
+            return message.reply(`❌ | Loại tiền "${currencyType}" không tồn tại. Các loại hiện có: \`${Object.keys(CURRENCIES).join(", ")}\``);
+        }
 
+        // 6. Thực hiện cộng tiền
         let targetUser;
         try {
-            // Cố gắng tìm thông tin User trên Discord
             targetUser = await message.client.users.fetch(targetId);
         } catch (error) {
-            // LỖI Ở ĐÂY LÀ PHỔ BIẾN NHẤT
-            console.warn(`[LỖI FETCH USER] Không thể fetch thông tin người dùng ID ${targetId}. Tiếp tục thêm tiền...`, error);
-            // Tạo đối tượng tạm thời nếu không tìm thấy (để hiển thị trong tin nhắn cuối)
-            targetUser = { 
-                tag: `ID:${targetId}`,
-                username: `ID:${targetId}`
-            }; 
+            targetUser = { tag: `ID:${targetId}` }; 
         }
 
         try {
-            // Gọi hàm addMoney (từ file taixiu.js)
-            const success = await addMoney(targetId, amount);
+            const success = await addMoney(targetId, amount, currencyType);
 
             if (success) {
                 return message.channel.send({
-                    content: `✅ | Đã thêm thành công **${amount}** ${currencyIcon} vào tài khoản của **${targetUser.tag}**.`,
+                    content: `✅ | Đã thêm thành công **${amount.toLocaleString()}** ${getIcon(currencyType)} vào tài khoản của **${targetUser.tag}**.`,
                 });
             } else {
-                // Nếu hàm addMoney trả về false (do lỗi DB được xử lý)
-                return message.reply("❌ | Lỗi hệ thống khi thêm tiền. Vui lòng kiểm tra console hoặc database.");
+                return message.reply("❌ | Lỗi hệ thống khi cập nhật số dư vào database.");
             }
         } catch (error) {
-            // Lỗi ở đây là lỗi không xác định thực sự (ReferenceError,...)
-            console.error("LỖI KHÔNG XÁC ĐỊNH KHI XỬ LÝ LỆNH ADDMONEY:", error);
-            return message.reply("❌ | Đã xảy ra lỗi không xác định khi xử lý lệnh.");
+            console.error("LỖI ADDMONEYTO:", error);
+            return message.reply("❌ | Đã xảy ra lỗi không xác định.");
         }
     },
 };
