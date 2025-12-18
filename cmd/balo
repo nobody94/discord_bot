@@ -1,0 +1,44 @@
+const { EmbedBuilder } = require('discord.js');
+const {db,dbKey} = require('../utils/currency');
+const { SHOP_ITEMS } = require('../utils/shop');
+
+module.exports = {
+    name: 'balo',
+    aliases: ['tui', 'inventory', 'inv'],
+    description: 'Xem các vật phẩm bạn đang sở hữu.',
+
+    async execute(message) {
+        const userId = message.author.id;
+        
+        // Lấy danh sách item từ DB (mảng các ID đã mua)
+        // Lưu ý: Trong lệnh .buy bạn nên lưu mảng ID: await db.push(`inventory_${userId}`, itemId);
+        const inventory = await db.get(`${dbKey}_inventory_${userId}`) || [];
+
+        const embed = new EmbedBuilder()
+            .setTitle(`🎒 TÚI ĐỒ CỦA ${message.author.username.toUpperCase()}`)
+            .setColor(0x3498DB)
+            .setThumbnail(message.author.displayAvatarURL());
+
+        if (inventory.length === 0) {
+            embed.setDescription('*Túi đồ của bạn đang trống rỗng...*');
+        } else {
+            // Đếm số lượng từng loại item
+            const counts = {};
+            inventory.forEach(id => {
+                counts[id] = (counts[id] || 0) + 1;
+            });
+
+            const itemList = Object.entries(counts).map(([id, count]) => {
+                const item = SHOP_ITEMS[id];
+                if (item) {
+                    return `${item.icon} **${item.name}** x${count} (ID: \`${id}\`)`;
+                }
+                return `❓ Vật phẩm lạ x${count} (ID: ${id})`;
+            }).join('\n');
+
+            embed.setDescription(itemList);
+        }
+
+        message.reply({ embeds: [embed] });
+    }
+};

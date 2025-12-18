@@ -58,9 +58,9 @@ async function removeMoney(userId, amount, type = DEFAULT_TYPE) {
     return true;
 }
 
-async function checkHintLimit(key,userId) {
+async function checkHintLimit(newKey,userId) {
     const today = new Date().toISOString().split('T')[0];
-    const key = `${dbKey}_${key}_${userId}`;
+    const key = `${dbKey}_${newKey}_${userId}`;
     
     let data = await db.get(key);
     
@@ -79,4 +79,4 @@ async function checkHintLimit(key,userId) {
     return { canUse: true, remaining: 5 - data.count };
 }
 
-module.exports = { getAllBalances,getBalance, addMoney, removeMoney, getIcon, CURRENCIES,db,checkHintLimit };
+module.exports = { getAllBalances,getBalance, addMoney, removeMoney, getIcon, CURRENCIES,db,checkHintLimit,dbKey };

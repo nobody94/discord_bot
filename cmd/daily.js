@@ -10,7 +10,7 @@ module.exports = {
 
   async execute(message, args) {
     const userId = message.author.id;
-    const dailyKey = `nobody_bot_daily_${userId}`; // Key mới để theo dõi thời gian claim
+    const dailyKey = `${Money.dbKey}_daily_${userId}`; // Key mới để theo dõi thời gian claim
 
     // 2. Lấy thời điểm claim cuối cùng
     const lastDaily = await Money.db.get(dailyKey);

@@ -75,7 +75,7 @@ async function finishRound(message) {
   }
 
   const { rolls, total, result, isTriple, isEven } = rollDice();
-  let resultMessage = `🎲 **KẾT QUẢ: ${rolls.join(" - ")} (${total})**\n**${isTriple ? "BÃO" : result.toUpperCase() + " | " + (isEven ? "CHẴN" : "LẺ")}**\n\n`;
+  let resultMessage = `🎲 **KẾT QUẢ:\n${rolls.map((d)=> rollingSymbols[d-1]).join(" | ")} - TỔNG:${total}**\n**${isTriple ? "BÃO" : result.toUpperCase() + " | " + (isEven ? "CHẴN" : "LẺ")}**\n\n`;
 
   for (const [userId, bet] of currentRound.bets) {
     let win = false;
@@ -86,9 +86,9 @@ async function finishRound(message) {
     }
     if (win) {
         await addMoney(userId, bet.amount * 2);
-        resultMessage += `> **${bet.username}**: Thắng +${bet.amount} ${getIcon()}\n`;
+        resultMessage += `> **${bet.username}**: Lụm ${bet.amount} ${getIcon()}\n`;
     } else {
-        resultMessage += `> **${bet.username}**: Thua -${bet.amount} ${getIcon()}\n`;
+        resultMessage += `> **${bet.username}**: Toạch ${bet.amount} ${getIcon()}\n`;
     }
   }
 
@@ -121,7 +121,7 @@ module.exports = {
     const embed = new EmbedBuilder()
         .setColor(0x0099ff) 
         .setTitle('🎲 **Tài Xỉu Teyvat**')
-        .setDescription(`Chọn cửa cược và nhập số tiền.`);
+        .setDescription(`Chọn Tài/ Xỉu , Chẵn/Lẻ để đặt cược.\nSau khi chọn, nhập số **MORA** bạn muốn cược\nNếu bot dừng, hãy sử dụng lại lệnh để tiếp tục ván chơi\nTrò chơi sẽ bắt đầu ngay lập tức và đếm ngược 40 giây.`);
 
     await message.channel.send({ embeds: [embed] });
     const gameMessage = await message.channel.send({ content: `⏱️ CÒN ${BETTING_TIME} GIÂY ĐẶT CƯỢC`, components: [row1, row2] });
