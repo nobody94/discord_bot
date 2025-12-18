@@ -15,7 +15,7 @@ module.exports = {
             .addFields(
                 { 
                     name: '🎮 Trò chơi (Games)', 
-                    value: '• slots, slot, sl: Chơi máy đánh bạc\n• taixiu, tx: Chơi tài xỉu\n• ws, wc: Gợi ý từ nối từ chỉ dùng trong kênh nối từ tối đa 5 lượt/ngày',
+                    value: '• slots, slot, sl: Chơi máy đánh bạc\n• taixiu, tx: Chơi tài xỉu',
                     inline:false  
                 },                
                 { 
@@ -35,7 +35,7 @@ module.exports = {
                 },
                 { 
                     name: '⚙️ Cấu hình (Admin)', 
-                    value: '• setwordchain-vi: Thiết lập kênh nối chữ' 
+                    value: '• setwordchain-vi: Thiết lập kênh nối chữ Tiếng Việt\nws, wc: Gợi ý từ nối từ Tiếng Việt\n• setwordchain-en: Thiết lập kênh nối chữ Tiếng Anh\nhint, ht: Gợi ý từ nối từ Tiếng Anh\nGợi ý từ nối từ chỉ dùng trong kênh nối từ tối đa 5 lượt/ngày' 
                 }
             )
             .setFooter({ text: 'Sử dụng dấu chấm (.) trước mỗi lệnh.' })

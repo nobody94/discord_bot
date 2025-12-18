@@ -1,27 +1,27 @@
 const GameManager = require("../game/wordchain-en");
-const { setGameChannelId } = require('../game/game_settings');
+const { setGameChannelId,getGameChannelId } = require('../game/game_settings');
 const { PermissionFlagsBits } = require('discord.js');
 
 const hintTracker = {};
 
 module.exports = {
     name: "setwordchain-en",
-    aliases: ["noichu-en", 'ws', 'wc'],
+    aliases: ["noichu-en", 'hint', 'ht'],
     description: "Thiết lập kênh và bắt đầu trò chơi nối từ.",
 
-    async execute(message, args, commandName,client) {
-        console.log('commandNameEn',commandName)
-        if (["noichu-en"].includes(commandName)) {
-            await client.db.set(`lang_${message.channel.id}`, 'en');
-            console.log('Đã bật chế độ Tiếng Anh')
-            // return message.reply("✅ Đã bật chế độ Tiếng Việt!");
-        }
-        //hint
-        const isHintShortcut = ["ws", "wc"].includes(commandName);
+    async execute(message, args, commandName) {     
+        const guildId = message.guildId;
+        const currentChannelId = message.channelId;  
+        const selectedChannel = message.channel;
 
-        if (isHintShortcut) {
-            const lang = await client.db.get(`lang_${message.channel.id}`);
-            if (lang !== 'en') return;
+        //hint
+        const isHintShortcut = ["hint", "ht"].includes(commandName);
+
+        if (isHintShortcut) {         
+            const gameChannelId = getGameChannelId(guildId);  
+            if (currentChannelId !== gameChannelId) {
+                return message.reply("❌ | Bạn chỉ có thể dùng lệnh gợi ý trong đúng kênh chơi game!");
+            }
 
             if (!GameManager.isGameActive()) {
                 return message.reply("❌ | Game chưa bắt đầu!");
@@ -58,9 +58,7 @@ module.exports = {
         // 1. Kiểm tra quyền hạn
         if (!message.member.permissions.has(PermissionFlagsBits.ManageChannels)) {
             return message.reply("❌ Bạn cần quyền `Quản lý kênh` để thiết lập trò chơi.");
-        }
-        const guildId = message.guildId;
-        const selectedChannel = message.channel;
+        }     
 
         // 2. Thiết lập kênh game (Lưu vào game_settings)
         setGameChannelId(guildId, selectedChannel.id);

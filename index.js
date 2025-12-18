@@ -9,7 +9,7 @@ const fs = require("fs");
 const path = require("path");
 const express = require('express');
 const { WordChain } = require("./game/wordchain");
-const { db } = require('./utils/currency');
+
 
 const app = express();
 app.get('/', (req, res) => {
@@ -21,11 +21,9 @@ const port = process.env.PORT || 3000;
 app.listen(port, '0.0.0.0', () => {
   console.log(`Server is running on port ${port}`);
 });
-// const keep_alive = require('./keep_alive.js');
 
-
-const Token = process.env.BOT_TOKEN;
-// const Token = process.env.BOT_TEST_TOKEN;
+// const Token = process.env.BOT_TOKEN;
+const Token = process.env.BOT_TEST_TOKEN;
 
 const PREFIX = ".";
 const client = new Client({
@@ -36,7 +34,7 @@ const client = new Client({
   ],
 });
 client.commands = new Collection();
-client.db = db;
+// client.db = db;
 
 const commandsPath = path.join(__dirname, "cmd");
 const commandFiles = fs
@@ -87,17 +85,7 @@ client.on("messageCreate", async (message) => {
       });
     }
 
-    try {
-      // if (["setwordchain-vi", "noichu-vi"].includes(content)) {
-      //   await client.db.set(`lang_${message.channel.id}`, 'vi');
-      //   console.log('Đã bật chế độ Tiếng Việt')
-      //   // return message.reply("✅ Đã bật chế độ Tiếng Việt!");
-      // }
-      // if (["setwordchain-en", "noichu-en"].includes(content)) {
-      //   await client.db.set(`lang_${message.channel.id}`, 'en');
-      //   console.log('Đã bật chế độ Tiếng Anh')
-      //   // return message.reply("✅ Đã bật chế độ Tiếng Việt!");
-      // }
+    try {     
       await command.execute(message, args, commandName, client);
     } catch (error) {
       console.error(error);
@@ -112,37 +100,49 @@ client.on("messageCreate", async (message) => {
   }
 });
 
-// 🖱️ Xử lý Tương tác Nút (Button Interaction Handler)
-client.on("interactionCreate", async (interaction) => {
-  //  Xử lý Modal Submit (Khi người dùng gửi form nhập tiền)
-  if (interaction.type === InteractionType.ModalSubmit) {
-    // 1. Kiểm tra xem đây có phải là Modal Tài Xỉu không
-    if (interaction.customId.startsWith("taixiu_bet_modal_")) {
-      // Thực thi Logic Game
+// 🖱️ Xử lý Tương tác (Button, Modal, Select Menu, v.v.)
+client.on("interactionCreate", async (interaction) => {  
+  // 1. XỬ LÝ NÚT BẤM (Button Interaction)
+  if (interaction.isButton()) {
+    // Kiểm tra nếu là các nút của trò chơi Tài Xỉu
+    if (interaction.customId.startsWith("tx_")) {
       const command = client.commands.get("taixiu");
+      if (command && command.handleInteraction) {
+        return await command.handleInteraction(interaction);
+      }
+    }
 
-      try {
-        if (command && command.handleModalSubmit) {
-          await command.handleModalSubmit(interaction);
-        }
-      } catch (error) {
-        console.error("LỖI TRONG handleModalSubmit SAU DEFER:", error);
-        // Gửi thông báo lỗi chung nếu logic game thất bại
-        // interaction.editReply(
-        //   `❌ Đã xảy ra lỗi hệ thống nghiêm trọng. Vui lòng kiểm tra console.`
-        // );
+    // Kiểm tra nếu là các nút của trò chơi Dice (Xúc xắc)
+    if (interaction.customId.startsWith("dice_")) {
+      const command = client.commands.get("dice");
+      if (command && command.handleInteraction) {
+        return await command.handleInteraction(interaction);
       }
     }
   }
 
-  // Xử lý nút Tài Xỉu
-  if (interaction.type === InteractionType.MessageComponent) {
-    if (interaction.isButton()) {
-      if (interaction.customId.startsWith("tx_")) {
-        const command = client.commands.get("taixiu");
-        if (command) {
-          command.handleButton(interaction);
-          return; // Rất quan trọng: Ngăn chặn code tiếp theo chạy
+  // 2. XỬ LÝ GỬI FORM (Modal Submit Interaction)
+  if (interaction.type === InteractionType.ModalSubmit) {
+    // Kiểm tra Modal của trò chơi Tài Xỉu
+    if (interaction.customId.startsWith("modal_tx_")) {
+      const command = client.commands.get("taixiu");
+      if (command && command.handleInteraction) {
+        try {
+          return await command.handleInteraction(interaction);
+        } catch (error) {
+          console.error("LỖI XỬ LÝ MODAL TÀI XỈU:", error);
+        }
+      }
+    }
+
+    // Kiểm tra Modal của trò chơi Dice
+    if (interaction.customId.startsWith("modal_dice_")) {
+      const command = client.commands.get("dice");
+      if (command && command.handleInteraction) {
+        try {
+          return await command.handleInteraction(interaction);
+        } catch (error) {
+          console.error("LỖI XỬ LÝ MODAL DICE:", error);
         }
       }
     }

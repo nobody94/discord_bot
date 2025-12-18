@@ -3,8 +3,7 @@ const ViWordchain = require('./wordchain-vi');
 const EnWordchain = require('./wordchain-en');
 const { getGameChannelId } = require("./game_settings");
 
-async function gameProcess(message, wordchain) {
-  // console.log('wordchain',wordchain.isGameActive);
+async function gameProcess(message, wordchain) { 
   const gameChannelId = getGameChannelId(message.guildId);
   const content = message.content.trim();
   const userId = message.author.id;
@@ -24,13 +23,13 @@ async function gameProcess(message, wordchain) {
 
   if (result.success) {
 
-    const tienThuong = 100;
+    const tienThuong = 50;
     wordchain.setLastUser(message.author.id);
 
     await Money.addMoney(userId, tienThuong);
 
     await message.channel.send(
-      `✅ Từ hợp lệ ${message.author.username} được thưởng 100 ${Money.currencyIcon}\n` +
+      `✅ Từ hợp lệ ${message.author.username} được thưởng ${tienThuong} ${Money.currencyIcon}\n` +
       `Từ tiếp theo phải bắt đầu bằng **"${result.nextRequiredWord}".`
     );
   } else {
@@ -39,7 +38,7 @@ async function gameProcess(message, wordchain) {
       const bonusReward = 500;
       await Money.addMoney(userId, bonusReward);
       await message.reply({
-        content: `${replyMessage}\n ${message.author.username} được thưởng 500 ${Money.currencyIcon}`,
+        content: `${replyMessage}\n ${message.author.username} được thưởng ${bonusReward} ${Money.currencyIcon}`,
         allowedMentions: { repliedUser: false },
       });
       wordchain.stopGame();
