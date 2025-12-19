@@ -14,7 +14,7 @@ const symbols = [
 
 // Tạo một Map để lưu trữ thời gian cooldown
 const cooldowns = new Map();
-const maxAmount = 50000;
+const maxAmount = 10000;
 
 const payouts = {
   "<:slotmachine:1450752596116635730><:slotmachine:1450752596116635730><:slotmachine:1450752596116635730>": 5,
