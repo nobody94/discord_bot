@@ -6,7 +6,7 @@ const DAILY_REWARD = 500; // Số tiền thưởng mỗi ngày
 module.exports = {
   name: "daily",
   description: "Nhận phần thưởng hàng ngày (Reset vào 4:00 sáng hàng ngày).",
-  aliases: ["dl", "claim"],
+  aliases: ["claim"],
 
   async execute(message, args) {
     const userId = message.author.id;

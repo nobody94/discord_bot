@@ -20,7 +20,7 @@ module.exports = {
                 },                
                 { 
                     name: '💵 Tiền tệ', 
-                    value: '• balance, money, tien, cash: Kiểm tra số tiền hiện có\n• daily, claim, dl: Nhận thưởng daily',
+                    value: '• balance, money, tien, cash: Kiểm tra số tiền hiện có\n• daily, claim: Nhận thưởng daily',
                     inline:true   
                 },
                 { 
@@ -35,7 +35,7 @@ module.exports = {
                 },               
                  { 
                     name: invisibleChar, 
-                    value: '• slap: tát\n• poke: chọc\n• bite: cắn\n• punch: đấm\n• bonk: gõ đầu\n• kick: đá\n• stare: nhìn phán xét',
+                    value: '• slap: tát\n• poke: chọc\n• bite: cắn\n• punch: đấm\n• bonk: gõ đầu\n• kick: đá\n• stare: nhìn phán xét\n• laugh: cười',
                     inline:true 
                 },
                 // { 

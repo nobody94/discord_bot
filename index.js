@@ -4,6 +4,7 @@ const {
   Collection,
   GatewayIntentBits,
   InteractionType,
+  Events
 } = require("discord.js");
 const fs = require("fs");
 const path = require("path");
@@ -53,9 +54,13 @@ for (const file of commandFiles) {
   }
 }
 
-client.on("ready", () => {
-  console.log(`✅ Bot ${client.user.tag} đã sẵn sàng!`);
+client.once(Events.ClientReady, (c) => {
+  console.log(`✅ Bot ${c.user.tag} đã sẵn sàng và đang hoạt động!`);
 });
+
+// client.on("ready", () => {
+//   console.log(`✅ Bot ${client.user.tag} đã sẵn sàng!`);
+// });
 
 client.on("messageCreate", async (message) => {
   // Bỏ qua tin nhắn của bot

@@ -4,11 +4,11 @@ const EnWordchain = require("./wcEnHandler");
 
 async function wordchainProcess(message, wordchain) {
   const guildId = message.guildId;
-  const content = message.content.trim();
-
+  const content = message.content.trim().toLowerCase();
+  
   const result = await wordchain.gameProcess(guildId, content);
 
-  if (wordchain.isRepeatPlayer(guildId, message.author.id)) {
+  if (await wordchain.isRepeatPlayer(guildId, message.author.id)) {
     return message.reply({
       content: "⚠️ Bạn vừa mới trả lời rồi, hãy đợi người khác nối tiếp nhé!",
       allowedMentions: { repliedUser: false },
@@ -19,7 +19,7 @@ async function wordchainProcess(message, wordchain) {
     const tienThuong = 50;
     const userId = message.author.id;
 
-    wordchain.setLastUser(guildId, userId);
+    await wordchain.setLastUser(guildId, userId);
 
     await Money.addMoney(userId, tienThuong);
 
@@ -73,20 +73,15 @@ async function wordchainProcess(message, wordchain) {
 async function wordchainHandler(message) {
   const guildId = message.guildId;
   const viState = await ViWordchain.getWCViData(guildId);
-  const enState = await EnWordchain.getWCEnData(guildId);
-  console.log('channelId',message.channelId)
-  console.log('viState',viState.channelId)
-  console.log('enState',enState.channelId)
+  const enState = await EnWordchain.getWCEnData(guildId);  
 
   if (message.channelId === viState.channelId) {
     if (viState.gameActive) {
-      console.log("nối chữ", message.channelId);
       return await wordchainProcess(message, ViWordchain);
     }
   }
   if (message.channelId === enState.channelId) {
     if (enState.gameActive) {
-      console.log("wordchain", message.channelId);
       return await wordchainProcess(message, EnWordchain);
     }
   }

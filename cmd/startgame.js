@@ -11,7 +11,7 @@ module.exports = {
 
     const wordleChannelId = wordleData.channelId;
 
-    if (!wordleChannelId) return message.reply("❌ Hãy set channel trước!");
+    if (!wordleChannelId) return ;
     //wordle game    
     if (message.channel.id === wordleChannelId) {
       if (wordleData.status){

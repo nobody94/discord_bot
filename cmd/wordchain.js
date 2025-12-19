@@ -23,8 +23,9 @@ module.exports = {
       // Lưu ID kênh theo Guild ID
       await ViWordchain.setWCViData(guildId, {
         channelId: channel.id,
-        lastUserId:null,
-        wordHistory:[]
+        lastUserId: null,
+        wordHistory: [],
+        gameActive:false
       });
 
       if (await ViWordchain.isGameActive(guildId)) {
@@ -47,10 +48,11 @@ module.exports = {
 
     if (args[0] === "en") {
       // Lưu ID kênh theo Guild ID
-      await EnWordchain.setWCEnData(message.guild.id, {
+      await EnWordchain.setWCEnData(guildId, {
         channelId: channel.id,
-        lastUserId:null,
-        wordHistory:[]
+        lastUserId: null,
+        wordHistory: [],
+        gameActive:false
       });
 
       if (await EnWordchain.isGameActive(guildId)) {
@@ -58,7 +60,7 @@ module.exports = {
       }
 
       const startingWord = EnWordchain.getRandomWords();
-      await EnWordchain.startGame(startingWord);
+      await EnWordchain.startGame(guildId, startingWord);
       const nextRequiredWord = EnWordchain.getSecondPart(startingWord);
 
       await message.reply({

@@ -64,9 +64,10 @@ function getSecondPart(word) {
   return parts[0];
 }
 
-function getHint(state) {
+function getHint(state) {  
   if (!state.gameActive || !state.currentWord) return null;
-
+  
+  const dictionary = viDictionary;
   const secondPart = getSecondPart(state.currentWord).toLowerCase();
 
   const matches = Array.from(dictionary).filter((word) => {
@@ -92,7 +93,7 @@ async function isGameActive(guildId) {
 
 async function startGame(guildId, startingWord) {
   const state = await getWCViData(guildId);
-  
+
   if (state.gameActive) return false;
 
   //Từ ngẫu nhiên khi bắt đầu game
@@ -107,7 +108,6 @@ async function startGame(guildId, startingWord) {
 
 async function stopGame(guildId) {
   const state = await getWCViData(guildId);
-  // console.log(state);
   if (!state.gameActive) {
     return 0;
   }
@@ -125,6 +125,7 @@ async function stopGame(guildId) {
 
 async function isRepeatPlayer(guildId, userId) {
   const state = await getWCViData(guildId);
+   if (!state || !state.lastUserId) return false;
   return state.lastUserId === userId;
 }
 
@@ -134,9 +135,9 @@ async function setLastUser(guildId, userId) {
   });
 }
 
-async function gameProcess(guildId) {
+async function gameProcess(guildId,newWord) {
   // 1. Lấy cấu hình từ DB 
-  const viState = getWCViData(guildId);
+  const viState = await getWCViData(guildId);
   const dictionary = viDictionary;
   if (!viState.gameActive) {
     return {

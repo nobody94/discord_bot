@@ -43,16 +43,18 @@ const interactions = {
       "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3a2l1eXo2eHZsb3EzbXBsc3RncmltbDJ1cDJuY3lobzRhcnIxYnA4MyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/HN0vI0nbR9jX2/giphy.gif",
       "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3ZWpsemJ2dXRlYTZsajFiaHc2cmQ0cnVoa3c5enNkZ3B4eW1zNDY5aiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/uAvMPK3narqc8/giphy.gif",
       "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3ZjZvMGk2N2R4aXp4OW5wd2p4dzFmbDhrYXJ2aDR1OWp2dDVoODdnNSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/9VTe635RMSfEkGaZGd/giphy.gif",
+      "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3N3l0ZXNsc2MybDQycGV3eDM0dnBvbGZiNDNwczZhY282eW9laGF3dyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/VLqvh9JBs0lQnIOOn5/giphy.gif",
+      "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNzFkcGlua292dDd5bzg5bXR4ejh4aTVucWozZXJhZmNkM3duZ2p0NyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/108M7gCS1JSoO4/giphy.gif"
     ],
   },
   cuddle: {
     tag: "cuddle",
-    color: "#FFB6C1", // Hồng nhạt (Light Pink)
+    color: "#FFB6C1", 
     msg: "đã ôm ấp thật nồng thắm với",
   },
   lick: {
     tag: "lick",
-    color: "#FF69B4", // Hồng đậm (Hot Pink)
+    color: "#FF69B4", 
     msg: "đã liếm",
     images:[
         "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExZ3AyaXp4ZjFpdDhiMTQwMmk0N2J3NnEweHY4eWMwbGZhcng5eXZsaiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/5cREBFcGOkC2I/giphy.gif",
@@ -64,19 +66,24 @@ const interactions = {
   },
   kick: {
     tag: "kick",
-    color: "#8B0000", // Đỏ đô (Dark Red)
+    color: "#8B0000", 
     msg: "đã tung một cú đá sấm sét vào",
   },
   highfive: {
     tag: "highfive",
-    color: "#00FF7F", // Xanh lá mùa xuân (Spring Green)
+    color: "#00FF7F", 
     msg: "đã đập tay cực ngầu với",
   },
   stare: {
     tag: "stare",
-    color: "#4682B4", // Xanh thép (Steel Blue)
+    color: "#4682B4", 
     msg: "đang nhìn chằm chằm (phán xét) vào",
-  }  
+  },
+   laugh: {
+    tag: "laugh",
+    color: "#f1c40f", 
+    msg: "đã cười vào mặt của",
+  }    
 };
 
 module.exports = {

@@ -9,13 +9,12 @@ module.exports = {
 
   async execute(message, args) {
     const guildId = message.guild.id;
+    const channelId = message.channel.id;
     const viState = await ViWordchain.getWCViData(guildId);
     const enState = await EnWordchain.getWCEnData(guildId);
-    const userId = message.author.id;
+    const userId = message.author.id;    
 
-    if (!viState.channelId || !enState.channelId) return;
-
-    if (guildId == viState.channelId) {      
+    if (channelId == viState.channelId) {   
       const hintStatus = await checkHintLimit("wordchain_vi", userId);
 
       if (!hintStatus.canUse) {
@@ -32,8 +31,6 @@ module.exports = {
       // Tăng số lượt đã dùng
       const remaining = hintStatus.remaining;
 
-      // console.log('hint',hint,'remaining',remaining)
-
       return message.reply({
         content: `💡 | Gợi ý: **||${hint.join(
           ", "
@@ -42,7 +39,7 @@ module.exports = {
       });
     }
 
-    if (guildId == enState.channelId) {
+    if (channelId == enState.channelId) {     
       const hintStatus = await checkHintLimit("wordchain_en", userId);
 
       if (!hintStatus.canUse) {

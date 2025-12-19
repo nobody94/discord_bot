@@ -6,6 +6,9 @@ const db = new Database(mongoUrl);
 const dbKey="nobody_bot";
 
 function renderKey(key,id){
+    if(!id){
+        return `${dbKey}_${key}`
+    }
     return `${dbKey}_${key}_${id}`
 }
 

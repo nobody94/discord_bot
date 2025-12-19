@@ -3,8 +3,9 @@ const { enDictionary } = require("../dictionary/dictionary");
 
 async function getWCEnData(guildId) {
   const dbKey = renderKey("wordchain_en", guildId);
+  const data = await getKey(dbKey);
   return (
-    (await getKey(dbKey)) || {
+    data || {
       gameActive: false,
       currentWord: null,
       lastUserId: null,
@@ -44,12 +45,14 @@ function isValidWord(word) {
 }
 
 function getSecondPart(word) {
+  if (!word || typeof word !== 'string') return "";
   return word.slice(-1);
 }
 
 function getHint(state) {
   if (!state.gameActive || !state.currentWord) return null;
 
+  const dictionary = enDictionary;
   const secondPart = getSecondPart(state.currentWord).toLowerCase();
 
   const matches = Array.from(dictionary).filter((word) => {
@@ -73,17 +76,17 @@ async function isGameActive(guildId) {
 
 async function startGame(guildId, startingWord) {
   const state = await getWCEnData(guildId);
+ 
   if (state.gameActive) {
     return false;
   }
-
+  
   await setWCEnData(guildId, {
     gameActive: true,
     currentWord: startingWord,
     lastUserId: null,
-    wordHistory: [startingWord],
+    wordHistory: [startingWord.toLowerCase()],
   });
-
   return true;
 }
 
@@ -107,7 +110,8 @@ async function stopGame(guildId) {
 
 async function isRepeatPlayer(guildId, userId) {
   const state = await getWCEnData(guildId);
-  return state.lastUserId === userId; //
+  if (!state || !state.lastUserId) return false;
+  return state.lastUserId === userId;
 }
 
 async function setLastUser(guildId, userId) {
@@ -116,16 +120,16 @@ async function setLastUser(guildId, userId) {
   });
 }
 
-async function gameProcess(guildId) { 
-  const enState = getWCEnData(guildId);
-  
+async function gameProcess(guildId, newWord) {
+  const enState = await getWCEnData(guildId);
+
   if (!enState.gameActive)
     return {
       success: false,
       reason: "NOT_ACTIVE",
       message: "Game chưa hoạt động",
     };
-
+  const dictionary = enDictionary;
   const secondWord = getSecondPart(newWord);
   const parts = newWord.split(/\s+/);
   if (parts.length > 1) {
@@ -176,7 +180,8 @@ async function gameProcess(guildId) {
     };
   }
   // Kiểm tra xem từ thứ nhất phải bằng từ thứ 2 trước đó
-  const currentLastWord = getSecondPart(state.currentWord);
+  const currentLastWord = getSecondPart(enState.currentWord);
+ 
   if (newWord[0] !== currentLastWord) {
     return {
       success: false,
@@ -188,7 +193,7 @@ async function gameProcess(guildId) {
   // Hợp lệ → cập nhật
   await setWCEnData(guildId, {
     currentWord: newWord,
-    wordHistory: [...state.wordHistory, newWord],
+    wordHistory: [...enState.wordHistory, newWord],
   });
 
   const nextRequiredWord = getSecondPart(newWord);

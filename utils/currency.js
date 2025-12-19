@@ -20,9 +20,7 @@ async function getAllBalances(userId) {
     // Chạy vòng lặp qua danh sách các loại tiền đã định nghĩa
     for (const [type, config] of Object.entries(CURRENCIES)) {
         const key = renderKey(config.key,userId);
-        const rawValue = await getKey(key);
-        // console.log('key',key);
-        // console.log('rawValue',rawValue);
+        const rawValue = await getKey(key);    
         balances[type] = Number(rawValue) || 0;
     }
     
