@@ -5,9 +5,9 @@ module.exports = {
   description: "Thiết lập kênh chơi game đoán chữ",
   
   async execute(message, args) {
-    if (!message.member.permissions.has("MANAGE_CHANNELS")) {
-      return message.reply("❌ Bạn cần quyền `Quản lý kênh`.");
-    }
+    // if (!message.member.permissions.has("MANAGE_CHANNELS")) {
+    //   return message.reply("❌ Bạn cần quyền `Quản lý kênh`.");
+    // }
 
     const channel = message.mentions.channels.first() || message.channel;
 
