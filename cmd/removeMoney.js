@@ -1,13 +1,11 @@
-// const { PermissionsBitField } = require('discord.js');
-const { removeMoney, getIcon, CURRENCIES } = require('../utils/currency.js'); 
+const { removeMoney, getIcon, CURRENCIES,getBalance } = require('../utils/currency.js'); 
 
 // 1. Cấu hình ID của bạn (Developer) để có quyền tối cao
 const DEVELOPER_IDS = ['1446889473374683400']; 
 
 module.exports = {
     name: 'removemoney',
-    description: 'Trừ tiền của người dùng bằng @mention hoặc ID (chỉ dành cho Developer).',   
-    // userPermissions: [PermissionsBitField.Flags.Administrator],
+    description: 'Trừ tiền của người dùng bằng @mention hoặc ID (chỉ dành cho Developer).',  
 
     async execute(message, args) {
         // 2. Kiểm tra quyền hạn (Phải có trong ID trong danh sách Developer)
@@ -57,6 +55,12 @@ module.exports = {
             targetUser = await message.client.users.fetch(targetId);
         } catch (error) {
             targetUser = { tag: `ID:${targetId}` }; 
+        }
+
+        const currentMoney = getBalance(targetId,currencyType);
+
+        if(currentMoney < amount){
+            return message.reply(`Tiền của ${targetUser.tag} không đủ để thực hiện trừ tiền`);
         }
 
         try {

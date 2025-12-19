@@ -38,10 +38,10 @@ module.exports = {
                     value: '• slap: tát\n• poke: chọc\n• bite: cắn\n• punch: đấm\n• bonk: gõ đầu\n• kick: đá\n• stare: nhìn phán xét',
                     inline:true 
                 },
-                { 
-                    name: '⚙️ Cấu hình (Admin)', 
-                    value: '• setwordchain-vi: Thiết lập kênh nối chữ Tiếng Việt\nws, wc: Gợi ý từ nối từ Tiếng Việt\n• setwordchain-en: Thiết lập kênh nối chữ Tiếng Anh\nhint, ht: Gợi ý từ nối từ Tiếng Anh\nGợi ý từ nối từ chỉ dùng trong kênh nối từ tối đa 5 lượt/ngày' 
-                }
+                // { 
+                //     name: '⚙️ Cấu hình (Admin)', 
+                //     value: '• setwordchain-vi: Thiết lập kênh nối chữ Tiếng Việt\nws, wc: Gợi ý từ nối từ Tiếng Việt\n• setwordchain-en: Thiết lập kênh nối chữ Tiếng Anh\nhint, ht: Gợi ý từ nối từ Tiếng Anh\nGợi ý từ nối từ chỉ dùng trong kênh nối từ tối đa 5 lượt/ngày' 
+                // }
             )
             .setFooter({ text: 'Sử dụng dấu chấm (.) trước mỗi lệnh.' })
             .setTimestamp();

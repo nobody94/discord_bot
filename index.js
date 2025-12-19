@@ -8,8 +8,8 @@ const {
 const fs = require("fs");
 const path = require("path");
 const express = require('express');
-const { WordChain } = require("./game/wordchain");
-const {db} = require('./utils/currency');
+// const { WordChain } = require("./game/wordchain");
+const {db} = require('./utils/db');
 
 const app = express();
 app.get('/', (req, res) => {
@@ -60,54 +60,38 @@ client.on("messageCreate", async (message) => {
   if (message.author.bot) return;
 
   const content = message.content.trim();
-  //xử lý lệnh
+  //xử lý lệnh 
   if (content.startsWith(PREFIX)) {
     const args = content.slice(PREFIX.length).trim().split(/\s+/);
     const commandName = args.shift().toLowerCase();
 
-    const command = client.commands.get(commandName) || 
-                    client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
+    const command =
+      client.commands.get(commandName) ||
+      client.commands.find(
+        (cmd) => cmd.aliases && cmd.aliases.includes(commandName)
+      );
 
-    if (command) {
-      try {     
-        await command.execute(message, args, commandName);
-      } catch (error) {
-        console.error(error);
-      }
-      return; // BẮT BUỘC: Dừng lại ở đây, không cho chạy xuống dưới nữa
+    if (!command) return;
+
+    // Kiểm tra quyền (nếu lệnh có yêu cầu)
+    if (
+      command.userPermissions &&
+      !message.member.permissions.has(command.userPermissions)
+    ) {
+      return message.reply({
+        content: "❌ Bạn không có quyền thực hiện lệnh này.",
+        allowedMentions: { repliedUser: false },
+      });
     }
+
+    try {     
+      await command.execute(message, args, commandName);
+    } catch (error) {
+      console.error(error);
+      message.reply("Đã xảy ra lỗi khi thực thi lệnh này!");
+    }
+    return; // Dừng xử lý sau khi xử lý lệnh
   }
-  // if (content.startsWith(PREFIX)) {
-  //   const args = content.slice(PREFIX.length).trim().split(/\s+/);
-  //   const commandName = args.shift().toLowerCase();
-
-  //   const command =
-  //     client.commands.get(commandName) ||
-  //     client.commands.find(
-  //       (cmd) => cmd.aliases && cmd.aliases.includes(commandName)
-  //     );
-
-  //   if (!command) return;
-
-  //   // Kiểm tra quyền (nếu lệnh có yêu cầu)
-  //   if (
-  //     command.userPermissions &&
-  //     !message.member.permissions.has(command.userPermissions)
-  //   ) {
-  //     return message.reply({
-  //       content: "❌ Bạn không có quyền thực hiện lệnh này.",
-  //       allowedMentions: { repliedUser: false },
-  //     });
-  //   }
-
-  //   try {     
-  //     await command.execute(message, args, commandName);
-  //   } catch (error) {
-  //     console.error(error);
-  //     message.reply("Đã xảy ra lỗi khi thực thi lệnh này!");
-  //   }
-  //   return; // Dừng xử lý sau khi xử lý lệnh
-  // }
 
   //xử lý game
   // if (!content.startsWith(PREFIX)) {

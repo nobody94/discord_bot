@@ -1,5 +1,5 @@
 const { EmbedBuilder } = require('discord.js');
-const {db,dbKey} = require('../utils/currency');
+const {getKey,renderKey} = require('../utils/db');
 const { SHOP_ITEMS } = require('../utils/shop');
 
 module.exports = {
@@ -11,8 +11,9 @@ module.exports = {
         const userId = message.author.id;
         
         // Lấy danh sách item từ DB (mảng các ID đã mua)
-        // Lưu ý: Trong lệnh .buy bạn nên lưu mảng ID: await db.push(`inventory_${userId}`, itemId);
-        const inventory = await db.get(`${dbKey}_inventory_${userId}`) || [];
+        // Lưu ý: Trong lệnh .buy bạn nên lưu mảng ID;
+        const invKey = renderKey('inventory',userId);
+        const inventory = await getKey(invKey) || [];
 
         const embed = new EmbedBuilder()
             .setTitle(`🎒 TÚI ĐỒ CỦA ${message.author.username.toUpperCase()}`)

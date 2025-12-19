@@ -1,4 +1,3 @@
-// const { PermissionsBitField } = require('discord.js');
 const { addMoney, getIcon, CURRENCIES } = require('../utils/currency.js'); 
 
 // 1. Cấu hình ID của bạn (Developer) để có quyền tối cao
@@ -6,9 +5,8 @@ const DEVELOPER_IDS = ['1446889473374683400'];
 
 module.exports = {
     name: 'addmoney',
-    description: 'Thêm tiền cho người dùng bằng @mention hoặc ID (chỉ dành cho Developer).',   
-    // userPermissions: [PermissionsBitField.Flags.Administrator],
-
+    description: 'Thêm tiền cho người dùng bằng @mention hoặc ID (chỉ dành cho Developer).',  
+    
     async execute(message, args) {
         // 2. Kiểm tra quyền hạn (Phải có trong ID trong danh sách Developer)
         const isDeveloper = DEVELOPER_IDS.includes(message.author.id);

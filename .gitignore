@@ -1,3 +1,5 @@
 .env
 node_modules/
 test.js
+cmd_err/
+game_err/

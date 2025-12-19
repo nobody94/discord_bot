@@ -1,7 +1,4 @@
-const { Database } = require("quickmongo");
-
-const mongoUrl = process.env.MONGOURL;
-const db = new Database(mongoUrl);
+const {renderKey,getKey,setKey,addKey} = require('./db');
 
 // Cấu hình các loại tiền
 const CURRENCIES = {
@@ -10,7 +7,7 @@ const CURRENCIES = {
 };
 
 const DEFAULT_TYPE = 'mora';
-const dbKey="nobody_bot"
+
 
 // Hàm lấy Icon theo loại tiền
 function getIcon(type = DEFAULT_TYPE) {
@@ -22,8 +19,10 @@ async function getAllBalances(userId) {
     
     // Chạy vòng lặp qua danh sách các loại tiền đã định nghĩa
     for (const [type, config] of Object.entries(CURRENCIES)) {
-        const key = `${dbKey}_${config.key}_${userId}`;
-        const rawValue = await db.get(key);
+        const key = renderKey(config.key,userId);
+        const rawValue = await getKey(key);
+        // console.log('key',key);
+        // console.log('rawValue',rawValue);
         balances[type] = Number(rawValue) || 0;
     }
     
@@ -32,16 +31,16 @@ async function getAllBalances(userId) {
 
 // Lấy số dư theo loại tiền
 async function getBalance(userId, type = DEFAULT_TYPE) {
-    const key = `${dbKey}_${CURRENCIES[type]?.key || DEFAULT_TYPE}_${userId}`;
-    const rawBalance = await db.get(key);
+    const key = renderKey(CURRENCIES[type]?.key || DEFAULT_TYPE,userId);
+    const rawBalance = await getKey(key);
     return Number(rawBalance) || 0;
 }
 
 // Cộng tiền theo loại tiền
 async function addMoney(userId, amount, type = DEFAULT_TYPE) {
     try {
-        const key = `${dbKey}_${CURRENCIES[type]?.key || DEFAULT_TYPE}_${userId}`;
-        await db.add(key, amount);
+        const key = renderKey(CURRENCIES[type]?.key || DEFAULT_TYPE,userId);
+        await addKey(key, amount);
         return true;
     } catch (error) {
         console.error("LỖI CỘNG TIỀN:", error);
@@ -55,30 +54,11 @@ async function removeMoney(userId, amount, type = DEFAULT_TYPE) {
     const current = await getBalance(userId, type);
     if (amount > current) return false;
 
-    const key = `${dbKey}_${CURRENCIES[type]?.key || DEFAULT_TYPE}_${userId}`;
-    await db.set(key, current - amount);
+    const key = renderKey(CURRENCIES[type]?.key || DEFAULT_TYPE,userId);
+    await setKey(key, current - amount);
     return true;
 }
 
-async function checkHintLimit(newKey,userId) {
-    const today = new Date().toISOString().split('T')[0];
-    const key = `${dbKey}_${newKey}_${userId}`;
-    
-    let data = await db.get(key);
-    
-    // Nếu chưa có dữ liệu hoặc sang ngày mới thì reset
-    if (!data || data.lastUsed !== today) {
-        data = { count: 0, lastUsed: today };
-    }
 
-    if (data.count >= 5) {
-        return { canUse: false, remaining: 0 };
-    }
 
-    data.count++;
-    await db.set(key, data);
-    
-    return { canUse: true, remaining: 5 - data.count };
-}
-
-module.exports = { getAllBalances,getBalance, addMoney, removeMoney, getIcon, CURRENCIES,db,checkHintLimit,dbKey };
+module.exports = { getAllBalances,getBalance, addMoney, removeMoney, getIcon, CURRENCIES };

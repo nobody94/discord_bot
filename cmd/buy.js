@@ -1,4 +1,5 @@
-const { getBalance, removeMoney, getIcon,db,dbKey } = require('../utils/currency');
+const { getBalance, removeMoney, getIcon } = require('../utils/currency');
+const { renderKey,pushKey } = require('../utils/db');
 const {SHOP_ITEMS} = require('../utils/shop');
 
 module.exports = {
@@ -34,7 +35,8 @@ module.exports = {
             if (success) {
                 // 5. Thêm vật phẩm vào túi đồ (inventory) trong DB
                 // Chúng ta lưu mảng các ID vật phẩm đã mua
-                await db.push(`${dbKey}_inventory_${userId}`, itemId);
+                const invKey = renderKey('inventory',userId);
+                await pushKey(invKey,itemId);                 
 
                 return message.reply({
                     content: `✅ | Chúc mừng! Bạn đã mua thành công ${item.icon} **${item.name}** với giá **${item.price.toLocaleString()}** ${getIcon(item.currency)}.\n📦 Gõ \`.balo\` để kiểm tra túi đồ.`

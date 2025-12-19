@@ -1,4 +1,5 @@
 const Money = require("../utils/currency");
+const {renderKey,setKey,getKey} = require('../utils/db');
 
 const DAILY_REWARD = 500; // Số tiền thưởng mỗi ngày
 const COOLDOWN = 24 * 60 * 60 * 1000; // 24 giờ tính bằng mili-giây
@@ -10,10 +11,10 @@ module.exports = {
 
   async execute(message, args) {
     const userId = message.author.id;
-    const dailyKey = `${Money.dbKey}_daily_${userId}`; // Key mới để theo dõi thời gian claim
+    const dailyKey = renderKey('daily',userId); // Key mới để theo dõi thời gian claim
 
     // 2. Lấy thời điểm claim cuối cùng
-    const lastDaily = await Money.db.get(dailyKey);
+    const lastDaily = await getKey(dailyKey);
 
     // 3. Kiểm tra Cooldown
     if (lastDaily !== null && COOLDOWN - (Date.now() - lastDaily) > 0) {
@@ -41,7 +42,7 @@ module.exports = {
 
       // 4. Cộng tiền và cập nhật thời điểm claim
       await Money.addMoney(userId, DAILY_REWARD);
-      await Money.db.set(dailyKey, Date.now()); // Lưu lại thời điểm hiện tại
+      await setKey(dailyKey,Date.now())// Lưu lại thời điểm hiện tại
 
       // 5. Gửi thông báo thành công
       return message.reply(
