@@ -1,4 +1,4 @@
-const { renderKey,setKey } = require("../utils/db"); // Đường dẫn đến nơi bạn khởi tạo db
+const { setWordleData } = require("../game/wordleHandler");
 
 module.exports = {
   name: "setwordle",
@@ -11,9 +11,8 @@ module.exports = {
 
     const channel = message.mentions.channels.first() || message.channel;
 
-    // Lưu ID kênh theo Guild ID: wordle_channel_guildID
-    const dbKey = renderKey('wordle_channel',message.guild.id);
-    await setKey(dbKey,channel._id);
+    // Lưu ID kênh theo Guild ID: wordle_channel_guildID    
+    await setWordleData(message.guild.id,{channelId:channel.id});
 
     return message.reply(`✅ Đã thiết lập kênh chơi game tại: ${channel}`);
   }

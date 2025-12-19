@@ -21,7 +21,7 @@ const dicFilter = new Set(sourceArray
 const enDictionary = Array.from(dicFilter).map((d)=> d);
 
 const viDictionary = Array.from(listViWord).filter(
-  (phrase) => phrase.split(" ").length === 2
+  (phrase) => phrase.split(" ").length === 2 && !phrase.includes('-')
 );
 
 module.exports = {

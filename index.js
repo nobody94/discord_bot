@@ -8,7 +8,7 @@ const {
 const fs = require("fs");
 const path = require("path");
 const express = require('express');
-// const { WordChain } = require("./game/wordchain");
+const { wordleProcess } = require("./game/wordleHandler");
 const {db} = require('./utils/db');
 
 const app = express();
@@ -58,8 +58,10 @@ client.on("messageCreate", async (message) => {
   // Bỏ qua tin nhắn của bot
   if (!message) return;
   if (message.author.bot) return;
+  
 
-  const content = message.content.trim();
+  const content = message.content.trim(); 
+
   //xử lý lệnh 
   if (content.startsWith(PREFIX)) {
     const args = content.slice(PREFIX.length).trim().split(/\s+/);
@@ -94,9 +96,7 @@ client.on("messageCreate", async (message) => {
   }
 
   //xử lý game
-  // if (!content.startsWith(PREFIX)) {
-  //   WordChain(message);
-  // }
+   await wordleProcess(message);
 });
 
 // 🖱️ Xử lý Tương tác (Button, Modal, Select Menu, v.v.)
