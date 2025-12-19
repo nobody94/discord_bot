@@ -7,7 +7,7 @@ module.exports = {
     description: 'Xem danh sách vật phẩm.',
     async execute(message) {
         const embed = new EmbedBuilder()
-            .setTitle('🏪 CỬA HÀNG TEYVAT')
+            .setTitle('<:store:1451465383436615731> TẠP HÓA KATHERINE')
             .setColor(0x00FF99)            
             .setDescription('Sử dụng lệnh `.buy <ID>` để mua đồ.');
 

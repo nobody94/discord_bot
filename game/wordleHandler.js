@@ -46,10 +46,14 @@ async function wordleProcess(message) {
   if (message.channel.id !== wordleData.channelId || !wordleData.status) return;
 
   const dictionary = viDictionary;
-  const currentAnswer = wordleData.answer; 
-  
+  const currentAnswer = wordleData.answer;
+
   // 4. Kiểm tra đáp án của người dùng
-  const userGuess = message.content.toLowerCase().trim(); 
+  const userGuess = message.content.toLowerCase().trim();
+  const wordsCount = userGuess.split(/\s+/).length;
+  if (wordsCount > 2) {
+    return;
+  }
   if (userGuess === currentAnswer.toLowerCase()) {
     //có thể thêm thưởng tiền ở đây
     message.react("✅");
@@ -65,7 +69,7 @@ async function wordleProcess(message) {
       return message.reply(
         `🎉 Chính xác! Bạn đã hoàn thành lượt cuối cùng và nhận được ${reward} ${getIcon()}. Game kết thúc! Để chơi tiếp hãy dùng lệnh \`.start\`.`
       );
-    } else {     
+    } else {
       message.reply(
         `🎉 Chính xác! Đáp án là **${currentAnswer}**. Bạn nhận được ${reward} ${getIcon()}`
       );
@@ -75,11 +79,18 @@ async function wordleProcess(message) {
         const nextWord =
           dictionary[Math.floor(Math.random() * dictionary.length)];
         const nextShuffled = shuffleWord(nextWord);
-        await setWordleData(guildId,{answer:nextWord,turn: wordleData.turn + 1})
-        message.channel.send(`📝 Câu tiếp theo **Lượt ${wordleData.turn + 1}/5**: **${nextShuffled}**`);
+        await setWordleData(guildId, {
+          answer: nextWord,
+          turn: wordleData.turn + 1,
+        });
+        message.channel.send(
+          `📝 Câu tiếp theo **Lượt ${
+            wordleData.turn + 1
+          }/5**: **${nextShuffled}**`
+        );
       }, 3000);
     }
-  }else{
+  } else {
     message.react("❌");
   }
 }
@@ -89,5 +100,5 @@ module.exports = {
   setWordleData,
   getWordleData,
   getRandomWord,
-  shuffleWord
+  shuffleWord,
 };
