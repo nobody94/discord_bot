@@ -1,4 +1,4 @@
-const {db,renderKey,getKey,setKey} = require('./db');
+const {renderKey,getKey,setKey} = require('./db');
 
 async function checkHintLimit(newKey,userId) {
     const today = new Date().toISOString().split('T')[0];

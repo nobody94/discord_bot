@@ -8,8 +8,11 @@ const {
 const fs = require("fs");
 const path = require("path");
 const express = require('express');
-const { wordleProcess } = require("./game/wordleHandler");
 const {db} = require('./utils/db');
+
+const { wordleProcess } = require("./game/wordleHandler");
+const { wordchainHandler } = require('./game/wordchainHandler');
+
 
 const app = express();
 app.get('/', (req, res) => {
@@ -97,6 +100,7 @@ client.on("messageCreate", async (message) => {
 
   //xử lý game
    await wordleProcess(message);
+   await wordchainHandler(message);
 });
 
 // 🖱️ Xử lý Tương tác (Button, Modal, Select Menu, v.v.)
