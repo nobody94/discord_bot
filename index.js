@@ -13,6 +13,7 @@ const {db} = require('./utils/db');
 
 const { wordleProcess } = require("./game/wordleHandler");
 const { wordchainHandler } = require('./game/wordchainHandler');
+const {errorIcon} = require('./utils/icon');
 
 
 const app = express();
@@ -55,11 +56,11 @@ for (const file of commandFiles) {
 }
 
 client.once(Events.ClientReady, (c) => {
-  console.log(`✅ Bot ${c.user.tag} đã sẵn sàng và đang hoạt động!`);
+  console.log(`Bot ${c.user.tag} đã sẵn sàng và đang hoạt động!`);
 });
 
 // client.on("ready", () => {
-//   console.log(`✅ Bot ${client.user.tag} đã sẵn sàng!`);
+//   console.log(`Bot ${client.user.tag} đã sẵn sàng!`);
 // });
 
 client.on("messageCreate", async (message) => {
@@ -89,7 +90,7 @@ client.on("messageCreate", async (message) => {
       !message.member.permissions.has(command.userPermissions)
     ) {
       return message.reply({
-        content: "❌ Bạn không có quyền thực hiện lệnh này.",
+        content: `${errorIcon} Bạn không có quyền thực hiện lệnh này.`,
         allowedMentions: { repliedUser: false },
       });
     }
@@ -186,15 +187,15 @@ async function startBot() {
     await db.connect(); 
     console.log("✅ Đã kết nối MongoDB thành công!");
 
-    if (!Token) return console.error("❌ BOT_TOKEN missing!");
+    if (!Token) return console.error(`${errorIcon} BOT_TOKEN missing!`);
 
     // Kiểm tra nếu client đã login rồi thì không login lại
     if (!client.readyAt) {
       await client.login(Token);
-      console.log("🚀 Bot đã đăng nhập thành công!");
+      console.log("Bot đã đăng nhập thành công!");
     }
   } catch (error) {
-    console.error("🔴 Lỗi khởi động:", error);
+    console.error("Lỗi khởi động:", error);
     process.exit(1); 
   }
 }

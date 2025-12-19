@@ -1,4 +1,5 @@
 const { removeMoney, getIcon, CURRENCIES,getBalance } = require('../utils/currency.js'); 
+const { errorIcon,verifyIcon } = require('../utils/icon.js')
 
 // 1. Cấu hình ID của bạn (Developer) để có quyền tối cao
 const DEVELOPER_IDS = ['1446889473374683400']; 
@@ -13,7 +14,7 @@ module.exports = {
 
         if (!isDeveloper ) {
             return message.reply({ 
-                content: "❌ | Bạn không có quyền sử dụng lệnh này.", 
+                content: `${errorIcon} | Bạn không có quyền sử dụng lệnh này.`, 
                 ephemeral: true 
             });
         }
@@ -37,16 +38,16 @@ module.exports = {
 
         // 5. Kiểm tra tính hợp lệ của dữ liệu
         if (!/^\d+$/.test(targetId)) {
-            return message.reply(`❌ | Đối tượng "${args[0]}" không hợp lệ. Vui lòng @mention hoặc nhập ID chính xác.`);
+            return message.reply(`${errorIcon} | Đối tượng "${args[0]}" không hợp lệ. Vui lòng @mention hoặc nhập ID chính xác.`);
         }
 
         if (isNaN(amount) || amount <= 0) {
-            return message.reply(`❌ | Số tiền "${args[1]}" không hợp lệ.`);
+            return message.reply(`${errorIcon} | Số tiền "${args[1]}" không hợp lệ.`);
         }
 
         // Kiểm tra xem loại tiền có tồn tại trong currency.js không
         if (!CURRENCIES[currencyType]) {
-            return message.reply(`❌ | Loại tiền "${currencyType}" không tồn tại. Các loại hiện có: \`${Object.keys(CURRENCIES).join(", ")}\``);
+            return message.reply(`${errorIcon} | Loại tiền "${currencyType}" không tồn tại. Các loại hiện có: \`${Object.keys(CURRENCIES).join(", ")}\``);
         }
 
         // 6. Thực hiện cộng tiền
@@ -68,14 +69,14 @@ module.exports = {
 
             if (success) {
                 return message.channel.send({
-                    content: `✅ | Đã trừ thành công **${amount.toLocaleString()}** ${getIcon(currencyType)} của **${targetUser.tag}**.`,
+                    content: `${verifyIcon} | Đã trừ thành công **${amount.toLocaleString()}** ${getIcon(currencyType)} của **${targetUser.tag}**.`,
                 });
             } else {
-                return message.reply("❌ | Lỗi hệ thống khi trừ tiền vào database.");
+                return message.reply(`${errorIcon} | Lỗi hệ thống khi trừ tiền vào database.`);
             }
         } catch (error) {
             console.error("LỖI ADDMONEYTO:", error);
-            return message.reply("❌ | Đã xảy ra lỗi không xác định.");
+            return message.reply(`${errorIcon} | Đã xảy ra lỗi không xác định.`);
         }
     },
 };

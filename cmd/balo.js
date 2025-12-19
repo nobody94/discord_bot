@@ -1,6 +1,7 @@
 const { EmbedBuilder } = require("discord.js");
 const { getKey, renderKey, setKey } = require("../utils/db");
 const { SHOP_ITEMS } = require("../utils/shop");
+const { errorIcon, verifyIcon, bagIcon } = require('../utils/icon.js')
 
 module.exports = {
   name: "balo",
@@ -21,18 +22,18 @@ module.exports = {
 
       if (!target)
         return message.reply(
-          "❌ | Vui lòng tag người muốn tặng: `.balo give @user [ID_vật_phẩm]`"
+          `${errorIcon} | Vui lòng tag người muốn tặng: .balo give @user [ID_vật_phẩm]`
         );
       if (target.id === userId)
-        return message.reply("❌ | Bạn không thể tự tặng đồ cho chính mình.");
+        return message.reply(`${errorIcon} | Bạn không thể tự tặng đồ cho chính mình.`);
       if (!itemId)
-        return message.reply("❌ | Vui lòng nhập ID vật phẩm muốn tặng.");
+        return message.reply(`${errorIcon} | Vui lòng nhập ID vật phẩm muốn tặng.`);
 
       // Kiểm tra vật phẩm có trong túi đồ không
       const itemIndex = inventory.indexOf(itemId);
       if (itemIndex === -1) {
         return message.reply(
-          `❌ | Bạn không sở hữu vật phẩm có ID \`${itemId}\` trong túi đồ.`
+          `${errorIcon} | Bạn không sở hữu vật phẩm có ID \`${itemId}\` trong túi đồ.`
         );
       }
 
@@ -53,14 +54,14 @@ module.exports = {
         icon: "<:box:1451465056612253779>",
       };
       return message.reply(
-        `✅ | Bạn đã tặng **${item.icon} ${item.name}** cho **${target.username}** thành công!`
+        `${verifyIcon} | Bạn đã tặng **${item.icon} ${item.name}** cho **${target.username}** thành công!`
       );
     }
 
     //LOGIC HIỂN THỊ TÚI ĐỒ
     const embed = new EmbedBuilder()
       .setTitle(
-        `<:bag:1451465027252125738> TÚI ĐỒ CỦA ${message.author.username.toUpperCase()}`
+        `${bagIcon} TÚI ĐỒ CỦA ${message.author.username.toUpperCase()}`
       )
       .setColor(0x3498db)
       .setFooter({

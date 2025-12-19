@@ -9,6 +9,7 @@ const {
   EmbedBuilder,
 } = require("discord.js");
 const { maxAmount } = require("../utils/constant");
+const { errorIcon,verifyIcon,dicesIcon } = require('../utils/icon.js')
 
 const {
   getBalance,
@@ -88,14 +89,8 @@ async function finishRound(message) {
     currentRound.confirmationMsgIds = [];
   }
 
-  const rollingSymbols = [
-    "<:dice1:1451038871440588892>",
-    "<:dice2:1451038882891042988>",
-    "<:dice3:1451038893200642118>",
-    "<:dice4:1451038903547986031>",
-    "<:dice5:1451038914185003082>",
-    "<:dice6:1451038922724610068>",
-  ];
+  const rollingSymbols = dicesIcon;
+
   for (let i = 0; i < ROLLING_TIME * 2; i++) {
     const rolling = [
       rollingSymbols[Math.floor(Math.random() * 6)],
@@ -149,7 +144,7 @@ module.exports = {
 
   async execute(message) {
     if (currentRound.status !== "inactive")
-      return message.reply("❌ | Vòng đấu đang diễn ra.");
+      return message.reply(`${errorIcon} | Vòng đấu đang diễn ra.`);
 
     currentRound.status = "betting";
     currentRound.bets.clear();
@@ -206,7 +201,7 @@ module.exports = {
     if (interaction.isButton()) {
       if (currentRound.status !== "betting") {
         return interaction.reply({
-          content: "❌ | Hết thời gian đặt cược!",
+          content: `${errorIcon} | Hết thời gian đặt cược!`,
           ephemeral: true,
         });
       }
@@ -240,17 +235,17 @@ module.exports = {
       // --- THÊM ĐIỀU KIỆN GIỚI HẠN ---
       if (betAmount > maxAmount) {
         return interaction.editReply({
-          content: `❌ | Số tiền đặt cược tối đa là **${maxAmount}**!`,
+          content: `${errorIcon} | Số tiền đặt cược tối đa là **${maxAmount}**!`,
           ephemeral: true,
         });
       }
 
       if (currentRound.status !== "betting")
-        return interaction.editReply("❌ | Hết thời gian cược!");
+        return interaction.editReply(`${errorIcon} | Hết thời gian cược!`);
       if (!choice || isNaN(betAmount) || betAmount <= 0)
-        return interaction.editReply("❌ | Tiền cược không hợp lệ.");
+        return interaction.editReply(`${errorIcon} | Tiền cược không hợp lệ.`);
       if (currentRound.bets.has(userId))
-        return interaction.editReply("❌ | Bạn đã cược rồi.");
+        return interaction.editReply(`${errorIcon} | Bạn đã cược rồi.`);
 
       const balance = await getBalance(userId);
       if (betAmount > balance)
@@ -267,7 +262,7 @@ module.exports = {
 
       await interaction.deleteReply().catch(() => {}); // Xóa defer ephemeral
       const confirm = await interaction.followUp({
-        content: `✅ **${
+        content: `${verifyIcon} **${
           interaction.user.username
         }** đã cược **${betAmount}** ${getIcon()} vào **${getChoiceLabel(
           choice

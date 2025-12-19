@@ -28,7 +28,7 @@ module.exports = {
       })     
 
       return message.channel.send(
-        `✅ **Trò chơi đoán chữ bắt đầu!** (Giới hạn: 5 lượt)\n\n📝 **Lượt 1/5:** Hãy sắp xếp các chữ: **${shuffled}**`
+        `**Trò chơi đoán chữ bắt đầu!** (Giới hạn: 5 lượt)\n\n📝 **Lượt 1/5:** Hãy sắp xếp các chữ: **${shuffled}**`
       );
     }
 

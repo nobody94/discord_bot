@@ -1,4 +1,5 @@
 const { addMoney, getIcon, CURRENCIES } = require('../utils/currency.js'); 
+const { errorIcon, verifyIcon } = require('../utils/icon.js');
 
 // 1. Cấu hình ID của bạn (Developer) để có quyền tối cao
 const DEVELOPER_IDS = ['1446889473374683400']; 
@@ -13,14 +14,14 @@ module.exports = {
 
         if (!isDeveloper ) {
             return message.reply({ 
-                content: "❌ | Bạn không có quyền sử dụng lệnh này.", 
+                content: `${errorIcon} | Bạn không có quyền sử dụng lệnh này.`, 
                 ephemeral: true 
             });
         }
 
         // 3. Kiểm tra tham số đầu vào
         if (args.length < 2) {
-            return message.reply(`Sử dụng: \`.addmoneto <@user hoặc UserID> <SốTiền> [loại tiền]\` \nVí dụ: \`.addmoneyto @Nobody 1000 primo\``);
+            return message.reply(`Sử dụng: \`.addmoney <@user hoặc UserID> <SốTiền> [loại tiền]\` \nVí dụ: \`.addmoney @Nobody 1000 primo\``);
         }
 
         // 4. Xử lý lấy ID từ @mention hoặc ID thuần
@@ -37,16 +38,16 @@ module.exports = {
 
         // 5. Kiểm tra tính hợp lệ của dữ liệu
         if (!/^\d+$/.test(targetId)) {
-            return message.reply(`❌ | Đối tượng "${args[0]}" không hợp lệ. Vui lòng @mention hoặc nhập ID chính xác.`);
+            return message.reply(`${errorIcon} | Đối tượng "${args[0]}" không hợp lệ. Vui lòng @mention hoặc nhập ID chính xác.`);
         }
 
         if (isNaN(amount) || amount <= 0) {
-            return message.reply(`❌ | Số tiền "${args[1]}" không hợp lệ.`);
+            return message.reply(`${errorIcon} | Số tiền "${args[1]}" không hợp lệ.`);
         }
 
         // Kiểm tra xem loại tiền có tồn tại trong currency.js không
         if (!CURRENCIES[currencyType]) {
-            return message.reply(`❌ | Loại tiền "${currencyType}" không tồn tại. Các loại hiện có: \`${Object.keys(CURRENCIES).join(", ")}\``);
+            return message.reply(`${errorIcon} | Loại tiền "${currencyType}" không tồn tại. Các loại hiện có: \`${Object.keys(CURRENCIES).join(", ")}\``);
         }
 
         // 6. Thực hiện cộng tiền
@@ -62,14 +63,14 @@ module.exports = {
 
             if (success) {
                 return message.channel.send({
-                    content: `✅ | Đã thêm thành công **${amount.toLocaleString()}** ${getIcon(currencyType)} vào tài khoản của **${targetUser.tag}**.`,
+                    content: `${verifyIcon} | Đã thêm thành công **${amount.toLocaleString()}** ${getIcon(currencyType)} vào tài khoản của **${targetUser.tag}**.`,
                 });
             } else {
-                return message.reply("❌ | Lỗi hệ thống khi cập nhật số dư vào database.");
+                return message.reply(`${errorIcon} | Lỗi hệ thống khi cập nhật số dư vào database.`);
             }
         } catch (error) {
             console.error("LỖI ADDMONEYTO:", error);
-            return message.reply("❌ | Đã xảy ra lỗi không xác định.");
+            return message.reply(`${errorIcon} | Đã xảy ra lỗi không xác định.`);
         }
     },
 };

@@ -13,17 +13,11 @@ const {
   getIcon,
 } = require("../utils/currency");
 const {maxAmount} = require('../utils/constant');
+const { errorIcon,dicesIcon } = require('../utils/icon.js')
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const symbols = [
-  "<:dice1:1451038871440588892>",
-  "<:dice2:1451038882891042988>",
-  "<:dice3:1451038893200642118>",
-  "<:dice4:1451038903547986031>",
-  "<:dice5:1451038914185003082>",
-  "<:dice6:1451038922724610068>",
-];
+const symbols = dicesIcon;
 
 function getRandomSymbol() {
   return symbols[Math.floor(Math.random() * symbols.length)];
@@ -80,7 +74,7 @@ module.exports = {
 
       if (isNaN(betAmount) || betAmount <= 0) {
         return interaction.reply({
-          content: "❌ | Số tiền cược không hợp lệ!",
+          content: `${errorIcon} | Số tiền cược không hợp lệ!`,
           ephemeral: true,
         });
       }
@@ -96,7 +90,7 @@ module.exports = {
       // --- THÊM ĐIỀU KIỆN GIỚI HẠN ---
       if (betAmount > maxAmount) {
         return interaction.reply({
-          content: `❌ | Số tiền đặt cược tối đa là **${maxAmount}**!`,
+          content: `${errorIcon} | Số tiền đặt cược tối đa là **${maxAmount}**!`,
           ephemeral: true,
         });
       }

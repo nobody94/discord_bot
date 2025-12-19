@@ -1,4 +1,5 @@
 const Money = require("../utils/currency");
+const { errorIcon,verifyIcon } = require('../utils/icon.js')
 
 module.exports = {
   name: "give",
@@ -32,7 +33,7 @@ module.exports = {
     // 3. Kiểm tra số dư của người gửi
     const senderBalance = await Money.getBalance(senderId);
     if (senderBalance < amount) {
-      return message.reply(`❌ | Bạn không đủ tiền! Số dư hiện tại của bạn là: **${senderBalance}** ${Money.getIcon()}`);
+      return message.reply(`${errorIcon} | Bạn không đủ tiền! Số dư hiện tại của bạn là: **${senderBalance}** ${Money.getIcon()}`);
     }
 
     try {
@@ -43,11 +44,11 @@ module.exports = {
       await Money.addMoney(receiverId, amount);
 
       return message.channel.send(
-        `✅ | **${message.author.username}** đã tặng **${amount}** ${Money.getIcon()} cho **${target.username}**!`
+        `${verifyIcon} | **${message.author.username}** đã tặng **${amount}** ${Money.getIcon()} cho **${target.username}**!`
       );
     } catch (error) {
       console.error("Lỗi khi thực hiện lệnh give:", error);
-      return message.reply("❌ | Đã xảy ra lỗi khi thực hiện giao dịch.");
+      return message.reply(`${errorIcon} | Đã xảy ra lỗi khi thực hiện giao dịch.`);
     }
   },
 };

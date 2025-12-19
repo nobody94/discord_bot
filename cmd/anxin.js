@@ -7,6 +7,7 @@ const {
   TextInputStyle,
 } = require("discord.js");
 const Money = require("../utils/currency");
+const { errorIcon, verifyIcon } = require('../utils/icon.js')
 
 module.exports = {
   name: "anxin",
@@ -54,7 +55,7 @@ module.exports = {
 
       if (interaction.user.id === requesterId) {
         return interaction.reply({
-          content: "❌ Bạn không thể tự tặng tiền cho bản thân!",
+          content: `${errorIcon} Bạn không thể tự tặng tiền cho bản thân!`,
           ephemeral: true,
         });
       }
@@ -82,7 +83,7 @@ module.exports = {
 
       if (isNaN(amount) || amount <= 0) {
         return interaction.reply({
-          content: "❌ Số tiền không hợp lệ!",
+          content: `${errorIcon} Số tiền không hợp lệ!`,
           ephemeral: true,
         });
       }
@@ -90,7 +91,7 @@ module.exports = {
       const giverBalance = await Money.getBalance(giverId);
       if (giverBalance < amount) {
         return interaction.reply({
-          content: `❌ Bạn không đủ tiền! Số dư hiện tại: ${giverBalance} ${Money.getIcon()}`,
+          content: `${errorIcon} Bạn không đủ tiền! Số dư hiện tại: ${giverBalance} ${Money.getIcon()}`,
           ephemeral: true,
         });
       }
@@ -100,7 +101,7 @@ module.exports = {
         await Money.addMoney(requesterId, amount);
 
         await interaction.reply({
-          content: `✅ **${interaction.user.displayName}** đã tặng **${amount}** ${Money.getIcon()} cho <@${requesterId}>!`,
+          content: `${verifyIcon} **${interaction.user.displayName}** đã tặng **${amount}** ${Money.getIcon()} cho <@${requesterId}>!`,
         });
         
         // (Tùy chọn) Xóa nút ngay sau khi có người tặng thành công
@@ -108,7 +109,7 @@ module.exports = {
       } catch (error) {
         console.error(error);
         await interaction.reply({
-          content: "❌ Lỗi hệ thống khi chuyển tiền.",
+          content: `${errorIcon} Lỗi hệ thống khi chuyển tiền.`,
           ephemeral: true,
         });
       }

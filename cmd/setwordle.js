@@ -1,4 +1,5 @@
 const { setWordleData } = require("../game/wordleHandler");
+const { verifyIcon } = require('../utils/icon.js')
 
 module.exports = {
   name: "setwordle",
@@ -14,6 +15,6 @@ module.exports = {
     // Lưu ID kênh theo Guild ID: wordle_channel_guildID    
     await setWordleData(message.guild.id,{channelId:channel.id});
 
-    return message.reply(`✅ Đã thiết lập kênh chơi game đoán từ tại: ${channel}`);
+    return message.reply(`${verifyIcon} Đã thiết lập kênh chơi game đoán từ tại: ${channel}`);
   }
 };

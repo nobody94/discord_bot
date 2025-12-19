@@ -38,7 +38,7 @@ module.exports = {
 
       await message.reply({
         content:
-          `✅ Đã thiết lập **${channel}** làm kênh nối từ Tiếng Việt.\n` +
+          `Đã thiết lập **${channel}** làm kênh nối từ Tiếng Việt.\n` +
           `🎉 **Trò chơi bắt đầu ngay bây giờ!** 🎉\n` +
           `Từ bắt đầu: **${startingWord}**\n` +
           `Từ tiếp theo phải bắt đầu bằng **"${nextRequiredWord}"**.`,
@@ -65,7 +65,7 @@ module.exports = {
 
       await message.reply({
         content:
-          `✅ Đã thiết lập **${channel}** làm kênh nối từ Tiếng Anh.\n` +
+          `Đã thiết lập **${channel}** làm kênh nối từ Tiếng Anh.\n` +
           `🎉 **Trò chơi bắt đầu ngay bây giờ!** 🎉\n` +
           `Từ bắt đầu: **${startingWord}**\n` +
           `Từ tiếp theo phải bắt đầu bằng **"${nextRequiredWord}"**.`,

@@ -4,7 +4,7 @@ const invisibleChar = '\u200B';
 
 module.exports = {
     name: 'help',
-    aliases: ['h', 'trogiup'],
+    aliases: ['trogiup'],
     description: 'Danh sách các lệnh của Bot',
 
     async execute(message, args) {
@@ -38,10 +38,10 @@ module.exports = {
                     value: '• slap: tát\n• poke: chọc\n• bite: cắn\n• punch: đấm\n• bonk: gõ đầu\n• kick: đá\n• stare: nhìn phán xét\n• laugh: cười',
                     inline:true 
                 },
-                // { 
-                //     name: '⚙️ Cấu hình (Admin)', 
-                //     value: '• setwordchain-vi: Thiết lập kênh nối chữ Tiếng Việt\nws, wc: Gợi ý từ nối từ Tiếng Việt\n• setwordchain-en: Thiết lập kênh nối chữ Tiếng Anh\nhint, ht: Gợi ý từ nối từ Tiếng Anh\nGợi ý từ nối từ chỉ dùng trong kênh nối từ tối đa 5 lượt/ngày' 
-                // }
+                { 
+                    name: '⚙️ Cấu hình (Admin)', 
+                    value: '• setwordchain-vi: Thiết lập kênh nối chữ Tiếng Việt\n• setwordchain-en: Thiết lập kênh nối chữ Tiếng Anh\n• setwordle: Thiết lập kênh vua tiếng việt\nhint, wc, ws: Dùng để search từ trong kênh nối từ Tiếng Việt/Tiếng Anh(Mỗi ngày được 5 lượt)' 
+                }
             )
             .setFooter({ text: 'Sử dụng dấu chấm (.) trước mỗi lệnh.' })
             .setTimestamp();

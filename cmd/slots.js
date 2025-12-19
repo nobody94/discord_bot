@@ -5,35 +5,14 @@ const {
   getIcon,
 } = require("../utils/currency");
 const {maxAmount} = require('../utils/constant');
+const { errorIcon,slotsIcon } = require('../utils/icon.js')
 
-const symbols = [
-  "<:cherries:1450752576256475156>",
-  "<:watermelon:1450752616349962250>",
-  "<:lemon:1450752606887477321>",
-  "<:slotmachine:1450752596116635730>",
-  "<:grapes:1451466576850190356>",
-  "<:diamond:1451466638103806012>",
-  "<:bell:1451466624216596613>",
-  "<:orange:1451471799022915617>",
-  "<:strawberry:1451471830681522291>",
-  "<:bar:1451472695739809913>"
-];
+const symbols = slotsIcon;
 
 // Tạo một Map để lưu trữ thời gian cooldown
 const cooldowns = new Map();
 
-const payouts = {
-  "<:slotmachine:1450752596116635730><:slotmachine:1450752596116635730><:slotmachine:1450752596116635730>": 3,
-  "<:cherries:1450752576256475156><:cherries:1450752576256475156><:cherries:1450752576256475156>": 3,
-  "<:watermelon:1450752616349962250><:watermelon:1450752616349962250><:watermelon:1450752616349962250>": 3,
-  "<:lemon:1450752606887477321><:lemon:1450752606887477321><:lemon:1450752606887477321>": 3,
-  "<:grapes:1451466576850190356><:grapes:1451466576850190356><:grapes:1451466576850190356>":3,
-  "<:diamond:1451466638103806012><:diamond:1451466638103806012><:diamond:1451466638103806012>":3,
-  "<:bell:1451466624216596613><:bell:1451466624216596613><:bell:1451466624216596613>":3,
-  "<:orange:1451471799022915617><:orange:1451471799022915617><:orange:1451471799022915617>":3,
-  "<:strawberry:1451471830681522291><:strawberry:1451471830681522291><:strawberry:1451471830681522291>":3,
-  "<:bar:1451472695739809913><:bar:1451472695739809913><:bar:1451472695739809913>":3
-};
+const payouts = Object.fromEntries(symbols.map(x => [`${x}${x}${x}`, 3]));
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -98,14 +77,14 @@ module.exports = {
     // 1. Kiểm tra định dạng số tiền
     if (isNaN(betAmount) || betAmount <= 0) {
       return message.reply(
-        "❌ | Vui lòng nhập đúng cú pháp: `.slots [số tiền cược]`"
+        `${errorIcon} | Vui lòng nhập đúng cú pháp: .slots [số tiền cược]`
       );
     }
 
     // 2. Chặn cược trên maxAmount
     if (betAmount > maxAmount) {
       return message.reply(
-        `❌ | Giới hạn cược tối đa là **${maxAmount}**` + getIcon()
+        `${errorIcon} | Giới hạn cược tối đa là **${maxAmount}**` + getIcon()
       );
     }
 
