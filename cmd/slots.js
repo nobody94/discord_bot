@@ -18,9 +18,9 @@ const maxAmount = 10000;
 
 const payouts = {
   "<:slotmachine:1450752596116635730><:slotmachine:1450752596116635730><:slotmachine:1450752596116635730>": 3,
-  "<:cherries:1450752576256475156><:cherries:1450752576256475156><:cherries:1450752576256475156>": 2,
-  "<:watermelon:1450752616349962250><:watermelon:1450752616349962250><:watermelon:1450752616349962250>": 2,
-  "<:lemon:1450752606887477321><:lemon:1450752606887477321><:lemon:1450752606887477321>": 2,
+  "<:cherries:1450752576256475156><:cherries:1450752576256475156><:cherries:1450752576256475156>": 3,
+  "<:watermelon:1450752616349962250><:watermelon:1450752616349962250><:watermelon:1450752616349962250>": 3,
+  "<:lemon:1450752606887477321><:lemon:1450752606887477321><:lemon:1450752606887477321>": 3,
 };
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -135,7 +135,7 @@ module.exports = {
       multiplier = payouts[resultString];
       winType = "JACKPOT! 🎉";
     } else if (roll1 === roll2 || roll1 === roll3 || roll2 === roll3) {
-      multiplier = 1;
+      multiplier = 2;
       winType = "TRÚNG CẶP! ✨";
     }
 
