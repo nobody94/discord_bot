@@ -4,6 +4,7 @@ const {
   removeMoney,
   getIcon,
 } = require("../utils/currency");
+const {maxAmount} = require('../utils/constant');
 
 const symbols = [
   "<:cherries:1450752576256475156>",
@@ -12,12 +13,14 @@ const symbols = [
   "<:slotmachine:1450752596116635730>",
   "<:grapes:1451466576850190356>",
   "<:diamond:1451466638103806012>",
-  "<:bell:1451466624216596613>"
+  "<:bell:1451466624216596613>",
+  "<:orange:1451471799022915617>",
+  "<:strawberry:1451471830681522291>",
+  "<:bar:1451472695739809913>"
 ];
 
 // Tạo một Map để lưu trữ thời gian cooldown
 const cooldowns = new Map();
-const maxAmount = 10000;
 
 const payouts = {
   "<:slotmachine:1450752596116635730><:slotmachine:1450752596116635730><:slotmachine:1450752596116635730>": 3,
@@ -26,7 +29,10 @@ const payouts = {
   "<:lemon:1450752606887477321><:lemon:1450752606887477321><:lemon:1450752606887477321>": 3,
   "<:grapes:1451466576850190356><:grapes:1451466576850190356><:grapes:1451466576850190356>":3,
   "<:diamond:1451466638103806012><:diamond:1451466638103806012><:diamond:1451466638103806012>":3,
-  "<:bell:1451466624216596613><:bell:1451466624216596613><:bell:1451466624216596613>":3
+  "<:bell:1451466624216596613><:bell:1451466624216596613><:bell:1451466624216596613>":3,
+  "<:orange:1451471799022915617><:orange:1451471799022915617><:orange:1451471799022915617>":3,
+  "<:strawberry:1451471830681522291><:strawberry:1451471830681522291><:strawberry:1451471830681522291>":3,
+  "<:bar:1451472695739809913><:bar:1451472695739809913><:bar:1451472695739809913>":3
 };
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));

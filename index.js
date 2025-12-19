@@ -156,20 +156,18 @@ client.on("interactionCreate", async (interaction) => {
           console.error("LỖI XỬ LÝ MODAL DICE:", error);
         }
       }
-    }
-
-     // Kiểm tra Modal của lệnh ăn xin
-    if (interaction.customId.startsWith("open_give_modal_")) {
+    }     
+    // Kiểm tra Modal của ANXIN 
+    if (interaction.customId.startsWith("confirm_give_modal_")) {
       const command = client.commands.get("anxin");
       if (command && command.handleInteraction) {
         try {
           return await command.handleInteraction(interaction);
         } catch (error) {
-          console.error("LỖI XỬ LÝ MODAL anxin:", error);
+          console.error("LỖI XỬ LÝ MODAL SUBMIT ANXIN:", error);
         }
       }
     }
-    
   }
 });
 

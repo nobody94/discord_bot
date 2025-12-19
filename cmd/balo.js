@@ -64,7 +64,7 @@ module.exports = {
       )
       .setColor(0x3498db)
       .setFooter({
-        text: "Dùng lệnh .balo give @user để tặng món đồ",
+        text: "Dùng lệnh .balo give @user <[ID]> để tặng món đồ",
       });
 
     if (inventory.length === 0) {
