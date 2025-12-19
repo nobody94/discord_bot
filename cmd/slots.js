@@ -17,10 +17,10 @@ const cooldowns = new Map();
 const maxAmount = 10000;
 
 const payouts = {
-  "<:slotmachine:1450752596116635730><:slotmachine:1450752596116635730><:slotmachine:1450752596116635730>": 5,
-  "<:cherries:1450752576256475156><:cherries:1450752576256475156><:cherries:1450752576256475156>": 3,
-  "<:watermelon:1450752616349962250><:watermelon:1450752616349962250><:watermelon:1450752616349962250>": 3,
-  "<:lemon:1450752606887477321><:lemon:1450752606887477321><:lemon:1450752606887477321>": 3,
+  "<:slotmachine:1450752596116635730><:slotmachine:1450752596116635730><:slotmachine:1450752596116635730>": 3,
+  "<:cherries:1450752576256475156><:cherries:1450752576256475156><:cherries:1450752576256475156>": 2,
+  "<:watermelon:1450752616349962250><:watermelon:1450752616349962250><:watermelon:1450752616349962250>": 2,
+  "<:lemon:1450752606887477321><:lemon:1450752606887477321><:lemon:1450752606887477321>": 2,
 };
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -135,7 +135,7 @@ module.exports = {
       multiplier = payouts[resultString];
       winType = "JACKPOT! 🎉";
     } else if (roll1 === roll2 || roll1 === roll3 || roll2 === roll3) {
-      multiplier = 2;
+      multiplier = 1;
       winType = "TRÚNG CẶP! ✨";
     }
 
@@ -144,7 +144,7 @@ module.exports = {
     if (multiplier >= 1) {
       const winAmount = Math.floor(betAmount * multiplier);
       await addMoney(userId, winAmount);
-      resultMessage += `\n${winType} (${multiplier}x) Bạn nhận được **${winAmount}** ${getIcon()}.`;
+      resultMessage += winAmount == betAmount ? `\n${winType} - Hòa vốn - Bạn được nhận lại **${winAmount}** ${getIcon()}.` : `\n${winType} (${multiplier}x) Bạn nhận được **${winAmount}** ${getIcon()}.`;
     } else {
       resultMessage += `\n**THUA!** Bạn đã mất **${betAmount}** ${getIcon()}.`;
     }
