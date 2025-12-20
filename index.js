@@ -54,6 +54,7 @@ for (const file of commandFiles) {
     console.log(`[Cảnh báo] Lệnh tại ${filePath} thiếu 'name' hoặc 'execute'.`);
   }
 }
+console.log("BOT_TOKEN:", process.env.BOT_TOKEN ? "OK" : "MISSING");
 
 client.once(Events.ClientReady, (c) => {
   console.log(`Bot ${c.user.tag} đã sẵn sàng và đang hoạt động!`);
