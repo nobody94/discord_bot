@@ -3,7 +3,7 @@ const { getIcon, addMoney } = require('../utils/currency.js');
 const { SHOP_ITEMS, BLIND_BOX_LOOT } = require("../utils/shop");
 const { errorIcon, verifyIcon, bagIcon } = require('../utils/icon.js')
 
-async function baloHandler(args, message, inventory,invKey) {
+async function baloHandler(args, message, inventory,invKey,userId) {
     // --- LOGIC TẶNG ĐỒ (GIVE) ---
     if (args[0] === "give") {
         const target = message.mentions.users.first();
