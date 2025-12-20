@@ -9,11 +9,11 @@ const {
 const fs = require("fs");
 const path = require("path");
 const express = require('express');
-const {db} = require('./utils/db');
+const { db } = require('./utils/db');
 
 const { wordleProcess } = require("./game/wordleHandler");
 const { wordchainHandler } = require('./game/wordchainHandler');
-const {errorIcon} = require('./utils/icon');
+const { errorIcon } = require('./utils/icon');
 
 
 const app = express();
@@ -55,21 +55,21 @@ for (const file of commandFiles) {
   }
 }
 
-// client.once(Events.ClientReady, (c) => {
-//   console.log(`Bot ${c.user.tag} đã sẵn sàng và đang hoạt động!`);
-// });
-
-client.on("ready", () => {
-  console.log(`Bot ${client.user.tag} đã sẵn sàng!`);
+client.once(Events.ClientReady, (c) => {
+  console.log(`Bot ${c.user.tag} đã sẵn sàng và đang hoạt động!`);
 });
+
+// client.on("ready", () => {
+//   console.log(`Bot ${client.user.tag} đã sẵn sàng!`);
+// });
 
 client.on("messageCreate", async (message) => {
   // Bỏ qua tin nhắn của bot
   if (!message) return;
   if (message.author.bot) return;
-  
 
-  const content = message.content.trim(); 
+
+  const content = message.content.trim();
 
   //xử lý lệnh 
   if (content.startsWith(PREFIX)) {
@@ -95,7 +95,7 @@ client.on("messageCreate", async (message) => {
       });
     }
 
-    try {     
+    try {
       await command.execute(message, args, commandName);
     } catch (error) {
       console.error(error);
@@ -105,12 +105,12 @@ client.on("messageCreate", async (message) => {
   }
 
   //xử lý game
-   await wordleProcess(message);
-   await wordchainHandler(message);
+  await wordleProcess(message);
+  await wordchainHandler(message);
 });
 
 // 🖱️ Xử lý Tương tác (Button, Modal, Select Menu, v.v.)
-client.on("interactionCreate", async (interaction) => {  
+client.on("interactionCreate", async (interaction) => {
   // 1. XỬ LÝ NÚT BẤM (Button Interaction)
   if (interaction.isButton()) {
     // Kiểm tra nếu là các nút của trò chơi Tài Xỉu
@@ -127,9 +127,9 @@ client.on("interactionCreate", async (interaction) => {
       if (command && command.handleInteraction) {
         return await command.handleInteraction(interaction);
       }
-    }   
+    }
 
-     // Kiểm tra Modal của lệnh ăn xin
+    // Kiểm tra Modal của lệnh ăn xin
     if (interaction.customId.startsWith("open_give_modal_")) {
       const command = client.commands.get("anxin");
       if (command && command.handleInteraction) {
@@ -166,7 +166,7 @@ client.on("interactionCreate", async (interaction) => {
           console.error("LỖI XỬ LÝ MODAL DICE:", error);
         }
       }
-    }     
+    }
     // Kiểm tra Modal của ANXIN 
     if (interaction.customId.startsWith("confirm_give_modal_")) {
       const command = client.commands.get("anxin");
@@ -184,19 +184,26 @@ client.on("interactionCreate", async (interaction) => {
 async function startBot() {
   try {
     // Chỉ nên kết nối DB và Login khi Server Express đã sẵn sàng
-    await db.connect(); 
+    await db.connect();
     console.log("✅ Đã kết nối MongoDB thành công!");
 
     if (!Token) return console.error(`${errorIcon} BOT_TOKEN missing!`);
 
     // Kiểm tra nếu client đã login rồi thì không login lại
-    if (!client.readyAt) {
-      await client.login(Token);
-      console.log("Bot đã đăng nhập thành công!");
-    }
+    client.login(Token)
+      .then(() => {
+        console.log("🔑 Login request sent to Discord");
+      })
+      .catch(err => {
+        console.error("❌ Discord login failed:", err);
+      });
+    // if (!client.readyAt) {
+    //   await client.login(Token);
+    //   console.log("Bot đã đăng nhập thành công!");
+    // }
   } catch (error) {
     console.error("Lỗi khởi động:", error);
-    process.exit(1); 
+    process.exit(1);
   }
 }
 
