@@ -95,8 +95,8 @@ const SHOP_ITEMS = {
     },
     'tui_rac': {
         name: 'Túi rác 3 ngày chưa vứt',
-        price: 5,
-        sellPrice:5,
+        price: 50,
+        sellPrice:50,
         currency: mora,
         description: desc.common,
         icon: '<:garbage:1451606744295018578>',
@@ -104,11 +104,11 @@ const SHOP_ITEMS = {
     },
     'canh_cay': {
         name: 'Cành cây vô dụng',
-        price: 5,
-        sellPrice:5,
+        price: 50,
+        sellPrice:50,
         currency: mora,
         description: desc.common,
-        icon: '<:branch:1451742208666632332>',
+        icon: '<:twig:1451858076310437939>',
         hideFromShop: true
     },
     'vien_da': {
