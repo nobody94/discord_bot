@@ -168,7 +168,7 @@ const BLIND_BOX_LOOT = {
         { item: "an_do", amount: 1, weight: 800 },
         { item: "mora", amount: 10000, weight: 500 },
         { item: "primo", amount: 2, weight: 200 },
-        { item: "kim_cuong", amount: 1, weight: 0.5 }
+        { item: "kim_cuong", amount: 1, weight: 10,isGolden: true }
     ]
 };
 

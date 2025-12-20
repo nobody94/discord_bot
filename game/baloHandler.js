@@ -3,7 +3,7 @@ const { getIcon, addMoney } = require('../utils/currency.js');
 const { SHOP_ITEMS, BLIND_BOX_LOOT } = require("../utils/shop");
 const { errorIcon, verifyIcon, bagIcon } = require('../utils/icon.js')
 
-async function baloHandler(args, message, inventory,invKey,userId) {
+async function baloHandler(args, message, inventory, invKey, userId) {
     // --- LOGIC TẶNG ĐỒ (GIVE) ---
     if (args[0] === "give") {
         const target = message.mentions.users.first();
@@ -97,96 +97,103 @@ async function baloHandler(args, message, inventory,invKey,userId) {
     // --- LOGIC MỞ ĐỒ (OPEN) ---
     if (args[0] === "open") {
         const itemId = args[1];
-        const amountToOpen = parseInt(args[2]) || 1; // Mặc định mở 1 món
+        const amountToOpen = parseInt(args[2]) || 1;
 
-        if (!itemId) {
-            return message.reply(`${errorIcon} | Vui lòng nhập ID vật phẩm muốn mở: \`.balo open [ID] [số lượng]\``);
-        }
+        if (!itemId) return message.reply(`${errorIcon} | Vui lòng nhập ID vật phẩm: \`.balo open [ID] [số lượng]\``);
+        if (amountToOpen <= 0) return message.reply(`${errorIcon} | Số lượng không hợp lệ!`);
 
         const item = SHOP_ITEMS[itemId];
-        // Kiểm tra vật phẩm có tồn tại và có thể mở không
-        if (!item || !item.canOpen) {
+        const lootTable = BLIND_BOX_LOOT[itemId];
+
+        if (!item || !item.canOpen || !lootTable) {
             return message.reply(`${errorIcon} | Vật phẩm này không thể mở!`);
         }
 
-        // Kiểm tra số lượng trong túi đồ
-        const currentItems = inventory.filter(id => id === itemId);
-        if (currentItems.length < amountToOpen) {
-            return message.reply(`${errorIcon} | Bạn không đủ số lượng **${item.name}** để mở (Hiện có: ${currentItems.length}).`);
+        // Kiểm tra số lượng thực tế trong túi
+        const countInInv = inventory.filter(id => id === itemId).length;
+        if (countInInv < amountToOpen) {
+            return message.reply(`${errorIcon} | Bạn không đủ **${amountToOpen}x ${item.name}** (Hiện có: ${countInInv}).`);
         }
 
-        const lootTable = BLIND_BOX_LOOT[itemId];
-        if (!lootTable) {
-            return message.reply(`${errorIcon} | Chưa cấu hình quà tặng cho vật phẩm này!`);
-        }
+        // Lấy số Pity hiện tại từ DB
+        const pityKey = renderKey("pity_counter", userId);
+        let currentPity = (await getKey(pityKey)) || 0;
 
-        let totalRewards = {}; // Lưu trữ tổng quà nhận được
+        let totalRewards = {};
+        let goldenNotes = []; // Lưu lại thông tin nếu nổ đồ vàng
 
-        // 1. Thực hiện trừ vật phẩm khỏi túi đồ và quay gacha
         for (let i = 0; i < amountToOpen; i++) {
-            const index = inventory.indexOf(itemId);
-            if (index === -1) break; // Bảo vệ nếu số lượng thay đổi trong vòng lặp
+            // Trừ 1 món khỏi inventory
+            const idx = inventory.indexOf(itemId);
+            inventory.splice(idx, 1);
 
-            inventory.splice(index, 1);
-
-            // Tính tổng trọng số
-            const totalWeight = lootTable.reduce((sum, loot) => sum + (loot.weight || 0), 0);
-
-            // KIỂM TRA 1: Nếu tổng weight bằng 0 hoặc nhỏ hơn
-            if (totalWeight <= 0) {
-                return message.reply(`${errorIcon} | Lỗi: Vật phẩm này chưa được thiết lập tỉ lệ quà tặng!`);
-            }
-
-            let random = Math.random() * totalWeight;
+            currentPity++;
             let selectedLoot = null;
 
-            for (const loot of lootTable) {
-                if (random < loot.weight) {
-                    selectedLoot = loot;
-                    break;
+            // KIỂM TRA BẢO HIỂM (PITY 90)
+            if (currentPity >= 90) {
+                const goldenItems = lootTable.filter(l => l.isGolden === true);
+                selectedLoot = goldenItems[Math.floor(Math.random() * goldenItems.length)];
+                
+                goldenNotes.push(`🌟 **${selectedLoot.item}** (Nổ tại lần thứ **90**)`);
+                currentPity = 0; // Reset
+            } else {
+                // QUAY GACHA BÌNH THƯỜNG
+                const totalWeight = lootTable.reduce((sum, loot) => sum + (loot.weight || 0), 0);
+                let random = Math.random() * totalWeight;
+
+                for (const loot of lootTable) {
+                    if (random < loot.weight) {
+                        selectedLoot = loot;
+                        break;
+                    }
+                    random -= loot.weight;
                 }
-                random -= loot.weight;
+
+                // Nếu may mắn nổ vàng sớm
+                if (selectedLoot && selectedLoot.isGolden) {
+                    goldenNotes.push(`🌟 **${selectedLoot.item}** (Nổ sớm tại lần thứ **${currentPity}**)`);
+                    currentPity = 0; // Reset ngay lập tức
+                }
             }
 
-            // KIỂM TRA 2: Sửa lỗi (reading 'item')
-            if (selectedLoot && selectedLoot.item) {
-                const rewardKey = selectedLoot.item;
-                if (!totalRewards[rewardKey]) {
-                    totalRewards[rewardKey] = 0;
-                }
-                totalRewards[rewardKey] += selectedLoot.amount;
-            } else {
-                // Nếu không may rơi vào trường hợp null, hoàn trả vật phẩm hoặc báo lỗi
-                console.error(`Lỗi Gacha: Không tìm thấy selectedLoot cho vật phẩm ${itemId}`);
+            if (selectedLoot) {
+                const rKey = selectedLoot.item;
+                totalRewards[rKey] = (totalRewards[rKey] || 0) + selectedLoot.amount;
             }
         }
 
-        // 2. Trao quà vào DB
-        let rewardStrings = [];
+        // Cập nhật Database (Inventory và Pity)
+        await setKey(pityKey, currentPity);
+        await setKey(invKey, inventory);
 
+        // Trao quà vào DB
+        let rewardStrings = [];
         for (const [rewardId, rewardAmount] of Object.entries(totalRewards)) {
-            // Nếu quà là tiền tệ (mora/primo)
             if (rewardId === "mora" || rewardId === "primo") {
                 await addMoney(userId, rewardAmount, rewardId);
                 rewardStrings.push(`**${rewardAmount.toLocaleString()}** ${getIcon(rewardId)}`);
             } else {
-                // Nếu quà là vật phẩm khác
-                for (let k = 0; k < rewardAmount; k++) {
-                    inventory.push(rewardId);
-                }
-                const rewardItemInfo = SHOP_ITEMS[rewardId] || { name: rewardId, icon: bagIcon };
-                rewardStrings.push(`**${rewardAmount}x** ${rewardItemInfo.icon} ${rewardItemInfo.name}`);
+                for (let k = 0; k < rewardAmount; k++) inventory.push(rewardId);
+                const rInfo = SHOP_ITEMS[rewardId] || { name: rewardId, icon: "📦" };
+                rewardStrings.push(`**${rewardAmount}x** ${rInfo.icon} ${rInfo.name}`);
             }
         }
-
-        // 3. Lưu lại túi đồ sau khi mở và thêm quà
+        
+        // Lưu lại inventory lần cuối (sau khi đã thêm các vật phẩm trúng thưởng vào)
         await setKey(invKey, inventory);
 
-        message.reply({
-            content: `✨ Bạn đã mở **${amountToOpen}x ${item.icon} ${item.name}** và nhận được:\n🎊 ${rewardStrings.join(", ")}`,
+        // Hiển thị kết quả
+        let responseContent = `✨ Bạn đã mở **${amountToOpen}x ${item.icon} ${item.name}**\n🎊 Nhận được: ${rewardStrings.join(", ")}\nPity hiện tại: **${currentPity}/90**`;
+        
+        if (goldenNotes.length > 0) {
+            responseContent += `\n${goldenNotes.join("\n")}`;
+        }
+
+        return message.reply({
+            content: responseContent,
             allowedMentions: { repliedUser: false }
         });
-        return true;
     }
     return false;
 }

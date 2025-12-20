@@ -19,7 +19,7 @@ module.exports = {
             const embed = new EmbedBuilder()
                 .setTitle('<:store:1451465383436615731> TẠP HÓA KATHERINE')
                 .setColor(0x00FF99)
-                .setDescription('Sử dụng lệnh `.buy <ID>` để mua đồ.')
+                .setDescription('Sử dụng lệnh `.buy <ID> <số lượng>` để mua đồ.')
                 .setFooter({ text: `Trang ${page + 1}/${totalPages}` });
 
             const start = page * itemsPerPage;
