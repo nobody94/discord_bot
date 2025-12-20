@@ -25,11 +25,11 @@ module.exports = {
         const row = new ActionRowBuilder().addComponents(
             new ButtonBuilder()
                 .setCustomId('exchange_mora_to_primo')
-                .setLabel(`${getIcon('mora')}Mora ➔ ${getIcon('primo')}Nguyên thạch`)
+                .setLabel(`Mora ➔ Nguyên thạch`)
                 .setStyle(ButtonStyle.Success),
             new ButtonBuilder()
                 .setCustomId('exchange_primo_to_mora')
-                .setLabel(`${getIcon('primo')}Nguyên thạch ➔ ${getIcon('mora')}Mora`)
+                .setLabel(`Nguyên thạch ➔ Mora`)
                 .setStyle(ButtonStyle.Primary)
         );
 
@@ -109,12 +109,12 @@ module.exports = {
                 const row = new ActionRowBuilder().addComponents(
                     new ButtonBuilder()
                         .setCustomId('exchange_mora_to_primo')
-                        .setLabel(`${getIcon('mora')}Mora ➔ ${getIcon('primo')}Nguyên thạch`)
+                        .setLabel(`Mora ➔ Nguyên thạch`)
                         .setStyle(ButtonStyle.Success)                        
                         .setDisabled(true),
                     new ButtonBuilder()
                         .setCustomId('exchange_primo_to_mora')
-                        .setLabel(`${getIcon('primo')}Nguyên thạch ➔ ${getIcon('mora')}Mora`)
+                        .setLabel(`Nguyên thạch ➔ Mora`)
                         .setStyle(ButtonStyle.Primary)
                         .setDisabled(true)
                 );
