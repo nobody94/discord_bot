@@ -129,13 +129,13 @@ const SHOP_ITEMS = {
         icon: '<:dirty_sock:1451742253797216427>',
         hideFromShop: true
     },
-    'tui_rach': {
-        name: 'Một chiếc túi rách',
+    'bong_den': {
+        name: 'Một cái bóng đèn bị hỏng',
         price: 100,
         sellPrice:100,
         currency: mora,
         description: desc.uncommon,
-        icon: '<:stringbag:1451742296704942211>',
+        icon: '<:lightbulb:1451842003905286154>',
         hideFromShop: true
     },
     'an_do': {
@@ -164,7 +164,7 @@ const BLIND_BOX_LOOT = {
         { item: "canh_cay", amount: 1, weight: 1000 },
         { item: "vien_da", amount: 1, weight: 1000 },
         { item: "tat_thung", amount: 1, weight: 100 },
-        { item: "tui_rach", amount: 1, weight: 100 },
+        { item: "bong_den", amount: 1, weight: 100 },
         { item: "an_do", amount: 1, weight: 100 },
         { item: "mora", amount: 1000, weight: 50 },
         { item: "primo", amount: 5, weight: 10 },
