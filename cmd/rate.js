@@ -1,6 +1,7 @@
 const { EmbedBuilder } = require("discord.js");
 const { SHOP_ITEMS, BLIND_BOX_LOOT } = require("../utils/shop");
 const { errorIcon, verifyIcon } = require('../utils/icon.js');
+const { getIcon } = require('../utils/currency.js')
 
 module.exports = {
   name: "gacha",
@@ -34,8 +35,8 @@ module.exports = {
     let rateDescription = "";
     lootTable.forEach(loot => {
       const percentage = ((loot.weight / totalWeight) * 100).toFixed(2);
-      const rewardItem = SHOP_ITEMS[loot.item] || { name: loot.item, icon: "🎁" };
-      
+      const rewardItem = loot.item == 'mora' ? { name: loot.item, icon: getIcon('mora') } : loot.item == 'primo' ? { name: loot.item, icon: getIcon('primo') } : SHOP_ITEMS[loot.item] || { name: loot.item, icon: "🎁" };
+
       rateDescription += `${rewardItem.icon} **${rewardItem.name}**: \`${percentage}%\` (Số lượng: ${loot.amount})\n`;
     });
 
@@ -45,11 +46,10 @@ module.exports = {
       .setColor(0x00FFFF)
       .setThumbnail(itemInfo ? (itemInfo.image || null) : null)
       .setDescription(rateDescription)
-      .addFields({ 
-        name: "Hướng dẫn", 
-        value: `Dùng lệnh \`.balo open ${itemId}\` để mở.` 
+      .addFields({
+        name: "Hướng dẫn",
+        value: `Dùng lệnh \`.balo open ${itemId}\` để mở.`
       })
-      .setFooter({ text: `Tổng trọng số: ${totalWeight}` });
 
     return message.reply({ embeds: [embed] });
   },

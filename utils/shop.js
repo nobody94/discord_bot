@@ -155,7 +155,7 @@ const SHOP_ITEMS = {
         description: desc.legendary,
         icon: '<:diamond:1451466638103806012>',
         hideFromShop: true
-    }
+    }    
 };
 
 const BLIND_BOX_LOOT = {
