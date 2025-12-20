@@ -100,7 +100,8 @@ const SHOP_ITEMS = {
         currency: mora,
         description: desc.common,
         icon: '<:garbage:1451606744295018578>',
-        hideFromShop: true
+        hideFromShop: true,
+        isTrash: true
     },
     'canh_cay': {
         name: 'Cành cây vô dụng',
@@ -109,7 +110,8 @@ const SHOP_ITEMS = {
         currency: mora,
         description: desc.common,
         icon: '<:twig:1451858076310437939>',
-        hideFromShop: true
+        hideFromShop: true,
+        isTrash: true
     },
     'vien_da': {
         name: 'Viên đá không mấy nổi bật',
@@ -118,7 +120,8 @@ const SHOP_ITEMS = {
         currency: mora,
         description: desc.common,
         icon: '<:rock:1451742232024715386>',
-        hideFromShop: true
+        hideFromShop: true,
+        isTrash: true
     },
     'tat_thung': {
         name: 'Một chiếc tất bị thủng',
@@ -127,7 +130,8 @@ const SHOP_ITEMS = {
         currency: mora,
         description: desc.uncommon,
         icon: '<:dirty_sock:1451742253797216427>',
-        hideFromShop: true
+        hideFromShop: true,
+        isTrash: true
     },
     'bong_den': {
         name: 'Một cái bóng đèn bị hỏng',
@@ -136,7 +140,8 @@ const SHOP_ITEMS = {
         currency: mora,
         description: desc.uncommon,
         icon: '<:lightbulb:1451842003905286154>',
-        hideFromShop: true
+        hideFromShop: true,
+        isTrash: true
     },
     'an_do': {
         name: 'Món ăn đã bị ăn dở',
@@ -145,7 +150,8 @@ const SHOP_ITEMS = {
         currency: mora,
         description: desc.uncommon,
         icon: '<:burger:1451742141331144725>',
-        hideFromShop: true
+        hideFromShop: true,
+        isTrash: true
     },
     'kim_cuong': {
         name: 'Một viên kim cương quý giá',

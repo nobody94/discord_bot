@@ -8,33 +8,39 @@ async function baloHandler(args, message, inventory, invKey, userId) {
     if (args[0] === "give") {
         const target = message.mentions.users.first();
         const itemId = args[2];
+        const amountToGive = parseInt(args[3]) || 1; // Lấy số lượng từ đối số thứ 4, mặc định là 1
 
         if (!target)
-            return message.reply(
-                `${errorIcon} | Vui lòng tag người muốn tặng: .balo give @user [ID_vật_phẩm]`
-            );
+            return message.reply(`${errorIcon} | Vui lòng tag người muốn tặng: \`.balo give @user [ID] [số lượng]\``);
         if (target.id === userId)
             return message.reply(`${errorIcon} | Bạn không thể tự tặng đồ cho chính mình.`);
         if (!itemId)
             return message.reply(`${errorIcon} | Vui lòng nhập ID vật phẩm muốn tặng.`);
+        if (isNaN(amountToGive) || amountToGive <= 0)
+            return message.reply(`${errorIcon} | Số lượng tặng không hợp lệ.`);
 
-        // Kiểm tra vật phẩm có trong túi đồ không
-        const itemIndex = inventory.indexOf(itemId);
-        if (itemIndex === -1) {
+        // 1. Kiểm tra số lượng vật phẩm có trong túi đồ
+        const userItems = inventory.filter(id => id === itemId);
+        if (userItems.length < amountToGive) {
             return message.reply(
-                `${errorIcon} | Bạn không sở hữu vật phẩm có ID \`${itemId}\` trong túi đồ.`
+                `${errorIcon} | Bạn không đủ số lượng **${itemId}** để tặng (Hiện có: ${userItems.length}).`
             );
         }
 
-        // Thực hiện chuyển đồ
+        // 2. Thực hiện chuyển đồ
         const targetInvKey = renderKey("inventory", target.id);
         let targetInventory = (await getKey(targetInvKey)) || [];
 
-        // Xóa 1 món từ người tặng và thêm vào người nhận
-        inventory.splice(itemIndex, 1);
-        targetInventory.push(itemId);
+        // Xóa số lượng món đồ từ người tặng và thêm vào người nhận
+        for (let i = 0; i < amountToGive; i++) {
+            const index = inventory.indexOf(itemId);
+            if (index !== -1) {
+                inventory.splice(index, 1);
+                targetInventory.push(itemId);
+            }
+        }
 
-        // Cập nhật lại Database cho cả 2 người
+        // 3. Cập nhật lại Database cho cả 2 người
         await setKey(invKey, inventory);
         await setKey(targetInvKey, targetInventory);
 
@@ -42,57 +48,100 @@ async function baloHandler(args, message, inventory, invKey, userId) {
             name: itemId,
             icon: "<:box:1451465056612253779>",
         };
+
         message.reply(
-            `${verifyIcon} | Bạn đã tặng **${item.icon} ${item.name}** cho **${target.username}** thành công!`
+            `${verifyIcon} | Bạn đã tặng **${amountToGive}x ${item.icon} ${item.name}** cho **${target.username}** thành công!`
         );
         return true;
-    }
-
+    }    
     // --- LOGIC BÁN ĐỒ (SELL) ---
     if (args[0] === "sell") {
-        const itemId = args[1]; // ID vật phẩm người dùng nhập
-        const amountToSell = parseInt(args[2]) || 1; // Mặc định bán 1 món
+        const itemId = args[1]?.toLowerCase();
+        let amountToSell = parseInt(args[2]); // Không để mặc định 1 ở đây để check logic sau
 
         if (!itemId) {
-            return message.reply(`${errorIcon} | Vui lòng nhập ID vật phẩm muốn bán: \`.balo sell [ID] [số lượng]\``);
+            message.reply(`${errorIcon} | Cú pháp: \`.balo sell [ID] [Số lượng]\` hoặc \`.balo sell trash\``);
         }
 
-        const item = SHOP_ITEMS[itemId];
-        if (!item || !item.sellPrice || item.sellPrice <= 0) {
-            return message.reply(`${errorIcon} | Vật phẩm này không có giá trị bán hoặc không tồn tại.`);
-        }
+        let totalMoraEarned = 0;
+        let totalPrimoEarned = 0;
+        let itemsSold = 0;
+        let soldDescription = "";
 
-        // Đếm số lượng vật phẩm này đang có trong kho
-        const currentItems = inventory.filter(id => id === itemId);
-        if (currentItems.length < amountToSell) {
-            return message.reply(`${errorIcon} | Bạn không đủ số lượng **${item.name}** để bán (Hiện có: ${currentItems.length}).`);
-        }
+        // TRƯỜNG HỢP 1: BÁN TẤT CẢ ĐỒ RÁC (.balo sell trash)
+        if (itemId === "trash") {
+            // Lọc những món có isTrash: true trong SHOP_ITEMS
+            const trashItems = inventory.filter(id => SHOP_ITEMS[id] && SHOP_ITEMS[id].isTrash === true);
 
-        // 1. Thực hiện trừ vật phẩm khỏi mảng inventory
-        for (let i = 0; i < amountToSell; i++) {
-            const index = inventory.indexOf(itemId);
-            if (index !== -1) {
-                inventory.splice(index, 1);
+            if (trashItems.length === 0) {
+                message.reply(`${errorIcon} | Túi đồ của bạn không có món đồ rác nào.`);
             }
+
+            trashItems.forEach(id => {
+                const item = SHOP_ITEMS[id];
+                if (item.currency === 'primo') totalPrimoEarned += item.sellPrice;
+                else totalMoraEarned += item.sellPrice;
+
+                // Xóa món đó khỏi inventory
+                const index = inventory.indexOf(id);
+                if (index !== -1) inventory.splice(index, 1);
+                itemsSold++;
+            });
+
+            soldDescription = `đã dọn túi và bán **${itemsSold}** món đồ rác`;
         }
 
-        // 2. Tính toán tiền nhận được và cộng vào DB
-        const totalMoney = item.sellPrice * amountToSell;
-        const currencyType = item.currency || 'mora'; // Mặc định là mora nếu không có
+        // TRƯỜNG HỢP 2: BÁN VẬT PHẨM CỤ THỂ (.balo sell [ID] [Số lượng])
+        else {
+            const item = SHOP_ITEMS[itemId];
+            if (!item || item.sellPrice === undefined) {
+                message.reply(`${errorIcon} | Vật phẩm này không thể bán hoặc không tồn tại.`);
+            }
 
-        // Giả sử bạn lưu tiền chung trong một Object user_data hoặc theo Key riêng
-        // Ở đây mình ví dụ cộng trực tiếp vào thuộc tính của User (phổ biến trong bot của bạn)
-        const userMoneyKey = renderKey(currencyType, userId);
-        const currentBalance = (await getKey(userMoneyKey)) || 0;
+            // Đếm xem thực tế có bao nhiêu món này
+            const countInInv = inventory.filter(id => id === itemId).length;
 
-        // Cập nhật lại Database
-        await setKey(invKey, inventory); // Lưu lại túi đồ
-        await setKey(userMoneyKey, currentBalance + totalMoney); // Lưu lại tiền
+            // Nếu không nhập số lượng thì bán 1, nếu nhập 'all' thì bán hết món đó
+            if (args[2]?.toLowerCase() === "all") amountToSell = countInInv;
+            else amountToSell = amountToSell || 1;
 
-        message.reply(
-            `${verifyIcon} | Bạn đã bán thành công **${amountToSell}x ${item.icon} ${item.name}** và nhận được **${totalMoney.toLocaleString()}** ${getIcon(currencyType)}!`
-        );
-        return true;
+            if (amountToSell <= 0) return message.reply(`${errorIcon} | Số lượng bán không hợp lệ.`);
+            if (countInInv < amountToSell) {
+                message.reply(`${errorIcon} | Bạn chỉ có **${countInInv}x** ${item.name}, không đủ để bán **${amountToSell}**.`);
+            }
+
+            // Thực hiện xóa và tính tiền
+            for (let i = 0; i < amountToSell; i++) {
+                const idx = inventory.indexOf(itemId);
+                inventory.splice(idx, 1);
+
+                if (item.currency === 'primo') totalPrimoEarned += item.sellPrice;
+                else totalMoraEarned += item.sellPrice;
+                itemsSold++;
+            }
+
+            soldDescription = `đã bán **${itemsSold}x** ${item.icon} **${item.name}**`;
+        }
+
+        // CẬP NHẬT DATABASE
+        try {
+            if (totalMoraEarned > 0) await addMoney(userId, totalMoraEarned, 'mora');
+            if (totalPrimoEarned > 0) await addMoney(userId, totalPrimoEarned, 'primo');
+            await setKey(invKey, inventory);
+
+            // Tạo thông báo nhận tiền
+            let moneyMsg = [];
+            if (totalMoraEarned > 0) moneyMsg.push(`**${totalMoraEarned.toLocaleString()}** ${getIcon('mora')}`);
+            if (totalPrimoEarned > 0) moneyMsg.push(`**${totalPrimoEarned.toLocaleString()}** ${getIcon('primo')}`);
+
+            message.reply(
+                `${verifyIcon} | Bạn ${soldDescription}, nhận về tổng cộng ${moneyMsg.join(" và ")}!`
+            );
+        } catch (error) {
+            console.error("LỖI KHI BÁN ĐỒ:", error);
+            message.reply(`${errorIcon} | Đã xảy ra lỗi khi xử lý giao dịch bán đồ.`);
+        }
+        return true
     }
     // --- LOGIC MỞ ĐỒ (OPEN) ---
     if (args[0] === "open") {
@@ -134,7 +183,7 @@ async function baloHandler(args, message, inventory, invKey, userId) {
             if (currentPity >= 90) {
                 const goldenItems = lootTable.filter(l => l.isGolden === true);
                 selectedLoot = goldenItems[Math.floor(Math.random() * goldenItems.length)];
-                
+
                 goldenNotes.push(`🌟 **${selectedLoot.item}** (Nổ tại lần thứ **90**)`);
                 currentPity = 0; // Reset
             } else {
@@ -179,13 +228,13 @@ async function baloHandler(args, message, inventory, invKey, userId) {
                 rewardStrings.push(`**${rewardAmount}x** ${rInfo.icon} ${rInfo.name}`);
             }
         }
-        
+
         // Lưu lại inventory lần cuối (sau khi đã thêm các vật phẩm trúng thưởng vào)
         await setKey(invKey, inventory);
 
         // Hiển thị kết quả
         let responseContent = `✨ Bạn đã mở **${amountToOpen}x ${item.icon} ${item.name}**\n🎊 Nhận được: ${rewardStrings.join(", ")}\nPity hiện tại: **${currentPity}/90**`;
-        
+
         if (goldenNotes.length > 0) {
             responseContent += `\n${goldenNotes.join("\n")}`;
         }
