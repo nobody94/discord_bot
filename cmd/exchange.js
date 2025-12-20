@@ -1,79 +1,130 @@
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
-const { getIcon,getBalance,removeMoney,addMoney } = require("../utils/currency");
-const {verifyIcon,errorIcon} = require('../utils/icon');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ModalBuilder, TextInputBuilder, TextInputStyle } = require("discord.js");
+const { getIcon, getBalance, removeMoney, addMoney } = require("../utils/currency");
+const { verifyIcon, errorIcon } = require('../utils/icon');
 
 module.exports = {
     name: "exchange",
     aliases: ["convert", "doitien"],
-    description: "Giao diện chuyển đổi Mora sang Nguyên Thạch",
+    description: "Giao diện chuyển đổi giữa Mora và Nguyên Thạch",
 
     async execute(message, args) {
-        const RATE = 10000;
+        const RATE = 10000; // 1 Primo = 10,000 Mora
 
         const embed = new EmbedBuilder()
             .setTitle("🏦 Ngân Hàng Bắc Quốc")
             .setColor(0xFFD700)
-            .setDescription(`Chào mừng bạn đến với Ngân Hàng Bắc Quốc!\n\n**Tỷ giá hiện tại:**\n${RATE.toLocaleString()} ${getIcon('mora')} = 1 ${getIcon('primo')}`)
-            .setFooter({ text: "Nhấn nút bên dưới để bắt đầu giao dịch" });
+            .setDescription(
+                `Chào mừng bạn đến với Ngân Hàng Bắc Quốc!\n\n` +
+                `**Tỷ giá quy đổi:**\n` +
+                `• 1 ${getIcon('primo')} ➔ **${RATE.toLocaleString()}** ${getIcon('mora')}\n` +
+                `• ${RATE.toLocaleString()} ${getIcon('mora')} ➔ **1** ${getIcon('primo')}\n\n` +
+                `*Vui lòng chọn loại giao dịch bên dưới.*`
+            )
+            .setFooter({ text: "Giao dịch an toàn và nhanh chóng" });
 
         const row = new ActionRowBuilder().addComponents(
             new ButtonBuilder()
-                .setCustomId('open_exchange_modal')
-                .setLabel('Bắt đầu đổi')
+                .setCustomId('exchange_mora_to_primo')
+                .setLabel(`${getIcon('mora')}Mora ➔ ${getIcon('primo')}Nguyên thạch`)
+                .setStyle(ButtonStyle.Success),
+            new ButtonBuilder()
+                .setCustomId('exchange_primo_to_mora')
+                .setLabel(`${getIcon('primo')}Nguyên thạch ➔ ${getIcon('mora')}Mora`)
                 .setStyle(ButtonStyle.Primary)
-                .setEmoji('🔄')
         );
 
-        // Chỉ gửi tin nhắn kèm nút, việc xử lý nút đã có index.js lo
         await message.reply({ embeds: [embed], components: [row] });
     },
 
-    // Hàm này sẽ được index.js gọi khi có tương tác
     async handleInteraction(interaction) {
+        const RATE = 10000;
+        const userId = interaction.user.id;
+
+        // --- 1. XỬ LÝ KHI NHẤN NÚT (MỞ MODAL) ---
         if (interaction.isButton()) {
-            const { ModalBuilder, TextInputBuilder, TextInputStyle } = require("discord.js");
+            const isMoraToPrimo = interaction.customId === 'exchange_mora_to_primo';
+
             const modal = new ModalBuilder()
-                .setCustomId('exchange_modal') // Phải khớp với customId trong index.js
-                .setTitle('Đổi Mora sang Nguyên Thạch');
+                .setCustomId(isMoraToPrimo ? 'exchange_modal_mora_to_primo' : 'exchange_modal_primo_to_mora')
+                .setTitle(isMoraToPrimo ? 'Đổi Mora sang Nguyên Thạch' : 'Đổi Nguyên Thạch sang Mora');
 
             const amountInput = new TextInputBuilder()
-                .setCustomId('primo_amount')
-                .setLabel("Số lượng Nguyên Thạch muốn nhận")
+                .setCustomId('exchange_amount')
+                .setLabel(isMoraToPrimo ? "Số lượng Nguyên Thạch muốn nhận" : "Số lượng Nguyên Thạch muốn đổi")
                 .setStyle(TextInputStyle.Short)
-                .setPlaceholder("Nhập số lượng, ví dụ: 10")
+                .setPlaceholder(isMoraToPrimo ? "Ví dụ: 10 (tốn 100,000 Mora)" : "Ví dụ: 10 (nhận 100,000 Mora)")
                 .setRequired(true);
 
             modal.addComponents(new ActionRowBuilder().addComponents(amountInput));
             await interaction.showModal(modal);
         }
 
+        // --- 2. XỬ LÝ KHI GỬI MODAL (XÁC NHẬN GIAO DỊCH) ---
         if (interaction.isModalSubmit()) {
-            const amountStr = interaction.fields.getTextInputValue('primo_amount');
-            const amount = parseInt(amountStr);
-            const userId = interaction.user.id;
-            const RATE = 10000;
+            const amount = parseInt(interaction.fields.getTextInputValue('exchange_amount'));
+
+            // Tránh lỗi "Interaction Failed" bằng cách defer trước
+            await interaction.deferReply({ ephemeral: true });
 
             if (isNaN(amount) || amount <= 0) {
-                return interaction.reply({ content: `${errorIcon} | Số lượng không hợp lệ!`, ephemeral: true });
+                return interaction.editReply({ content: `${errorIcon} | Số lượng không hợp lệ!` });
             }
 
-            const currentMora = await getBalance(userId, 'mora') || 0;
-            const totalMoraNeeded = amount * RATE;
+            let success = false;
+            let messageOutput = "";
 
-            if (currentMora < totalMoraNeeded) {
-                return interaction.reply({
-                    content: `${errorIcon} | Bạn không đủ Mora! Cần **${totalMoraNeeded.toLocaleString()}** ${getIcon("mora")} để đổi.`,
-                    ephemeral: true
-                });
+            // A. Đổi MORA sang PRIMO
+            if (interaction.customId === 'exchange_modal_mora_to_primo') {
+                const totalMoraNeeded = amount * RATE;
+                const currentMora = await getBalance(userId, 'mora') || 0;
+
+                if (currentMora < totalMoraNeeded) {
+                    return interaction.editReply({ content: `${errorIcon} | Bạn không đủ Mora!` });
+                }
+
+                await removeMoney(userId, totalMoraNeeded, 'mora');
+                await addMoney(userId, amount, 'primo');
+                success = true;
+                messageOutput = `${verifyIcon} | Đã đổi **${totalMoraNeeded.toLocaleString()}** Mora lấy **${amount}** Primo.`;
             }
 
-            await removeMoney(userId, totalMoraNeeded, 'mora');
-            await addMoney(userId, amount, 'primo');
+            // B. Đổi PRIMO sang MORA
+            if (interaction.customId === 'exchange_modal_primo_to_mora') {
+                const currentPrimo = await getBalance(userId, 'primo') || 0;
 
-            return interaction.reply({
-                content: `${verifyIcon} | **Giao dịch thành công!**\n Đã dùng: **${totalMoraNeeded.toLocaleString()}** ${getIcon("mora")}\n Nhận được: **${amount.toLocaleString()}** ${getIcon("primo")}`,
-                ephemeral: false
-            });
+                if (currentPrimo < amount) {
+                    return interaction.editReply({ content: `${errorIcon} | Bạn không đủ Nguyên Thạch!` });
+                }
+
+                const totalMoraReceived = amount * RATE;
+                await removeMoney(userId, amount, 'primo');
+                await addMoney(userId, totalMoraReceived, 'mora');
+                success = true;
+                messageOutput = `${verifyIcon} | Đã đổi **${amount}** Primo lấy **${totalMoraReceived.toLocaleString()}** Mora.`;
+            }
+
+            // --- BƯỚC QUAN TRỌNG: ENABLE LẠI NÚT BẤM ---
+            if (success) {
+                // Tạo lại hàng nút bấm giống hệt lúc đầu
+                const row = new ActionRowBuilder().addComponents(
+                    new ButtonBuilder()
+                        .setCustomId('exchange_mora_to_primo')
+                        .setLabel(`${getIcon('mora')}Mora ➔ ${getIcon('primo')}Nguyên thạch`)
+                        .setStyle(ButtonStyle.Success)                        
+                        .setDisabled(true),
+                    new ButtonBuilder()
+                        .setCustomId('exchange_primo_to_mora')
+                        .setLabel(`${getIcon('primo')}Nguyên thạch ➔ ${getIcon('mora')}Mora`)
+                        .setStyle(ButtonStyle.Primary)
+                        .setDisabled(true)
+                );
+
+                // Cập nhật lại tin nhắn gốc để các nút sáng lên (Enabled)
+                await interaction.message.edit({ components: [row] }).catch(() => null);
+
+                // Phản hồi kết quả cho người dùng
+                return interaction.editReply({ content: messageOutput });
+            }
         }
     }
 };

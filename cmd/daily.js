@@ -1,7 +1,7 @@
 const Money = require("../utils/currency");
 const { renderKey, setKey, getKey } = require('../utils/db');
 
-const DAILY_REWARD = 500; // Số tiền thưởng mỗi ngày
+const DAILY_REWARD = 2000; 
 
 module.exports = {
   name: "daily",
@@ -10,27 +10,28 @@ module.exports = {
 
   async execute(message, args) {
     const userId = message.author.id;
-    const dailyKey = renderKey('daily', userId); //
+    const dailyKey = renderKey('daily', userId);
 
-    // 1. Lấy thời điểm claim cuối cùng từ Database
-    const lastDaily = await getKey(dailyKey); //
+    const lastDaily = await getKey(dailyKey); 
 
-    // 2. Tính toán thời điểm Reset (4h sáng hôm nay)
+    // 1. Lấy thời gian hiện tại theo UTC+7
     const now = new Date();
+    
+    // 2. Thiết lập mốc Reset: 4h sáng hôm nay
     const lastReset = new Date();
-    lastReset.setHours(4, 0, 0, 0); // Thiết lập mốc 4:00:00 sáng
+    lastReset.setHours(4, 0, 0, 0); 
 
-    // Nếu hiện tại chưa đến 4h sáng, thì mốc reset thực tế phải là 4h sáng ngày hôm qua
-    if (now < lastReset) {
+    // Nếu bây giờ chưa đến 4h sáng, mốc reset thực tế phải là 4h sáng ngày hôm qua
+    if (now.getTime() < lastReset.getTime()) {
       lastReset.setDate(lastReset.getDate() - 1);
     }
 
     // 3. Kiểm tra Cooldown
-    // Nếu lastDaily tồn tại và lớn hơn lastReset, nghĩa là người dùng đã nhận thưởng sau mốc 4h sáng gần nhất
-    if (lastDaily !== null && lastDaily > lastReset.getTime()) {
+    // Nếu thời điểm nhận cuối cùng (lastDaily) nằm SAU mốc Reset gần nhất, nghĩa là đã nhận rồi
+    if (lastDaily && lastDaily > lastReset.getTime()) {
       
       // Tính thời gian chờ đến 4h sáng ngày tiếp theo
-      const nextReset = new Date(lastReset);
+      const nextReset = new Date(lastReset.getTime());
       nextReset.setDate(nextReset.getDate() + 1);
       
       const timeRemaining = nextReset.getTime() - now.getTime();
@@ -39,25 +40,17 @@ module.exports = {
       const minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
       const seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
 
-      let timeString = "";
-      if (hours > 0) timeString += `${hours} giờ, `;
-      if (minutes > 0) timeString += `${minutes} phút, `;
-      timeString += `${seconds} giây`;
-
       return message.reply(
-        `⏰ | Bạn đã nhận thưởng rồi! Phần thưởng tiếp theo sẽ có lúc **04:00 sáng** (còn **${timeString}**).`
+        `⏰ | Bạn đã nhận thưởng rồi! Phần thưởng tiếp theo sẽ có lúc **04:00 sáng** (còn **${hours} giờ ${minutes} phút ${seconds} giây**).`
       );
-    } else {
-      // Trường hợp: Đã qua mốc 4h sáng hoặc đây là lần claim đầu tiên
-
-      // 4. Cộng tiền và cập nhật thời điểm claim
-      await Money.addMoney(userId, DAILY_REWARD); //
-      await setKey(dailyKey, Date.now()); // Lưu lại thời điểm hiện tại
-
-      // 5. Gửi thông báo thành công
-      return message.reply(
-        `🎉 | Chúc mừng! Bạn đã nhận được **${DAILY_REWARD}** ${Money.getIcon()} thưởng hàng ngày (Reset vào 4h sáng).`
-      ); //
     }
+
+    // 4. Cộng tiền và cập nhật thời điểm claim
+    await Money.addMoney(userId, DAILY_REWARD);
+    await setKey(dailyKey, Date.now()); 
+
+    return message.reply(
+      `🎉 | Chúc mừng! Bạn đã nhận được **${DAILY_REWARD}** ${Money.getIcon()} thưởng hàng ngày.`
+    );
   },
 };

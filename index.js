@@ -146,7 +146,7 @@ client.on("interactionCreate", async (interaction) => {
       }
     }
     // Kiểm tra nút của đổi tiền
-    if (interaction.customId === 'open_exchange_modal') {
+    if (interaction.customId.startsWith('exchange_')) {
       // Lấy giá trị từ các trường input trong modal
       const command = client.commands.get("exchange");
        if (command && command.handleInteraction) {
@@ -196,7 +196,7 @@ client.on("interactionCreate", async (interaction) => {
       }
     }
     // Kiểm tra Modal của đổi tiền
-    if (interaction.customId === 'exchange_modal') {
+    if (interaction.customId.startsWith('exchange_modal_')) {
       // Lấy giá trị từ các trường input trong modal
       const command = client.commands.get("exchange");
        if (command && command.handleInteraction) {

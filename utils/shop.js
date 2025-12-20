@@ -149,8 +149,8 @@ const SHOP_ITEMS = {
     },
     'kim_cuong': {
         name: 'Một viên kim cương quý giá',
-        price: 50,
-        sellPrice:50,
+        price: 100,
+        sellPrice:100,
         currency: primo,
         description: desc.legendary,
         icon: '<:diamond:1451466638103806012>',
@@ -168,7 +168,7 @@ const BLIND_BOX_LOOT = {
         { item: "an_do", amount: 1, weight: 800 },
         { item: "mora", amount: 10000, weight: 500 },
         { item: "primo", amount: 2, weight: 200 },
-        { item: "kim_cuong", amount: 1, weight: 10,isGolden: true }
+        { item: "kim_cuong", amount: 1, weight: 60,isGolden: true }
     ]
 };
 
