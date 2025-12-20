@@ -55,10 +55,10 @@ for (const file of commandFiles) {
   }
 }
 
-// client.on("debug", console.log);
-// client.on("warn", console.warn);
-// client.on("error", console.error);
-// client.on("shardError", console.error);
+client.on("debug", console.log);
+client.on("warn", console.warn);
+client.on("error", console.error);
+client.on("shardError", console.error);
 
 client.once(Events.ClientReady, (c) => {
   console.log(`Bot ${c.user.tag} đã sẵn sàng và đang hoạt động!`);
