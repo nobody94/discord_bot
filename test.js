@@ -1,86 +1,216 @@
-async function handleModalSubmit(interaction) {
-  if (interaction.type !== InteractionType.ModalSubmit) return;
+require("dotenv").config();
+const {
+  Client,
+  Collection,
+  GatewayIntentBits,
+  InteractionType,
+  Events
+} = require("discord.js");
+const fs = require("fs");
+const path = require("path");
 
-  const userId = interaction.user.id;
-  const choice = userBetState.get(userId); 
-  
-  // Kiểm tra trạng thái game (sau defer trong index.js)
-  if (currentRound.status !== 'betting') {
-       userBetState.delete(userId); 
-       return interaction.editReply({
-            content: "❌ | Đã hết thời gian đặt cược hoặc vòng đấu chưa bắt đầu.",
-        });
-  }
-  
-  let responseContent = "";
-  let isError = false;
+const { db } = require('./utils/db');
 
-  try {
-    const betInput = interaction.fields.getTextInputValue("betAmountInput");
-    let betAmount = Number(betInput);
-    betAmount = Math.floor(betAmount);
-    userBetState.delete(userId); 
+const { wordleProcess } = require("./game/wordleHandler");
+const { wordchainHandler } = require('./game/wordchainHandler');
+const { errorIcon } = require('./utils/icon');
 
-    if (!choice || isNaN(betAmount) || betAmount <= 0) {
-        responseContent = "❌ | Lựa chọn hoặc số tiền cược không hợp lệ. Giao dịch bị hủy.";
-        isError = true;
-    } else if (currentRound.bets.has(userId)) {
-        responseContent = `❌ | Bạn đã đặt cược **${currentRound.bets.get(userId).amount}** ${currency} vào **${currentRound.bets.get(userId).choice.toUpperCase()}** trong vòng này. Bạn chỉ được cược một lần.`;
-        isError = true;
-    } else {
-        const currentBalance = await getBalance(userId);
-        if (betAmount > currentBalance) {
-            responseContent = `💸 | Bạn không có đủ **${betAmount}** ${currency}. Số dư hiện tại: **${currentBalance}** ${currency}.`;
-            isError = true;
-        } else {
-            // Trừ tiền cược
-            const success = await removeMoney(userId, betAmount);
-            if (!success) {
-                responseContent = "❌ | Có lỗi xảy ra khi trừ tiền của bạn. Vui lòng kiểm tra số dư.";
-                isError = true;
-            } else {
-                // --- THÀNH CÔNG: LƯU CƯỢC VÀ GỬI TIN NHẮN CÔNG KHAI CÓ THỂ XÓA ---
-                
-                // 1. Lưu cược vào state
-                currentRound.bets.set(userId, {
-                    choice: choice,
-                    amount: betAmount,
-                    username: interaction.user.globalName || interaction.user.username,
-                });
-                
-                // 2. Xóa phản hồi defer ephemeral ban đầu (tin nhắn "Bot đang làm việc...")
-                await interaction.deleteReply().catch(console.error);
+// const express = require('express');
+// const app = express();
+// app.get('/', (req, res) => {
+//   console.log('--- Có tín hiệu Ping từ UptimeRobot! ---');
+//   res.send('Server is running!');
+// });
+// const port = process.env.PORT || 3000;
 
-                // 3. Gửi tin nhắn xác nhận KHÔNG PHẢI ephemeral
-                const successMsg = `✅ **[${currentRound.bets.size}]** ${interaction.user.globalName || interaction.user.username} đã đặt cược **${betAmount}** ${currency} vào **${choice.toUpperCase()}**.`;
-                const confirmMessage = await interaction.followUp({
-                    content: successMsg,
-                    ephemeral: false // RẤT QUAN TRỌNG: Không phải ephemeral để bot xóa được
-                });
-                
-                // 4. LƯU ID TIN NHẮN vào mảng chung
-                currentRound.confirmationMsgIds.push(confirmMessage.id);
-                
-                // 5. Kết thúc hàm tại đây.
-                return; 
-            }
-        }
-    }
-    // --- KẾT THÚC XỬ LÝ THÀNH CÔNG ---
+// app.listen(port, '0.0.0.0', () => {
+//   console.log(`Server is running on port ${port}`);
+// });
 
-  } catch (error) {
-    console.error("LỖI XỬ LÝ ĐẶT CƯỢC TÀI XỈU:", error);
-    responseContent = `❌ Đã xảy ra lỗi nghiêm trọng trong quá trình đặt cược! Lỗi: ${error.message}`;
-    isError = true;
-  }
-  
-  // 3. Phản hồi cuối cùng (Chỉ xử lý trường hợp LỖI - vẫn là ephemeral)
-  if (isError) {
-      await interaction
-          .editReply({ content: responseContent })
-          .catch(async (e) => {
-             console.error("LỖI KHÔNG THỂ EDIT REPLY. THỬ FOLLOW-UP:", e);
-             await interaction.followUp({ content: responseContent, ephemeral: true }).catch(console.error);
-          });
+const Token = process.env.BOT_TOKEN;
+// const Token = process.env.BOT_TEST_TOKEN;
+
+const PREFIX = ".";
+const client = new Client({
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent,
+  ],
+});
+client.commands = new Collection();
+
+const commandsPath = path.join(__dirname, "cmd");
+const commandFiles = fs
+  .readdirSync(commandsPath)
+  .filter((file) => file.endsWith(".js"));
+
+for (const file of commandFiles) {
+  const filePath = path.join(commandsPath, file);
+  const command = require(filePath);
+  if (command.name && command.execute) {
+    client.commands.set(command.name, command);
+  } else {
+    console.log(`[Cảnh báo] Lệnh tại ${filePath} thiếu 'name' hoặc 'execute'.`);
   }
 }
+
+// client.on("debug", console.log);
+// client.on("warn", console.warn);
+// client.on("error", console.error);
+// client.on("shardError", console.error);
+
+client.once(Events.ClientReady, (c) => {
+  console.log(`Bot ${c.user.tag} đã sẵn sàng và đang hoạt động!`);
+});
+
+// client.on("ready", () => {
+//   console.log(`Bot ${client.user.tag} đã sẵn sàng!`);
+// });
+
+client.on("messageCreate", async (message) => {
+  // Bỏ qua tin nhắn của bot
+  if (!message) return;
+  if (message.author.bot) return;
+
+
+  const content = message.content.trim();
+
+  //xử lý lệnh 
+  if (content.startsWith(PREFIX)) {
+    const args = content.slice(PREFIX.length).trim().split(/\s+/);
+    const commandName = args.shift().toLowerCase();
+
+    const command =
+      client.commands.get(commandName) ||
+      client.commands.find(
+        (cmd) => cmd.aliases && cmd.aliases.includes(commandName)
+      );
+
+    if (!command) return;
+
+    // Kiểm tra quyền (nếu lệnh có yêu cầu)
+    if (
+      command.userPermissions &&
+      !message.member.permissions.has(command.userPermissions)
+    ) {
+      return message.reply({
+        content: `${errorIcon} Bạn không có quyền thực hiện lệnh này.`,
+        allowedMentions: { repliedUser: false },
+      });
+    }
+
+    try {
+      await command.execute(message, args, commandName);
+    } catch (error) {
+      console.error(error);
+      message.reply("Đã xảy ra lỗi khi thực thi lệnh này!");
+    }
+    return; // Dừng xử lý sau khi xử lý lệnh
+  }
+
+  //xử lý game
+  await wordleProcess(message);
+  await wordchainHandler(message);
+});
+
+// 🖱️ Xử lý Tương tác (Button, Modal, Select Menu, v.v.)
+client.on("interactionCreate", async (interaction) => {
+  // 1. XỬ LÝ NÚT BẤM (Button Interaction)
+  if (interaction.isButton()) {
+    // Kiểm tra nếu là các nút của trò chơi Tài Xỉu
+    if (interaction.customId.startsWith("tx_")) {
+      const command = client.commands.get("taixiu");
+      if (command && command.handleInteraction) {
+        return await command.handleInteraction(interaction);
+      }
+    }
+
+    // Kiểm tra nếu là các nút của trò chơi Dice (Xúc xắc)
+    if (interaction.customId.startsWith("dice_")) {
+      const command = client.commands.get("dice");
+      if (command && command.handleInteraction) {
+        return await command.handleInteraction(interaction);
+      }
+    }
+
+    // Kiểm tra Modal của lệnh ăn xin
+    if (interaction.customId.startsWith("open_give_modal_")) {
+      const command = client.commands.get("anxin");
+      if (command && command.handleInteraction) {
+        try {
+          return await command.handleInteraction(interaction);
+        } catch (error) {
+          console.error("LỖI XỬ LÝ MODAL anxin:", error);
+        }
+      }
+    }
+  }
+
+  // 2. XỬ LÝ GỬI FORM (Modal Submit Interaction)
+  if (interaction.type === InteractionType.ModalSubmit) {
+    // Kiểm tra Modal của trò chơi Tài Xỉu
+    if (interaction.customId.startsWith("modal_tx_")) {
+      const command = client.commands.get("taixiu");
+      if (command && command.handleInteraction) {
+        try {
+          return await command.handleInteraction(interaction);
+        } catch (error) {
+          console.error("LỖI XỬ LÝ MODAL TÀI XỈU:", error);
+        }
+      }
+    }
+
+    // Kiểm tra Modal của trò chơi Dice
+    if (interaction.customId.startsWith("modal_dice_")) {
+      const command = client.commands.get("dice");
+      if (command && command.handleInteraction) {
+        try {
+          return await command.handleInteraction(interaction);
+        } catch (error) {
+          console.error("LỖI XỬ LÝ MODAL DICE:", error);
+        }
+      }
+    }
+    // Kiểm tra Modal của ANXIN 
+    if (interaction.customId.startsWith("confirm_give_modal_")) {
+      const command = client.commands.get("anxin");
+      if (command && command.handleInteraction) {
+        try {
+          return await command.handleInteraction(interaction);
+        } catch (error) {
+          console.error("LỖI XỬ LÝ MODAL SUBMIT ANXIN:", error);
+        }
+      }
+    }
+  }
+});
+
+async function startBot() {
+  try {
+    // Chỉ nên kết nối DB và Login khi Server Express đã sẵn sàng
+    await db.connect();
+    console.log("✅ Đã kết nối MongoDB thành công!");
+
+    if (!Token) return console.error(`${errorIcon} BOT_TOKEN missing!`);
+
+    // Kiểm tra nếu client đã login rồi thì không login lại
+    client.login(Token)
+      .then(() => {
+        console.log("🔑 Login request sent to Discord");
+      })
+      .catch(err => {
+        console.error("❌ Discord login failed:", err);
+      });
+    // if (!client.readyAt) {
+    //   await client.login(Token);
+    //   console.log("Bot đã đăng nhập thành công!");
+    // }
+  } catch (error) {
+    console.error("Lỗi khởi động:", error);
+    process.exit(1);
+  }
+}
+
+// Chạy hàm khởi động
+startBot();

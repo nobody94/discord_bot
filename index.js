@@ -8,24 +8,24 @@ const {
 } = require("discord.js");
 const fs = require("fs");
 const path = require("path");
-const express = require('express');
+
 const { db } = require('./utils/db');
 
 const { wordleProcess } = require("./game/wordleHandler");
 const { wordchainHandler } = require('./game/wordchainHandler');
 const { errorIcon } = require('./utils/icon');
 
+// const express = require('express');
+// const app = express();
+// app.get('/', (req, res) => {
+//   console.log('--- Có tín hiệu Ping từ UptimeRobot! ---');
+//   res.send('Server is running!');
+// });
+// const port = process.env.PORT || 3000;
 
-const app = express();
-app.get('/', (req, res) => {
-  console.log('--- Có tín hiệu Ping từ UptimeRobot! ---');
-  res.send('Server is running!');
-});
-const port = process.env.PORT || 3000;
-
-app.listen(port, '0.0.0.0', () => {
-  console.log(`Server is running on port ${port}`);
-});
+// app.listen(port, '0.0.0.0', () => {
+//   console.log(`Server is running on port ${port}`);
+// });
 
 const Token = process.env.BOT_TOKEN;
 // const Token = process.env.BOT_TEST_TOKEN;
@@ -54,7 +54,11 @@ for (const file of commandFiles) {
     console.log(`[Cảnh báo] Lệnh tại ${filePath} thiếu 'name' hoặc 'execute'.`);
   }
 }
-console.log("BOT_TOKEN:", process.env.BOT_TOKEN ? "OK" : "MISSING");
+
+client.on("debug", console.log);
+client.on("warn", console.warn);
+client.on("error", console.error);
+client.on("shardError", console.error);
 
 client.once(Events.ClientReady, (c) => {
   console.log(`Bot ${c.user.tag} đã sẵn sàng và đang hoạt động!`);
