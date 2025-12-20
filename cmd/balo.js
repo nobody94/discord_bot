@@ -1,7 +1,9 @@
 const { EmbedBuilder } = require("discord.js");
 const { getKey, renderKey, setKey } = require("../utils/db");
+const { getIcon } = require('../utils/currency.js');
 const { SHOP_ITEMS } = require("../utils/shop");
 const { errorIcon, verifyIcon, bagIcon } = require('../utils/icon.js')
+const { baloHandler } = require('../game/baloHandler.js');
 
 module.exports = {
   name: "balo",
@@ -15,48 +17,11 @@ module.exports = {
     const invKey = renderKey("inventory", userId);
     const inventory = (await getKey(invKey)) || [];
 
-    // --- LOGIC TẶNG ĐỒ (GIVE) ---
-    if (args[0] === "give") {
-      const target = message.mentions.users.first();
-      const itemId = args[2];
+    //Xử lý bán, cho, mở đồ
+    const isHandled = await baloHandler(args, message, inventory);
 
-      if (!target)
-        return message.reply(
-          `${errorIcon} | Vui lòng tag người muốn tặng: .balo give @user [ID_vật_phẩm]`
-        );
-      if (target.id === userId)
-        return message.reply(`${errorIcon} | Bạn không thể tự tặng đồ cho chính mình.`);
-      if (!itemId)
-        return message.reply(`${errorIcon} | Vui lòng nhập ID vật phẩm muốn tặng.`);
-
-      // Kiểm tra vật phẩm có trong túi đồ không
-      const itemIndex = inventory.indexOf(itemId);
-      if (itemIndex === -1) {
-        return message.reply(
-          `${errorIcon} | Bạn không sở hữu vật phẩm có ID \`${itemId}\` trong túi đồ.`
-        );
-      }
-
-      // Thực hiện chuyển đồ
-      const targetInvKey = renderKey("inventory", target.id);
-      let targetInventory = (await getKey(targetInvKey)) || [];
-
-      // Xóa 1 món từ người tặng và thêm vào người nhận
-      inventory.splice(itemIndex, 1);
-      targetInventory.push(itemId);
-
-      // Cập nhật lại Database cho cả 2 người
-      await setKey(invKey, inventory);
-      await setKey(targetInvKey, targetInventory);
-
-      const item = SHOP_ITEMS[itemId] || {
-        name: itemId,
-        icon: "<:box:1451465056612253779>",
-      };
-      return message.reply(
-        `${verifyIcon} | Bạn đã tặng **${item.icon} ${item.name}** cho **${target.username}** thành công!`
-      );
-    }
+    // Nếu đã thực hiện các lệnh phụ (open, sell, give) thì dừng lại luôn
+    if (isHandled) return;
 
     //LOGIC HIỂN THỊ TÚI ĐỒ
     const embed = new EmbedBuilder()
@@ -65,7 +30,7 @@ module.exports = {
       )
       .setColor(0x3498db)
       .setFooter({
-        text: "Dùng lệnh .balo give @user <[ID]> để tặng món đồ",
+        text: "Dùng lệnh .balo give @user <[ID]> để tặng món đồ.\nDùng lệnh .balo sell <[ID]> để bán\nDùng lệnh .balo open <[ID]> để mở",
       });
 
     if (inventory.length === 0) {

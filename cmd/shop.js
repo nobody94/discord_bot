@@ -12,6 +12,8 @@ module.exports = {
             .setDescription('Sử dụng lệnh `.buy <ID>` để mua đồ.');
 
         for (const [id, item] of Object.entries(SHOP_ITEMS)) {
+            if (item.hideFromShop) continue;
+            
             embed.addFields({
                 name: `${item.icon} ${item.name} (ID: \`${id}\`)`,
                 value: `Giá: **${item.price.toLocaleString()}** ${getIcon(item.currency)}\n*${item.description}*`

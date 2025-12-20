@@ -20,14 +20,15 @@ module.exports = {
                 },                
                 { 
                     name: '💵 Tiền tệ', 
-                    value: '• balance, money, tien, cash: Kiểm tra số tiền hiện có\n• daily, claim: Nhận thưởng daily',
+                    value: '• balance, money, tien, cash: Kiểm tra số tiền hiện có\n• daily, claim: Nhận thưởng daily\n• exchange, convert, doitien: Đổi Mora sang Nguyên Thạch',
                     inline:true   
                 },
                 { 
                     name: invisibleChar, 
-                    value: '• shop: Xem shop\n• balo:Xem balo\n• buy: Mua đồ',
+                    value: '• shop: Xem shop\n• balo: Xem balo\n• buy: Mua đồ',
                     inline:true   
                 },
+                { name: invisibleChar, value: '• balo give: Tặng đồ\n• balo sell: Bán đồ\n• balo open: Mở đồ(chỉ mở những đồ có thể mở trong túi)\n• rate, gacha: Xem tỉ lệ trúng thưởng', inline: true },
                 { 
                     name: '❤️ Tương tác',
                     value: '• kiss: Hôn\n• hug: ôm\n• airkiss: hôn gió\n• cuddle: ôm ấp\n• lick: liếm\n• pat: vỗ\n• highfive: đập tay',

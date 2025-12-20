@@ -15,17 +15,17 @@ const { wordleProcess } = require("./game/wordleHandler");
 const { wordchainHandler } = require('./game/wordchainHandler');
 const { errorIcon } = require('./utils/icon');
 
- const express = require('express');
- const app = express();
- app.get('/', (req, res) => {
+const express = require('express');
+const app = express();
+app.get('/', (req, res) => {
   console.log('--- Có tín hiệu Ping từ UptimeRobot! ---');
-   res.send('Server is running!');
- });
- const port = process.env.PORT || 3000;
+  res.send('Server is running!');
+});
+const port = process.env.PORT || 3000;
 
- app.listen(port, '0.0.0.0', () => {
-   console.log(`Server is running on port ${port}`);
- });
+app.listen(port, '0.0.0.0', () => {
+  console.log(`Server is running on port ${port}`);
+});
 
 const Token = process.env.BOT_TOKEN;
 // const Token = process.env.BOT_TEST_TOKEN;
@@ -55,10 +55,10 @@ for (const file of commandFiles) {
   }
 }
 
-client.on("debug", console.log);
-client.on("warn", console.warn);
-client.on("error", console.error);
-client.on("shardError", console.error);
+// client.on("debug", console.log);
+// client.on("warn", console.warn);
+// client.on("error", console.error);
+// client.on("shardError", console.error);
 
 client.once(Events.ClientReady, (c) => {
   console.log(`Bot ${c.user.tag} đã sẵn sàng và đang hoạt động!`);
@@ -134,7 +134,7 @@ client.on("interactionCreate", async (interaction) => {
       }
     }
 
-    // Kiểm tra Modal của lệnh ăn xin
+    // Kiểm tra nút của lệnh ăn xin
     if (interaction.customId.startsWith("open_give_modal_")) {
       const command = client.commands.get("anxin");
       if (command && command.handleInteraction) {
@@ -142,6 +142,18 @@ client.on("interactionCreate", async (interaction) => {
           return await command.handleInteraction(interaction);
         } catch (error) {
           console.error("LỖI XỬ LÝ MODAL anxin:", error);
+        }
+      }
+    }
+    // Kiểm tra nút của đổi tiền
+    if (interaction.customId === 'open_exchange_modal') {
+      // Lấy giá trị từ các trường input trong modal
+      const command = client.commands.get("exchange");
+       if (command && command.handleInteraction) {
+        try {
+          return await command.handleInteraction(interaction);
+        } catch (error) {
+          console.error("LỖI XỬ LÝ Nút SUBMIT ĐỔi tiền:", error);
         }
       }
     }
@@ -180,6 +192,18 @@ client.on("interactionCreate", async (interaction) => {
           return await command.handleInteraction(interaction);
         } catch (error) {
           console.error("LỖI XỬ LÝ MODAL SUBMIT ANXIN:", error);
+        }
+      }
+    }
+    // Kiểm tra Modal của đổi tiền
+    if (interaction.customId === 'exchange_modal') {
+      // Lấy giá trị từ các trường input trong modal
+      const command = client.commands.get("exchange");
+       if (command && command.handleInteraction) {
+        try {
+          return await command.handleInteraction(interaction);
+        } catch (error) {
+          console.error("LỖI XỬ LÝ MODAL SUBMIT ĐỔi tiền:", error);
         }
       }
     }

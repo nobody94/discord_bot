@@ -8,7 +8,6 @@ const CURRENCIES = {
 
 const DEFAULT_TYPE = 'mora';
 
-
 // Hàm lấy Icon theo loại tiền
 function getIcon(type = DEFAULT_TYPE) {
     return CURRENCIES[type]?.icon || CURRENCIES[DEFAULT_TYPE].icon;
@@ -59,4 +58,4 @@ async function removeMoney(userId, amount, type = DEFAULT_TYPE) {
 
 
 
-module.exports = { getAllBalances,getBalance, addMoney, removeMoney, getIcon, CURRENCIES };
+module.exports = { getAllBalances,getBalance, addMoney, removeMoney, getIcon,CURRENCIES };

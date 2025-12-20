@@ -1,100 +1,174 @@
+const {CURRENCIES} = require('./currency');
+
+const mora = CURRENCIES.mora.key;
+const primo = CURRENCIES.primo.key
+
+const desc = {
+    onlyView: 'Vật phẩm chỉ để trưng bày hoặc tặng',
+    common: 'Vật phẩm bình thường chỉ có từ túi mù',
+    uncommon: 'Vật phẩm không phổ biến chỉ có từ túi mù',
+    rare: 'Vật phẩm hiếm chỉ có từ túi mù',
+    legendary: 'Vật phẩm quý hiếm chỉ có từ túi mù',
+}
+
 const SHOP_ITEMS = {
-    'nhan_kim_cuong': {
-        name: 'Nhẫn kim cương',
-        price: 300000,
-        currency: 'mora',
-        description: 'Dùng để tặng cho đối tượng bạn thích',
-        icon: '<:diamond_ring:1451058258944065638>',
-        canOpen: false
-    },
-    'gau_bong': {
-        name: 'Gấu bông',
-        price: 100000,
-        currency: 'mora',
-        description: 'Dùng để tặng cho đối tượng bạn thích',
-        icon: '<:bear:1451058314237448284>',
-        canOpen: false
-    },
-    'tra_sua': {
-        name: 'Trà sữa',
-        price: 30000,
-        currency: 'mora',
-        description: 'Dùng để tặng cho đối tượng bạn thích',
-        icon: '<:milktea:1451058355857522883>',
-        canOpen: false
-    },
-    'kem': {
-        name: 'Kem',
-        price: 50000,
-        currency: 'mora',
-        description: 'Dùng để tặng cho đối tượng bạn thích',
-        icon: '<:icecream:1451606564698853519>',
-        canOpen: false
-    },
-    'pizza': {
-        name: 'Pizza',
-        price: 100000,
-        currency: 'mora',
-        description: 'Dùng để tặng cho đối tượng bạn thích',
-        icon: '<:pizza:1451606591983058994>',
-        canOpen: false
-    },
-    'burger': {
-        name: 'Burger',
-        price: 100000,
-        currency: 'mora',
-        description: 'Dùng để tặng cho đối tượng bạn thích',
-        icon: '<:fastfood:1451606621137670144>',
-        canOpen: false
-    },
-    'my_ly': {
-        name: 'Mỳ ly',
-        price: 20000,
-        currency: 'mora',
-        description: 'Dùng để tặng cho đối tượng bạn thích',
-        icon: '<:instantnoodles:1451606651588317357>',
-        canOpen: false
-    },
-    'my_tom': {
-        name: 'Mỳ tôm',
-        price: 30000,
-        currency: 'mora',
-        description: 'Dùng để tặng cho đối tượng bạn thích',
-        icon: '<:ramen:1451606668826775573>',
-        canOpen: false
-    },
-    'thit_xien': {
-        name: 'Thịt xiên nướng',
-        price: 20000,
-        currency: 'mora',
-        description: 'Dùng để tặng cho đối tượng bạn thích',
-        icon: '<:barbecue:1451606702632865813>',
-        canOpen: false
-    },
     'tui_mu': {
         name: 'Túi mù',
-        price: 50,
-        currency: 'primo',
+        price: 10,
+        sellPrice:10,
+        currency: primo,
         description: 'Mở ra ngẫu nhiên vật phẩm hiếm',
         icon: '<:blindbox:1451618660673130546>',
         canOpen: true
     },
+    'bim_bim': {
+        name: 'Bim bim',
+        price: 20000,
+        sellPrice:20000,
+        currency: mora,
+        description: desc.onlyView,
+        icon: '<:chips:1451742059953389779>'
+    },
+    'tra_sua': {
+        name: 'Trà sữa',
+        price: 30000,
+        sellPrice:30000,
+        currency: mora,
+        description: desc.onlyView,
+        icon: '<:milktea:1451058355857522883>',
+    },
+    'kem': {
+        name: 'Kem',
+        price: 50000,
+        sellPrice:50000,
+        currency: mora,
+        description: desc.onlyView,
+        icon: '<:icecream:1451606564698853519>',
+    },
+    'pizza': {
+        name: 'Pizza',
+        price: 100000,
+        sellPrice:100000,
+        currency: mora,
+        description: desc.onlyView,
+        icon: '<:pizza:1451606591983058994>',
+    },
+    'burger': {
+        name: 'Burger',
+        price: 100000,
+        sellPrice:100000,
+        currency: mora,
+        description: desc.onlyView,
+        icon: '<:fastfood:1451606621137670144>'
+    },
+    'my_ly': {
+        name: 'Mỳ ly',
+        price: 20000,
+        sellPrice:20000,
+        currency: mora,
+        description: desc.onlyView,
+        icon: '<:instantnoodles:1451606651588317357>'
+    },
+    'my_tom': {
+        name: 'Mỳ tôm',
+        price: 30000,
+        sellPrice:30000,
+        currency: mora,
+        description: desc.onlyView,
+        icon: '<:ramen:1451606668826775573>'
+    },
+    'gau_bong': {
+        name: 'Gấu bông',
+        price: 100000,
+        sellPrice:100000,
+        currency: mora,
+        description: desc.onlyView,
+        icon: '<:bear:1451058314237448284>',
+    },
+    'xien_ban': {
+        name: 'Xiên bẩn',
+        price: 20000,
+        sellPrice:20000,
+        currency: mora,
+        description: desc.onlyView,
+        icon: '<:barbecue:1451606702632865813>'
+    },
     'tui_rac': {
-        name: 'Vật phẩm gacha',
+        name: 'Túi rác 3 ngày chưa vứt',
         price: 5,
-        currency: 'primo',
-        description: 'Vật phẩm cực hiếm chỉ có từ túi mù',
+        sellPrice:5,
+        currency: mora,
+        description: desc.common,
         icon: '<:garbage:1451606744295018578>',
+        hideFromShop: true
+    },
+    'canh_cay': {
+        name: 'Cành cây vô dụng',
+        price: 5,
+        sellPrice:5,
+        currency: mora,
+        description: desc.common,
+        icon: '<:branch:1451742208666632332>',
+        hideFromShop: true
+    },
+    'vien_da': {
+        name: 'Viên đá không mấy nổi bật',
+        price: 100,
+        sellPrice:100,
+        currency: mora,
+        description: desc.common,
+        icon: '<:rock:1451742232024715386>',
+        hideFromShop: true
+    },
+    'tat_thung': {
+        name: 'Một chiếc tất bị thủng',
+        price: 100,
+        sellPrice:100,
+        currency: mora,
+        description: desc.uncommon,
+        icon: '<:dirty_sock:1451742253797216427>',
+        hideFromShop: true
+    },
+    'tui_rach': {
+        name: 'Một chiếc túi rách',
+        price: 100,
+        sellPrice:100,
+        currency: mora,
+        description: desc.uncommon,
+        icon: '<:stringbag:1451742296704942211>',
+        hideFromShop: true
+    },
+    'an_do': {
+        name: 'Món ăn đã bị ăn dở',
+        price: 100,
+        sellPrice:100,
+        currency: mora,
+        description: desc.uncommon,
+        icon: '<:burger:1451742141331144725>',
+        hideFromShop: true
+    },
+    'kim_cuong': {
+        name: 'Một viên kim cương quý giá',
+        price: 50,
+        sellPrice:50,
+        currency: primo,
+        description: desc.legendary,
+        icon: '<:diamond:1451466638103806012>',
         hideFromShop: true
     }
 };
 
 const BLIND_BOX_LOOT = {
     "tui_mu": [
-        { item: "tui_rac", amount: 1, rate: 60 },
-        { item: "mora", amount: 200, rate: 20 },
-        { item: "mora", amount: 1000, rate: 15 },
-        { item: "primo", amount: 5, rate: 5 },
+        { item: "tui_rac", amount: 1, weight: 1000 },
+        { item: "canh_cay", amount: 1, weight: 1000 },
+        { item: "vien_da", amount: 1, weight: 1000 },
+        { item: "tat_thung", amount: 1, weight: 100 },
+        { item: "tui_rach", amount: 1, weight: 100 },
+        { item: "an_do", amount: 1, weight: 100 },
+        { item: "mora", amount: 1000, weight: 50 },
+        { item: "primo", amount: 5, weight: 10 },
+        { item: "kim_cuong", amount: 1, weight: 0.5 }
     ]
 };
 

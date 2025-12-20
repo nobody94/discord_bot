@@ -19,8 +19,8 @@ module.exports = {
 
         // 2. Kiểm tra vật phẩm có tồn tại trong SHOP_ITEMS không
         const item = SHOP_ITEMS[itemId];
-        if (!item) {
-            return message.reply(`${errorIcon} | Vật phẩm với ID \`${itemId}\` không tồn tại trong cửa hàng. Dùng \`.shop\` để xem danh sách.`);
+        if (!item || item.hideFromShop === true) {
+            return message.reply(`${errorIcon} | Vật phẩm này không tồn tại hoặc không có sẵn để mua trực tiếp! Dùng \`.shop\` để xem danh sách.`);
         }
 
         // 3. Kiểm tra số dư người dùng
