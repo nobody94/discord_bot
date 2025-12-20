@@ -18,7 +18,7 @@ module.exports = {
     const inventory = (await getKey(invKey)) || [];
 
     //Xử lý bán, cho, mở đồ
-    const isHandled = await baloHandler(args, message, inventory);
+    const isHandled = await baloHandler(args, message, inventory,invKey);
 
     // Nếu đã thực hiện các lệnh phụ (open, sell, give) thì dừng lại luôn
     if (isHandled) return;
