@@ -14,8 +14,8 @@ const desc = {
 const SHOP_ITEMS = {
     'tui_mu': {
         name: 'Túi mù',
-        price: 10,
-        sellPrice:10,
+        price: 5,
+        sellPrice:5,
         currency: primo,
         description: 'Mở ra ngẫu nhiên vật phẩm hiếm',
         icon: '<:blindbox:1451618660673130546>',
@@ -167,7 +167,7 @@ const BLIND_BOX_LOOT = {
         { item: "bong_den", amount: 1, weight: 100 },
         { item: "an_do", amount: 1, weight: 100 },
         { item: "mora", amount: 1000, weight: 50 },
-        { item: "primo", amount: 5, weight: 10 },
+        { item: "primo", amount: 2, weight: 10 },
         { item: "kim_cuong", amount: 1, weight: 0.5 }
     ]
 };
