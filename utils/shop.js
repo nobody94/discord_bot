@@ -113,8 +113,8 @@ const SHOP_ITEMS = {
     },
     'vien_da': {
         name: 'Viên đá không mấy nổi bật',
-        price: 100,
-        sellPrice:100,
+        price: 50,
+        sellPrice:50,
         currency: mora,
         description: desc.common,
         icon: '<:rock:1451742232024715386>',
