@@ -81,7 +81,7 @@ const SHOP_ITEMS = {
     },
     'tui_rac': {
         name: 'Vật phẩm gacha',
-        price: 0,
+        price: 5,
         currency: 'primo',
         description: 'Vật phẩm cực hiếm chỉ có từ túi mù',
         icon: '<:garbage:1451606744295018578>',
