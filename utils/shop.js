@@ -163,11 +163,11 @@ const BLIND_BOX_LOOT = {
         { item: "tui_rac", amount: 1, weight: 1000 },
         { item: "canh_cay", amount: 1, weight: 1000 },
         { item: "vien_da", amount: 1, weight: 1000 },
-        { item: "tat_thung", amount: 1, weight: 100 },
-        { item: "bong_den", amount: 1, weight: 100 },
-        { item: "an_do", amount: 1, weight: 100 },
-        { item: "mora", amount: 1000, weight: 50 },
-        { item: "primo", amount: 2, weight: 10 },
+        { item: "tat_thung", amount: 1, weight: 800 },
+        { item: "bong_den", amount: 1, weight: 800 },
+        { item: "an_do", amount: 1, weight: 800 },
+        { item: "mora", amount: 10000, weight: 500 },
+        { item: "primo", amount: 2, weight: 200 },
         { item: "kim_cuong", amount: 1, weight: 0.5 }
     ]
 };
