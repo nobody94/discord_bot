@@ -133,5 +133,6 @@ module.exports = {
   setWordleData,
   getWordleData,
   shuffleWord,
-  nextQuestion
+  nextQuestion,
+  gameTimers
 };

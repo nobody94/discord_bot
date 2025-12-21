@@ -1,24 +1,29 @@
-const { setWordleData,getWordleData } = require("../game/wordleHandler");
+// File stopgame.js
+const { setWordleData, getWordleData, gameTimers } = require("../game/wordleHandler"); // Thêm gameTimers vào đây
 
 module.exports = {
   name: "stop",
   async execute(message, args) {
-    // if (!message.member.permissions.has("MANAGE_CHANNELS")) return;
-
     const guildId = message.guild.id;
     const wordleData = await getWordleData(guildId);    
     
-    //wordle game
     if (message.channel.id == wordleData.channelId) {
       if (!wordleData.status) return;
       
-      await setWordleData(guildId,{
-        status:false,
-        answer:null,
-        turn:0
-      })    
+      // --- PHẦN SỬA LỖI: Xóa bộ đếm giờ đang chạy ngầm ---
+      if (gameTimers.has(guildId)) {
+        clearTimeout(gameTimers.get(guildId));
+        gameTimers.delete(guildId);
+      }
+      // ------------------------------------------------
 
-      return message.reply("🛑 Đã dừng trò chơi đoán chữ. Dùng lệnh .start để bắt đầu game");
+      await setWordleData(guildId, {
+        status: false,
+        answer: null,
+        turn: 0
+      });
+
+      return message.reply("🛑 Đã dừng trò chơi đoán chữ và hủy bộ đếm giờ thành công.");
     }
   },
 };
