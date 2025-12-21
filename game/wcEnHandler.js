@@ -1,5 +1,6 @@
 const { renderKey, getKey, setKey } = require("../utils/db");
 const { enDictionary } = require("../dictionary/dictionary");
+const {errorIcon} = require('../utils/icon');
 
 async function getWCEnData(guildId) {
   const dbKey = renderKey("wordchain_en", guildId);
@@ -145,7 +146,7 @@ async function gameProcess(guildId, newWord) {
     return {
       success: false,
       reason: "WORD_NOT_VALID",
-      message: `❌ Từ này không có trong từ điển`,
+      message: `${errorIcon} Từ này không có trong từ điển`,
     };
   }
 
@@ -176,7 +177,7 @@ async function gameProcess(guildId, newWord) {
     return {
       success: false,
       reason: "WORD_DUPLICATE",
-      message: "❌ Từ này đã được sử dụng",
+      message: `${errorIcon} Từ này đã được sử dụng`,
     };
   }
   // Kiểm tra xem từ thứ nhất phải bằng từ thứ 2 trước đó
@@ -186,7 +187,7 @@ async function gameProcess(guildId, newWord) {
     return {
       success: false,
       reason: "WRONG_START_WORD",
-      message: `❌ Từ cần bắt đầu bằng ${currentLastWord}`,
+      message: `${errorIcon} Từ cần bắt đầu bằng ${currentLastWord}`,
     };
   }
 

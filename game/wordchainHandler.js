@@ -1,6 +1,7 @@
 const Money = require("../utils/currency");
 const ViWordchain = require("./wcViHandler");
 const EnWordchain = require("./wcEnHandler");
+const {errorIcon,verifyIcon} = require('../utils/icon');
 
 async function wordchainProcess(message, wordchain) {
   const guildId = message.guildId;
@@ -24,7 +25,7 @@ async function wordchainProcess(message, wordchain) {
     await Money.addMoney(userId, tienThuong);
 
     await message.channel.send(
-      `✅ Từ hợp lệ ${
+      `${verifyIcon} Từ hợp lệ ${
         message.author.username
       } được thưởng ${tienThuong} ${Money.getIcon()}\n` +
         `Từ tiếp theo phải bắt đầu bằng **"${result.nextRequiredWord}".`

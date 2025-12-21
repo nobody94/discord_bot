@@ -7,7 +7,7 @@ module.exports = {
 
   async execute(message, args) {
     // if (!message.member.permissions.has("MANAGE_CHANNELS")) {
-    //   return message.reply("❌ Bạn cần quyền `Quản lý kênh`.");
+    //   return message.reply("Bạn cần quyền `Quản lý kênh`.");
     // }
 
     if (!args[0]) {

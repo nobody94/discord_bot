@@ -1,5 +1,6 @@
 const { renderKey, getKey, setKey } = require("../utils/db");
 const { viDictionary } = require("../dictionary/dictionary");
+const {errorIcon} = require('../utils/icon');
 
 async function getWCViData(guildId) {
   const dbKey = renderKey("wordchain_vi", guildId);
@@ -153,7 +154,7 @@ async function gameProcess(guildId,newWord) {
     return {
       success: false,
       reason: "WORD_TOO_SHORT",
-      message: "❌ Từ phải là cụm 2 từ",
+      message: `${errorIcon} Từ phải là cụm 2 từ`,
     };
   }
   if (parts.length > 2) {
@@ -190,7 +191,7 @@ async function gameProcess(guildId,newWord) {
     return {
       success: false,
       reason: "WORD_NOT_VALID",
-      message: `❌ Từ này không có trong từ điển`,
+      message: `${errorIcon} Từ này không có trong từ điển`,
     };
   }
   // Không lặp cụm
@@ -198,7 +199,7 @@ async function gameProcess(guildId,newWord) {
     return {
       success: false,
       reason: "WORD_DUPLICATE",
-      message: "❌ Từ này đã được sử dụng",
+      message: `${errorIcon} Từ này đã được sử dụng`,
     };
   }
   // Kiểm tra xem từ thứ nhất phải bằng từ thứ 2 trước đó
@@ -207,7 +208,7 @@ async function gameProcess(guildId,newWord) {
     return {
       success: false,
       reason: "WRONG_START_WORD",
-      message: `❌ Từ cần bắt đầu bằng ${currentLastWord}`,
+      message: `${errorIcon} Từ cần bắt đầu bằng ${currentLastWord}`,
     };
   }
 
