@@ -9,7 +9,7 @@ const {
   EmbedBuilder,
 } = require("discord.js");
 const { maxAmount } = require("../utils/constant");
-const { errorIcon,verifyIcon,dicesIcon } = require('../utils/icon.js')
+const { errorIcon, verifyIcon, dicesIcon } = require('../utils/icon.js');
 
 const {
   getBalance,
@@ -33,20 +33,22 @@ const currentRound = {
   confirmationMsgIds: [],
 };
 
-// --- CÁC HÀM HỖ TRỢ (GIỮ NGUYÊN) ---
+// --- CÁC HÀM HỖ TRỢ ---
 function rollDice() {
   const roll1 = Math.floor(Math.random() * 6) + 1;
   const roll2 = Math.floor(Math.random() * 6) + 1;
   const roll3 = Math.floor(Math.random() * 6) + 1;
   const total = roll1 + roll2 + roll3;
-  let result =
-    roll1 === roll2 && roll2 === roll3 ? "bão" : total >= 11 ? "tài" : "xỉu";
+
+  // SỬA LỖI: Trả về kết quả không dấu để so sánh chuẩn với customId
+  let result = (roll1 === roll2 && roll2 === roll3) ? "bao" : (total >= 11 ? "tai" : "xiu");
+  
   const isEven = total % 2 === 0;
   return {
     rolls: [roll1, roll2, roll3],
     total,
     result,
-    isTriple: result === "bão",
+    isTriple: result === "bao",
     isEven,
   };
 }
@@ -104,34 +106,37 @@ async function finishRound(message) {
   }
 
   const { rolls, total, result, isTriple, isEven } = rollDice();
+  
+  // Hiển thị kết quả có dấu cho thân thiện
+  const displayResult = isTriple ? "BÃO" : (result === "tai" ? "TÀI" : "XỈU");
+  
   let resultMessage = `🎲 **KẾT QUẢ:\n${rolls
     .map((d) => rollingSymbols[d - 1])
-    .join(" | ")} - TỔNG: ${total}**\n**${
-    isTriple ? "BÃO" : result.toUpperCase() + " | " + (isEven ? "CHẴN" : "LẺ")
-  }**\n\n`;
+    .join(" | ")} - TỔNG: ${total}**\n**${displayResult} | ${isEven ? "CHẴN" : "LẺ"}**\n\n`;
 
   for (const [userId, bet] of currentRound.bets) {
     let win = false;
     if (!isTriple) {
+        // So sánh chuỗi không dấu: "tai" === "tai" hoặc "xiu" === "xiu"
       if (bet.choice === result) win = true;
       else if (bet.choice === "chan" && isEven) win = true;
       else if (bet.choice === "le" && !isEven) win = true;
     }
+
+    const choiceName = getChoiceLabel(bet.choice);
+
     if (win) {
       await addMoney(userId, bet.amount * 2);
-      resultMessage += `> **${bet.username}**: Lụm ${
-        bet.amount
-      } ${getIcon()}\n`;
+      resultMessage += `**${bet.username}**: Cược **${choiceName}** (**${bet.amount.toLocaleString()}**)\nLụm **${(bet.amount * 2).toLocaleString()}** ${getIcon()}\n`;
     } else {
-      resultMessage += `> **${bet.username}**: Toạch ${
-        bet.amount
-      } ${getIcon()}\n`;
+     resultMessage += `**${bet.username}**: Cược **${choiceName}** (**${bet.amount.toLocaleString()}**)\nToạch **${bet.amount.toLocaleString()}** ${getIcon()}\n`;
     }
   }
 
   await message
     .edit({ content: resultMessage, components: [] })
     .catch(console.error);
+    
   currentRound.status = "inactive";
   currentRound.bets.clear();
 }
@@ -144,7 +149,7 @@ module.exports = {
 
   async execute(message) {
     if (currentRound.status !== "inactive")
-      return message.reply(`${errorIcon} | Vòng đấu đang diễn ra.`);
+      return message.reply(`${errorIcon} | Vòng đấu đang diễn ra, vui lòng đợi.`);
 
     currentRound.status = "betting";
     currentRound.bets.clear();
@@ -174,12 +179,15 @@ module.exports = {
       .setColor(0x0099ff)
       .setTitle("🎲 **Tài Xỉu Teyvat**")
       .setDescription(
-        `Chọn Tài/ Xỉu , Chẵn/Lẻ để đặt cược.\nSau khi chọn, nhập số **MORA** bạn muốn cược\nNếu bot dừng, hãy sử dụng lại lệnh để tiếp tục ván chơi\nTrò chơi sẽ bắt đầu ngay lập tức và đếm ngược 40 giây.`
+        `Chọn Tài/ Xỉu , Chẵn/Lẻ để đặt cược.\nSau khi chọn, nhập số **MORA** bạn muốn cược\n\n` +
+        `• **Xỉu**: 4-10 điểm | **Tài**: 11-17 điểm\n` +
+        `• **Bão**: 3 mặt giống nhau (Nhà cái ăn hết)\n` +
+        `• Cược tối đa: **${maxAmount.toLocaleString()}** Mora`
       );
 
     await message.channel.send({ embeds: [embed] });
     const gameMessage = await message.channel.send({
-      content: `⏱️ CÒN ${BETTING_TIME} GIÂY ĐẶT CƯỢC`,
+      content: `⏱️ CÒN **${BETTING_TIME}** GIÂY ĐẶT CƯỢC`,
       components: [row1, row2],
     });
     currentRound.message = gameMessage;
@@ -188,16 +196,15 @@ module.exports = {
     while (timeLeft > 0 && currentRound.status === "betting") {
       await delay(1000);
       timeLeft--;
-      if (timeLeft % 5 === 0)
+      if (timeLeft % 10 === 0 || timeLeft <= 5)
         await gameMessage
-          .edit({ content: `⏱️ CÒN ${timeLeft} GIÂY ĐẶT CƯỢC` })
+          .edit({ content: `⏱️ CÒN **${timeLeft}** GIÂY ĐẶT CƯỢC` })
           .catch(() => {});
     }
     if (currentRound.status === "betting") await finishRound(gameMessage);
   },
 
   async handleInteraction(interaction) {
-    // 1. XỬ LÝ KHI NHẤN NÚT (Button)
     if (interaction.isButton()) {
       if (currentRound.status !== "betting") {
         return interaction.reply({
@@ -210,49 +217,48 @@ module.exports = {
       userBetState.set(interaction.user.id, choice);
 
       const modal = new ModalBuilder()
-        .setCustomId(`modal_tx_${interaction.user.id}`) // CustomID phải khớp với index.js
+        .setCustomId(`modal_tx_${interaction.user.id}`)
         .setTitle(`Đặt cược ${getChoiceLabel(choice)}`);
 
       const betInput = new TextInputBuilder()
         .setCustomId("betAmountInput")
-        .setLabel(`Nhập số tiền cược(không được đặt quá ${maxAmount}):`)
+        .setLabel(`Số tiền cược (Tối đa ${maxAmount.toLocaleString()}):`)
         .setStyle(TextInputStyle.Short)
+        .setPlaceholder("Ví dụ: 50000")
         .setRequired(true);
 
       modal.addComponents(new ActionRowBuilder().addComponents(betInput));
       await interaction.showModal(modal);
     }
 
-    // 2. XỬ LÝ KHI GỬI MODAL (Modal Submit)
     if (interaction.type === InteractionType.ModalSubmit) {
-      await interaction.deferReply({ ephemeral: true }); // Tránh lỗi "Interaction failed"
+      await interaction.deferReply({ ephemeral: true });
 
       const userId = interaction.user.id;
       const choice = userBetState.get(userId);
       const betInput = interaction.fields.getTextInputValue("betAmountInput");
       const betAmount = Math.floor(Number(betInput));
 
-      // --- THÊM ĐIỀU KIỆN GIỚI HẠN ---
-      if (betAmount > maxAmount) {
-        return interaction.editReply({
-          content: `${errorIcon} | Số tiền đặt cược tối đa là **${maxAmount}**!`,
-          ephemeral: true,
-        });
-      }
-
       if (currentRound.status !== "betting")
         return interaction.editReply(`${errorIcon} | Hết thời gian cược!`);
+      
       if (!choice || isNaN(betAmount) || betAmount <= 0)
-        return interaction.editReply(`${errorIcon} | Tiền cược không hợp lệ.`);
+        return interaction.editReply(`${errorIcon} | Số tiền cược không hợp lệ.`);
+        
+      if (betAmount > maxAmount) {
+        return interaction.editReply(`${errorIcon} | Bạn không được cược quá **${maxAmount.toLocaleString()}**!`);
+      }
+
       if (currentRound.bets.has(userId))
-        return interaction.editReply(`${errorIcon} | Bạn đã cược rồi.`);
+        return interaction.editReply(`${errorIcon} | Bạn đã đặt cược trong vòng này rồi.`);
 
       const balance = await getBalance(userId);
       if (betAmount > balance)
         return interaction.editReply(
-          `💸 | Bạn không đủ **${betAmount}** ${getIcon()}.`
+          `💸 | Bạn không đủ Mora để cược (Hiện có: **${balance.toLocaleString()}** ${getIcon()}).`
         );
 
+      // Trừ tiền và ghi nhận cược
       await removeMoney(userId, betAmount);
       currentRound.bets.set(userId, {
         choice,
@@ -260,13 +266,9 @@ module.exports = {
         username: interaction.user.globalName || interaction.user.username,
       });
 
-      await interaction.deleteReply().catch(() => {}); // Xóa defer ephemeral
+      await interaction.deleteReply().catch(() => {});
       const confirm = await interaction.followUp({
-        content: `${verifyIcon} **${
-          interaction.user.username
-        }** đã cược **${betAmount}** ${getIcon()} vào **${getChoiceLabel(
-          choice
-        )}**`,
+        content: `${verifyIcon} **${interaction.user.username}** đã cược **${betAmount.toLocaleString()}** ${getIcon()} vào **${getChoiceLabel(choice)}**`,
         ephemeral: false,
       });      
       currentRound.confirmationMsgIds.push(confirm.id);
