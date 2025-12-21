@@ -45,6 +45,14 @@ const SHOP_ITEMS = {
         description: desc.onlyView,
         icon: '<:icecream:1451606564698853519>',
     },
+    'banh_kem': {
+        name: 'Bánh kem',
+        price: 80000,
+        sellPrice:80000,
+        currency: mora,
+        description: desc.onlyView,
+        icon: '<:birthdaycake:1452248466016436235>'
+    },
     'pizza': {
         name: 'Pizza',
         price: 100000,
