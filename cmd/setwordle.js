@@ -1,9 +1,9 @@
-const { setWordleData } = require("../game/wordleHandler");
-const { verifyIcon,errorIcon } = require('../utils/icon.js')
+const { setWordleData, nextQuestion } = require("../game/wordleHandler"); // Thêm nextQuestion vào đây
+const { verifyIcon, errorIcon } = require('../utils/icon.js');
 
 module.exports = {
   name: "setwordle",
-  description: "Thiết lập kênh chơi game đoán chữ",
+  description: "Thiết lập kênh và bắt đầu game đoán chữ",
   
   async execute(message, args) {
     if (!message.member.permissions.has("MANAGE_CHANNELS")) {
@@ -12,9 +12,16 @@ module.exports = {
 
     const channel = message.mentions.channels.first() || message.channel;
 
-    // Lưu ID kênh theo Guild ID: wordle_channel_guildID    
-    await setWordleData(message.guild.id,{channelId:channel.id});
+    // 1. Lưu ID kênh và kích hoạt trạng thái game
+    await setWordleData(message.guild.id, {
+        channelId: channel.id,
+        status: true, // Kích hoạt game
+        turn: 0       // Reset về lượt 0
+    });
 
-    return message.reply(`${verifyIcon} Đã thiết lập kênh chơi game đoán từ tại: ${channel}`);
+    await message.reply(`${verifyIcon} Đã thiết lập kênh tại: ${channel}. Game sẽ bắt đầu ngay bây giờ!`);
+
+    // 2. Gọi nextQuestion để bắt đầu câu hỏi đầu tiên và chạy Timer 2 phút
+    return nextQuestion(message, message.guild.id); 
   }
 };

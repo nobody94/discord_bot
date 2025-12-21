@@ -1,52 +1,105 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
-
-const invisibleChar = '\u200B';
+const { 
+    EmbedBuilder, 
+    ActionRowBuilder, 
+    StringSelectMenuBuilder, 
+    ComponentType 
+} = require('discord.js');
 
 module.exports = {
     name: 'help',
     aliases: ['trogiup'],
-    description: 'Danh sách các lệnh của Bot',
+    description: 'Danh sách các lệnh của Bot với menu chọn lọc',
 
     async execute(message, args) {
-        const helpEmbed = new EmbedBuilder()
-            .setColor('#0099ff')
-            .setTitle('📚 Danh Sách Lệnh')
-            .setDescription('Dưới đây là các lệnh bạn có thể sử dụng:')
-            .addFields(
-                { 
-                    name: '🎮 Trò chơi (Games)', 
-                    value: '• slots, slot, sl: Chơi máy đánh bạc\n• taixiu, tx: Chơi tài xỉu',
-                    inline:false  
-                },                
-                { 
-                    name: '💵 Tiền tệ', 
-                    value: '• balance, money, tien, cash: Kiểm tra số tiền hiện có\n• daily, claim: Nhận thưởng daily\n• exchange, convert, doitien: Đổi Mora sang Nguyên Thạch',
-                    inline:true   
-                },
-                { 
-                    name: invisibleChar, 
-                    value: '• shop: Xem shop\n• balo: Xem balo\n• buy: Mua đồ',
-                    inline:true   
-                },
-                { name: invisibleChar, value: '• balo give: Tặng đồ\n• balo sell: Bán đồ\n• balo open: Mở đồ(chỉ mở những đồ có thể mở trong túi)\n• rate, gacha: Xem tỉ lệ trúng thưởng', inline: true },
-                { 
-                    name: '❤️ Tương tác',
-                    value: '• kiss: Hôn\n• hug: ôm\n• airkiss: hôn gió\n• cuddle: ôm ấp\n• lick: liếm\n• pat: vỗ\n• highfive: đập tay',
-                    inline:true                      
-                },               
-                 { 
-                    name: invisibleChar, 
-                    value: '• slap: tát\n• poke: chọc\n• bite: cắn\n• punch: đấm\n• bonk: gõ đầu\n• kick: đá\n• stare: nhìn phán xét\n• laugh: cười',
-                    inline:true 
-                },
-                { 
-                    name: '⚙️ Cấu hình (Admin)', 
-                    value: '• setwordchain-vi: Thiết lập kênh nối chữ Tiếng Việt\n• setwordchain-en: Thiết lập kênh nối chữ Tiếng Anh\n• setwordle: Thiết lập kênh vua tiếng việt\nhint, wc, ws: Dùng để search từ trong kênh nối từ Tiếng Việt/Tiếng Anh(Mỗi ngày được 5 lượt)' 
-                }
-            )
-            .setFooter({ text: 'Sử dụng dấu chấm (.) trước mỗi lệnh.' })
-            .setTimestamp();
+        // 1. Định nghĩa các danh mục và lệnh tương ứng
+        const categories = {
+            games: {
+                label: 'Trò chơi (Games)',
+                emoji: '🎮',
+                color: '#FF5733', // Màu cam đỏ (Action/Combat)
+                commands: '• slots, slot, sl: Máy đánh bạc\n• taixiu, tx: Chơi tài xỉu\n• hint, wc, ws: Dùng để search từ trong kênh nối từ Tiếng Việt/Tiếng Anh(Mỗi ngày được 5 lượt)'
+            },
+            currency: {
+                label: 'Tiền tệ & Cửa hàng',
+                emoji: '💵',
+                color: '#FFD700', // Màu vàng Mora
+                commands: '• balance, money: Kiểm tra số dư\n• daily, claim: Nhận thưởng hàng ngày\n• exchange, doitien: Đổi tiền\n• shop, buy: Xem và mua đồ'
+            },
+            inventory: {
+                label: 'Túi đồ (Inventory)',
+                emoji: '🎒',
+                color: '#3498db', // Màu xanh dương thông tin
+                commands: '• balo: Xem túi đồ\n• balo give: Tặng vật phẩm\n• balo sell: Bán vật phẩm\n• balo open: Mở vật phẩm'
+            },
+            interaction: {
+                label: 'Tương tác',
+                emoji: '❤️',
+                color: '#FFB6C1', // Màu hồng tình cảm
+                commands: '• Hạnh phúc: kiss, hug, cuddle, cheek, airkiss, lick, nibled\n• Vui vẻ: laugh, highfive, pat, stare, pinch,\n• Mạnh bạo: slap, poke, punch, kick, fight, bonk'
+            },
+            admin: {
+                label: 'Cấu hình (Admin)',
+                emoji: '⚙️',
+                color: '#95a5a6', // Màu xám hệ thống
+                commands: '• setwordchain vi/en: Cài đặt nối chữ\n• setwordle: Cài đặt Vua Tiếng Việt'
+            }
+        };
 
-        await message.reply({ embeds: [helpEmbed] });
+        // 2. Tạo Embed mặc định ban đầu
+        const mainEmbed = new EmbedBuilder()
+            .setColor('#0099ff')
+            .setTitle('📚 Trung Tâm Trợ Giúp')
+            .setDescription('Vui lòng chọn một danh mục từ **Menu bên dưới** để xem chi tiết các lệnh.')           
+            .setFooter({ text: 'Sử dụng dấu chấm (.) trước mỗi lệnh.' });
+
+        // 3. Tạo Select Menu
+        const selectMenu = new StringSelectMenuBuilder()
+            .setCustomId('help_menu')
+            .setPlaceholder('Chọn danh mục lệnh tại đây...')
+            .addOptions(
+                Object.keys(categories).map(key => ({
+                    label: categories[key].label,
+                    value: key,
+                    emoji: categories[key].emoji,
+                    description: `Xem các lệnh về ${categories[key].label}`
+                }))
+            );
+
+        const row = new ActionRowBuilder().addComponents(selectMenu);
+
+        // 4. Gửi tin nhắn và bắt đầu lắng nghe tương tác
+        const response = await message.reply({ 
+            embeds: [mainEmbed], 
+            components: [row] 
+        });
+
+        // Tạo bộ lọc: Chỉ người gọi lệnh mới có thể nhấn menu
+        const filter = (i) => i.user.id === message.author.id;
+        const collector = response.createMessageComponentCollector({ 
+            filter, 
+            componentType: ComponentType.StringSelect,
+            time: 60000 // Menu tồn tại trong 60 giây
+        });
+
+        collector.on('collect', async (interaction) => {
+            const selected = interaction.values[0];
+            const category = categories[selected];
+
+            const updatedEmbed = new EmbedBuilder()
+                .setColor(category.color)
+                .setTitle(`${category.emoji} Danh mục: ${category.label}`)
+                .setDescription(category.commands)
+                .setFooter({ text: 'Dùng (.) trước lệnh • Hết hạn sau 60s' });
+
+            await interaction.update({ embeds: [updatedEmbed] });
+        });
+
+        collector.on('end', () => {
+            // Vô hiệu hóa menu khi hết thời gian
+            const disabledRow = new ActionRowBuilder().addComponents(
+                selectMenu.setDisabled(true).setPlaceholder('Menu đã hết hạn.')
+            );
+            response.edit({ components: [disabledRow] }).catch(() => {});
+        });
     },
 };

@@ -18,7 +18,7 @@ const SHOP_ITEMS = {
         sellPrice:5,
         currency: primo,
         description: 'Mở ra ngẫu nhiên vật phẩm hiếm',
-        icon: '<:blindbox:1451618660673130546>',
+        icon: '<:lootbox:1452243400332935179>',
         canOpen: true
     },
     'bim_bim': {

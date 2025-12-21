@@ -1,37 +1,13 @@
-const { setWordleData,getWordleData } = require("../game/wordleHandler");
-const { getRandomWord,shuffleWord } = require('../game/wordleHandler');
+const { nextQuestion, getWordleData, setWordleData } = require("../game/wordleHandler");
 
 module.exports = {
   name: "start",
-  async execute(message, args) {
-    //game đoán chữ
-    const guildId = message.guild.id;
+  async execute(message) {
+    const wordleData = await getWordleData(message.guild.id);
+    if (message.channel.id !== wordleData.channelId) return;
+    if (wordleData.status) return message.reply("Game đang chạy rồi!");
 
-    const wordleData = await getWordleData(guildId);
-
-    const wordleChannelId = wordleData.channelId;
-
-    if (!wordleChannelId) return ;
-    //wordle game    
-    if (message.channel.id === wordleChannelId) {
-      if (wordleData.status){
-        return message.channel.send('Trò chơi đã bắt đầu, nếu không thấy game đang chạy hãy dùng lệnh .stop để ngừng game')
-      }
-
-      const firstAnswer = getRandomWord(); 
-      const shuffled = shuffleWord(firstAnswer);     
-
-      await setWordleData(guildId,{
-        status:true,
-        answer:firstAnswer,
-        turn:1
-      })     
-
-      return message.channel.send(
-        `**Trò chơi đoán chữ bắt đầu!** (Giới hạn: 5 lượt)\n\n📝 **Lượt 1/5:** Hãy sắp xếp các chữ: **${shuffled}**`
-      );
-    }
-
-    return;
+    await setWordleData(message.guild.id, { turn: 0, status: true });
+    return nextQuestion(message, message.guild.id);
   },
 };
