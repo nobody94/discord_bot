@@ -127,9 +127,9 @@ async function finishRound(message) {
 
     if (win) {
       await addMoney(userId, bet.amount * 2);
-      resultMessage += `**${bet.username}**: Cược **${choiceName}** (**${bet.amount.toLocaleString()}**)\nLụm **${(bet.amount * 2).toLocaleString()}** ${getIcon()}\n`;
+      resultMessage += `**${bet.username}**: Cược **${choiceName}** (**${bet.amount.toLocaleString()}**)\n**Lụm ${(bet.amount * 2).toLocaleString()}** ${getIcon()}\n`;
     } else {
-     resultMessage += `**${bet.username}**: Cược **${choiceName}** (**${bet.amount.toLocaleString()}**)\nToạch **${bet.amount.toLocaleString()}** ${getIcon()}\n`;
+     resultMessage += `**${bet.username}**: Cược **${choiceName}** (**${bet.amount.toLocaleString()}**)\n**Toạch ${bet.amount.toLocaleString()}** ${getIcon()}\n`;
     }
   }
 
