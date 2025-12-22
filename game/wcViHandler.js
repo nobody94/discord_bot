@@ -1,6 +1,6 @@
 const { renderKey, getKey, setKey } = require("../utils/db");
 const { viDictionary } = require("../dictionary/dictionary");
-const {errorIcon} = require('../utils/icon');
+const { errorIcon } = require("../utils/icon");
 
 async function getWCViData(guildId) {
   const dbKey = renderKey("wordchain_vi", guildId);
@@ -65,9 +65,9 @@ function getSecondPart(word) {
   return parts[0];
 }
 
-function getHint(state) {  
+function getHint(state) {
   if (!state.gameActive || !state.currentWord) return null;
-  
+
   const dictionary = viDictionary;
   const secondPart = getSecondPart(state.currentWord).toLowerCase();
 
@@ -126,7 +126,7 @@ async function stopGame(guildId) {
 
 async function isRepeatPlayer(guildId, userId) {
   const state = await getWCViData(guildId);
-   if (!state || !state.lastUserId) return false;
+  if (!state || !state.lastUserId) return false;
   return state.lastUserId === userId;
 }
 
@@ -136,8 +136,8 @@ async function setLastUser(guildId, userId) {
   });
 }
 
-async function gameProcess(guildId,newWord) {
-  // 1. Lấy cấu hình từ DB 
+async function gameProcess(guildId, newWord) {
+  // 1. Lấy cấu hình từ DB
   const viState = await getWCViData(guildId);
   const dictionary = viDictionary;
   if (!viState.gameActive) {
@@ -145,17 +145,6 @@ async function gameProcess(guildId,newWord) {
       success: false,
       reason: "NOT_ACTIVE",
       message: "Game chưa hoạt động",
-    };
-  }
-  // --- PHẦN THÊM MỚI: KIỂM TRA KÝ TỰ ĐẶC BIỆT VÀ SỐ ---
-  // Regex này cho phép chữ cái Tiếng Việt và khoảng trắng, chặn số và ký tự lạ
-  const regex = /^[a-zàáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵ\s]+$/i;
-  
-  if (!regex.test(newWord)) {
-    return {
-      success: false,
-      reason: "INVALID_CHARACTERS",
-      message: `${errorIcon} Từ không được chứa số hoặc ký tự đặc biệt!`,
     };
   }
   const parts = newWord.split(/\s+/);
@@ -175,6 +164,19 @@ async function gameProcess(guildId,newWord) {
       message: "",
     };
   }
+  // --- PHẦN THÊM MỚI: KIỂM TRA KÝ TỰ ĐẶC BIỆT VÀ SỐ ---
+  // Regex hỗ trợ đầy đủ Unicode Tiếng Việt, chữ cái và khoảng trắng
+  // const regex =
+  //   /^[a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂÂÊÔƠƯSauàáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵ\s|_]+$/;
+  const regex = /^[\p{L}\s]+$/u;
+
+  if (!regex.test(newWord)) {
+    return {
+      success: false,
+      reason: "INVALID_CHARACTERS",
+      message: `${errorIcon} Từ không được chứa số hoặc ký tự đặc biệt!`,
+    };
+  }
   // Lấy tất cả cụm 2 từ chưa dùng và bắt đầu bằng secondWord
   const nextOptions = dictionary.filter((p) => {
     if (viState.wordHistory.includes(p)) return false;
@@ -182,7 +184,7 @@ async function gameProcess(guildId,newWord) {
   });
 
   //hết từ nối
-  if (nextOptions.length === 0) {   
+  if (nextOptions.length === 0) {
     return {
       success: false,
       reason: "OUT_OF_WORD",
@@ -242,5 +244,5 @@ module.exports = {
   startGame,
   getHint,
   isGameActive,
-  getSecondPart
+  getSecondPart,
 };

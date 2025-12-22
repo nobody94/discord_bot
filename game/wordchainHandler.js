@@ -6,7 +6,15 @@ const {errorIcon,verifyIcon} = require('../utils/icon');
 async function wordchainProcess(message, wordchain) {
   const guildId = message.guildId;
   const userId = message.author.id;
-  const content = message.content.trim().toLowerCase();   
+  const content = message.content.trim().toLowerCase();  
+  
+  // Regex này chỉ cho phép chữ cái (Unicode) và khoảng trắng.
+  const cleanRegex = /^[\p{L}\s]+$/u;
+
+  // Nếu tin nhắn chứa emoji, icon, số hoặc ký tự lạ -> Kết thúc hàm luôn (im lặng)
+  if (!cleanRegex.test(content)) {
+    return; 
+  } 
 
   if (await wordchain.isRepeatPlayer(guildId, message.author.id)) {
     return message.reply({
