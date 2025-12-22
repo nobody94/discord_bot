@@ -147,6 +147,17 @@ async function gameProcess(guildId,newWord) {
       message: "Game chưa hoạt động",
     };
   }
+  // --- PHẦN THÊM MỚI: KIỂM TRA KÝ TỰ ĐẶC BIỆT VÀ SỐ ---
+  // Regex này cho phép chữ cái Tiếng Việt và khoảng trắng, chặn số và ký tự lạ
+  const regex = /^[a-zàáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵ\s]+$/i;
+  
+  if (!regex.test(newWord)) {
+    return {
+      success: false,
+      reason: "INVALID_CHARACTERS",
+      message: `${errorIcon} Từ không được chứa số hoặc ký tự đặc biệt!`,
+    };
+  }
   const parts = newWord.split(/\s+/);
   const [firstWord, secondWord] = parts;
   // check độ dài
@@ -171,14 +182,7 @@ async function gameProcess(guildId,newWord) {
   });
 
   //hết từ nối
-  if (nextOptions.length === 0) {
-    await setWCViData(guildId, {
-      gameActive: true,
-      currentWord: startingWord,
-      lastUserId: null,
-      wordHistory: [],
-    });
-
+  if (nextOptions.length === 0) {   
     return {
       success: false,
       reason: "OUT_OF_WORD",

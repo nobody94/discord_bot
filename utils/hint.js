@@ -1,38 +1,60 @@
-const {renderKey,getKey,setKey} = require('./db');
+const { renderKey, getKey, setKey } = require('./db');
 
-async function checkHintLimit(newKey,userId) {
+async function checkHintLimit(newKey, userId) {
     const today = new Date().toISOString().split('T')[0];
-    const key = renderKey(newKey,'hint');
+    const key = renderKey(newKey, 'hint');
     
     let data = await getKey(key);
     
-    // Nếu chưa có dữ liệu hoặc sang ngày mới thì reset
-    if (!data || data.hints?.length == 0) {
-        data = { 
-            hints:[
-                {
-                    userId,
-                    count: 0, 
-                    lastUsed: today
-                }
-            ]
+    // 1. Khởi tạo cấu trúc dữ liệu nếu chưa tồn tại
+    if (!data || !data.hints) {
+        data = { hints: [] };
+    }
+
+    // 2. Tìm dữ liệu của người dùng cụ thể
+    let userIndex = data.hints.findIndex((d) => d.userId === userId);
+    let userData = data.hints[userIndex];
+
+    // 3. Kiểm tra reset theo ngày: Nếu chưa có data hoặc ngày cuối dùng khác hôm nay
+    if (!userData || userData.lastUsed !== today) {
+        const newUserData = {
+            userId,
+            count: 0,
+            lastUsed: today
+        };
+
+        if (userIndex === -1) {
+            data.hints.push(newUserData);
+        } else {
+            data.hints[userIndex] = newUserData;
+        }
+        
+        userData = newUserData;
+    }
+
+    // 4. Kiểm tra giới hạn 5 lượt
+    const MAX_HINTS = 5;
+    if (userData.count >= MAX_HINTS) {
+        return { 
+            canUse: false, 
+            remaining: 0, 
+            count: userData.count 
         };
     }
 
-    const userData = data.hints.find((d)=> d.userId == userId);
-
-    if (userData.count >= 5) {
-        return { canUse: false, remaining: 0 };
-    }
-
-    data = {
-        hints: data.hints.map((d)=> d.userId == userId ? {...d,count: d.count + 1} :d)
-    };
+    // 5. Tăng số lượt dùng và lưu lại vào DB
+    userData.count += 1;
+    data.hints = data.hints.map((d) => d.userId === userId ? userData : d);
+    
     await setKey(key, data);
     
-    return { canUse: true, remaining: 5 - userData.count };
+    return { 
+        canUse: true, 
+        remaining: MAX_HINTS - userData.count,
+        count: userData.count
+    };
 }
 
-module.exports={
+module.exports = {
     checkHintLimit
-}
+};

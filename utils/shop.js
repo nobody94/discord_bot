@@ -53,6 +53,38 @@ const SHOP_ITEMS = {
         description: desc.onlyView,
         icon: '<:birthdaycake:1452248466016436235>'
     },
+    'xien_ban': {
+        name: 'Xiên bẩn',
+        price: 20000,
+        sellPrice:20000,
+        currency: mora,
+        description: desc.onlyView,
+        icon: '<:barbecue:1451606702632865813>'
+    },
+    'coca': {
+        name: 'Cô ca',
+        price: 10000,
+        sellPrice:10000,
+        currency: mora,
+        description: desc.onlyView,
+        icon: '<:coca:1452491105940537647>'
+    },
+    'com_nam': {
+        name: 'Cơm nắm',
+        price: 15000,
+        sellPrice:15000,
+        currency: mora,
+        description: desc.onlyView,
+        icon: '<:comnam:1452491150765199484>'
+    },
+    'nuoc_ep': {
+        name: 'Nước ép',
+        price: 25000,
+        sellPrice:25000,
+        currency: mora,
+        description: desc.onlyView,
+        icon: '<:juice:1452491233782923284>'
+    },
     'pizza': {
         name: 'Pizza',
         price: 100000,
@@ -92,14 +124,38 @@ const SHOP_ITEMS = {
         currency: mora,
         description: desc.onlyView,
         icon: '<:bear:1451058314237448284>',
-    },
-    'xien_ban': {
-        name: 'Xiên bẩn',
-        price: 20000,
-        sellPrice:20000,
+    },    
+    'donut': {
+        name: 'Donut',
+        price: 30000,
+        sellPrice:30000,
         currency: mora,
         description: desc.onlyView,
-        icon: '<:barbecue:1451606702632865813>'
+        icon: '<:donut:1452491274434379978>'
+    },
+    'banh_bao': {
+        name: 'Bánh bao',
+        price: 10000,
+        sellPrice:10000,
+        currency: mora,
+        description: desc.onlyView,
+        icon: '<:banhbao:1452491299528773662>'
+    },
+    'xuc_xich': {
+        name: 'Xúc xích',
+        price: 10000,
+        sellPrice:10000,
+        currency: mora,
+        description: desc.onlyView,
+        icon: '<:xucxich:1452491332261253182>'
+    },
+    'socola_box': {
+        name: 'Hộp socola',
+        price: 200000,
+        sellPrice:200000,
+        currency: mora,
+        description: desc.onlyView,
+        icon: '<:chocolatebox:1452491394663841803>'
     },
     'tui_rac': {
         name: 'Túi rác 3 ngày chưa vứt',

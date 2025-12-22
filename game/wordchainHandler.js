@@ -5,9 +5,8 @@ const {errorIcon,verifyIcon} = require('../utils/icon');
 
 async function wordchainProcess(message, wordchain) {
   const guildId = message.guildId;
-  const content = message.content.trim().toLowerCase();
-  
-  const result = await wordchain.gameProcess(guildId, content);
+  const userId = message.author.id;
+  const content = message.content.trim().toLowerCase();   
 
   if (await wordchain.isRepeatPlayer(guildId, message.author.id)) {
     return message.reply({
@@ -15,6 +14,8 @@ async function wordchainProcess(message, wordchain) {
       allowedMentions: { repliedUser: false },
     });
   }
+
+  const result = await wordchain.gameProcess(guildId, content);
 
   if (result.success) {
     const tienThuong = 50;
@@ -42,14 +43,21 @@ async function wordchainProcess(message, wordchain) {
         allowedMentions: { repliedUser: false },
       });
       await wordchain.stopGame(guildId);
-      const startgame = await wordchain.startGame(guildId, newStart);
-      setTimeout(() => {
-        const newStart = wordchain.getRandomWords();
-        startgame;
+      setTimeout(async () => {
+        // BƯỚC 1: Lấy từ mới trước
+        const newStart = wordchain.getRandomWords(); 
+        
+        // BƯỚC 2: Bắt đầu game với từ đó
+        await wordchain.startGame(guildId, newStart); 
+        
+        // BƯỚC 3: Lấy chữ cái cần nối tiếp
+        const nextLetter = wordchain.getSecondPart(newStart); 
+
         message.channel.send(
-          `🔄 **Ván mới bắt đầu!** Từ bắt đầu: **${newStart}**`
+          `🔄 **Ván mới bắt đầu!** Từ bắt đầu: **${newStart}**\nTừ tiếp theo phải bắt đầu bằng **"${nextLetter}"**`
         );
       }, 3000);
+      return;
     }
     if (result.reason == "LENGTH_OVER") {
       return;
