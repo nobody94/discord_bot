@@ -1,13 +1,14 @@
 const { setWordleData, nextQuestion } = require("../game/wordleHandler"); // Thêm nextQuestion vào đây
 const { verifyIcon, errorIcon } = require('../utils/icon.js');
 const {DEVELOPER_IDS} = require('../utils/constant.js');
+const { PermissionsBitField } = require('discord.js');
 
 module.exports = {
   name: "setwordle",
   description: "Thiết lập kênh và bắt đầu game đoán chữ",
   
   async execute(message, args) {
-    if (!message.member.permissions.has("MANAGE_CHANNELS")|| !DEVELOPER_IDS.includes(message.author.id)) {
+    if (!message.member.permissions.has(PermissionsBitField.Flags.ManageChannels)|| !DEVELOPER_IDS.includes(message.author.id)) {
       return message.reply(`${errorIcon} Bạn cần quyền Quản lý kênh.`);
     }
 

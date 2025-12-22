@@ -1,13 +1,14 @@
 const ViWordchain = require("../game/wcViHandler");
 const EnWordchain = require("../game/wcEnHandler");
 const {DEVELOPER_IDS} = require('../utils/constant.js');
+const { PermissionsBitField } = require('discord.js');
 
 module.exports = {
   name: "wordchain",
   description: "Thiết lập kênh chơi game đoán chữ",
 
   async execute(message, args) {
-    if (!message.member.permissions.has("MANAGE_CHANNELS") || !DEVELOPER_IDS.includes(message.author.id)) {
+    if (!message.member.permissions.has(PermissionsBitField.Flags.ManageChannels) || !DEVELOPER_IDS.includes(message.author.id)) {
       return message.reply("Bạn cần quyền `Quản lý kênh`.");
     }
 
