@@ -1,20 +1,24 @@
 const Money = require("../utils/currency");
 const ViWordchain = require("./wcViHandler");
 const EnWordchain = require("./wcEnHandler");
-const {errorIcon,verifyIcon} = require('../utils/icon');
+const { errorIcon, verifyIcon } = require("../utils/icon");
 
 async function wordchainProcess(message, wordchain) {
   const guildId = message.guildId;
   const userId = message.author.id;
-  const content = message.content.trim().toLowerCase();  
-  
+  const content = message.content.trim().toLowerCase();
+
   // Regex này chỉ cho phép chữ cái (Unicode) và khoảng trắng.
   const cleanRegex = /^[\p{L}\s]+$/u;
 
   // Nếu tin nhắn chứa emoji, icon, số hoặc ký tự lạ -> Kết thúc hàm luôn (im lặng)
   if (!cleanRegex.test(content)) {
-    return; 
-  } 
+    return;
+  }
+
+  if (result.reason == "LENGTH_OVER") {
+    return;
+  }
 
   if (await wordchain.isRepeatPlayer(guildId, message.author.id)) {
     return message.reply({
@@ -26,10 +30,10 @@ async function wordchainProcess(message, wordchain) {
   const result = await wordchain.gameProcess(guildId, content);
 
   if (result.success) {
-    const tienThuong = 50;
-    const userId = message.author.id;
-
     await wordchain.setLastUser(guildId, userId);
+
+    const tienThuong = 50;
+    const userId = message.author.id;    
 
     await Money.addMoney(userId, tienThuong);
 
@@ -53,13 +57,13 @@ async function wordchainProcess(message, wordchain) {
       await wordchain.stopGame(guildId);
       setTimeout(async () => {
         // BƯỚC 1: Lấy từ mới trước
-        const newStart = wordchain.getRandomWords(); 
-        
+        const newStart = wordchain.getRandomWords();
+
         // BƯỚC 2: Bắt đầu game với từ đó
-        await wordchain.startGame(guildId, newStart); 
-        
+        await wordchain.startGame(guildId, newStart);
+
         // BƯỚC 3: Lấy chữ cái cần nối tiếp
-        const nextLetter = wordchain.getSecondPart(newStart); 
+        const nextLetter = wordchain.getSecondPart(newStart);
 
         message.channel.send(
           `🔄 **Ván mới bắt đầu!** Từ bắt đầu: **${newStart}**\nTừ tiếp theo phải bắt đầu bằng **"${nextLetter}"**`
@@ -67,30 +71,27 @@ async function wordchainProcess(message, wordchain) {
       }, 3000);
       return;
     }
-    if (result.reason == "LENGTH_OVER") {
-      return;
-    } else {
-      await message
-        .reply({
-          content: replyMessage,
-          allowedMentions: { repliedUser: false },
-        })
-        .then((msg) => {
-          // Thiết lập thời gian chờ 10 giây (10000ms) trước khi xóa
-          setTimeout(() => {
-            msg
-              .delete()
-              .catch((err) => console.error("Không thể xóa tin nhắn:", err));
-          }, 10000);
-        });
-    }
+
+    await message
+      .reply({
+        content: replyMessage,
+        allowedMentions: { repliedUser: false },
+      })
+      .then((msg) => {
+        // Thiết lập thời gian chờ 10 giây (10000ms) trước khi xóa
+        setTimeout(() => {
+          msg
+            .delete()
+            .catch((err) => console.error("Không thể xóa tin nhắn:", err));
+        }, 10000);
+      });
   }
 }
 
 async function wordchainHandler(message) {
   const guildId = message.guildId;
   const viState = await ViWordchain.getWCViData(guildId);
-  const enState = await EnWordchain.getWCEnData(guildId);  
+  const enState = await EnWordchain.getWCEnData(guildId);
 
   if (message.channelId === viState.channelId) {
     if (viState.gameActive) {
