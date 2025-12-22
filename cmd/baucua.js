@@ -1,6 +1,7 @@
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle,ModalBuilder, TextInputBuilder, TextInputStyle} = require("discord.js");
-const { baucuaIcon } = require("../utils/icon");
+const { baucuaIcon,errorIcon } = require("../utils/icon");
 const Money = require('../utils/currency');
+const { maxAmount } = require('../utils/constant');
 
 const baucuaLabel = {
     bau: {
@@ -95,7 +96,7 @@ module.exports = {
 
       const moneyInput = new TextInputBuilder()
         .setCustomId("bet_amount")
-        .setLabel("Nhập số tiền Mora muốn cược:")
+        .setLabel(`Nhập số tiền Mora muốn cược (Không quá ${maxAmount}):`)
         .setStyle(TextInputStyle.Short)
         .setPlaceholder("Ví dụ: 1000")
         .setRequired(true);
@@ -113,6 +114,13 @@ module.exports = {
         return interaction.reply({ content: "Số tiền không hợp lệ!", ephemeral: true });
       }
 
+      if (betAmount > maxAmount) {
+        return interaction.reply({
+          content: `${errorIcon} Mức cược tối đa mỗi lượt là **${maxAmount} ${Money.getIcon}**!`,
+          ephemeral: true,
+        });
+      }
+
       const balance = await Money.getBalance(userId);
       if (balance < betAmount) {
         return interaction.reply({
@@ -125,7 +133,6 @@ module.exports = {
       await interaction.deferReply(); // Trả lời tạm thời để xử lý logic lâu hơn
       await Money.removeMoney(userId, betAmount);
 
-      const loadingIcons = ["❓", "❓", "❓"];
       const animationFrames = 3; // Số lần đổi icon để tạo hiệu ứng quay
       
       for (let i = 0; i < animationFrames; i++) {
