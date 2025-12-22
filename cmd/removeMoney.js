@@ -4,6 +4,7 @@ const {DEVELOPER_IDS} = require('../utils/constant.js');
 
 module.exports = {
     name: 'removemoney',
+    aliases:['rmmoney'],
     description: 'Trừ tiền của người dùng bằng @mention hoặc ID (chỉ dành cho Developer).',  
 
     async execute(message, args) {

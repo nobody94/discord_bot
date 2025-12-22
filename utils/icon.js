@@ -9,13 +9,21 @@ const dicesIcon = [
   "<:dice5:1451038914185003082>",
   "<:dice6:1451038922724610068>",
 ]
+const baucuaIcon = {
+    bau: '🍐',
+    cua: '🦀',
+    tom: '🦞',
+    ca: '🐟',
+    ga: '🐓',
+    nai: '🦌'
+};
+
 const slotsIcon = [
   "<:cherries:1450752576256475156>",
   "<:watermelon:1450752616349962250>",
   "<:lemon:1450752606887477321>",
   "<:slotmachine:1450752596116635730>",
-  "<:grapes:1451466576850190356>",  
-  "<:orange:1451471799022915617>"  
+  "<:grapes:1451466576850190356>"   
 ]
 
 
@@ -23,7 +31,8 @@ const slot =[
   "<:strawberry:1451471830681522291>",
   "<:bar:1451472695739809913>",  
   "<:diamond:1451466638103806012>",
-  "<:bell:1451466624216596613>" 
+  "<:bell:1451466624216596613>" ,
+  "<:orange:1451471799022915617>"  
 ]
 
 module.exports={
@@ -31,5 +40,6 @@ module.exports={
     errorIcon,
     bagIcon,
     dicesIcon,
-    slotsIcon
+    slotsIcon,
+    baucuaIcon
 }

@@ -4,26 +4,26 @@ const {
   Collection,
   GatewayIntentBits,
   InteractionType,
-  Events
+  Events,
 } = require("discord.js");
 const fs = require("fs");
 const path = require("path");
 
-const { db } = require('./utils/db');
+const { db } = require("./utils/db");
 
 const { wordleProcess } = require("./game/wordleHandler");
-const { wordchainHandler } = require('./game/wordchainHandler');
-const { errorIcon } = require('./utils/icon');
+const { wordchainHandler } = require("./game/wordchainHandler");
+const { errorIcon } = require("./utils/icon");
 
-const express = require('express');
+const express = require("express");
 const app = express();
-app.get('/', (req, res) => {
-  console.log('--- Có tín hiệu Ping từ UptimeRobot! ---');
-  res.send('Server is running!');
+app.get("/", (req, res) => {
+  console.log("--- Có tín hiệu Ping từ UptimeRobot! ---");
+  res.send("Server is running!");
 });
 const port = process.env.PORT || 3000;
 
-app.listen(port, '0.0.0.0', () => {
+app.listen(port, "0.0.0.0", () => {
   console.log(`Server is running on port ${port}`);
 });
 
@@ -73,10 +73,9 @@ client.on("messageCreate", async (message) => {
   if (!message) return;
   if (message.author.bot) return;
 
-
   const content = message.content.trim();
 
-  //xử lý lệnh 
+  //xử lý lệnh
   if (content.startsWith(PREFIX)) {
     const args = content.slice(PREFIX.length).trim().split(/\s+/);
     const commandName = args.shift().toLowerCase();
@@ -146,14 +145,25 @@ client.on("interactionCreate", async (interaction) => {
       }
     }
     // Kiểm tra nút của đổi tiền
-    if (interaction.customId.startsWith('exchange_')) {
+    if (interaction.customId.startsWith("exchange_")) {
       // Lấy giá trị từ các trường input trong modal
       const command = client.commands.get("exchange");
-       if (command && command.handleInteraction) {
+      if (command && command.handleInteraction) {
         try {
           return await command.handleInteraction(interaction);
         } catch (error) {
           console.error("LỖI XỬ LÝ Nút SUBMIT ĐỔi tiền:", error);
+        }
+      }
+    }
+    //baucua
+    if (interaction.customId.startsWith("bc_")) {
+      const command = client.commands.get("baucua");
+      if (command && command.handleInteraction) {
+        try {
+          return await command.handleInteraction(interaction);
+        } catch (error) {
+          console.error("LỖI XỬ LÝ Nút SUBMIT baucua:", error);
         }
       }
     }
@@ -184,7 +194,7 @@ client.on("interactionCreate", async (interaction) => {
         }
       }
     }
-    // Kiểm tra Modal của ANXIN 
+    // Kiểm tra Modal của ANXIN
     if (interaction.customId.startsWith("confirm_give_modal_")) {
       const command = client.commands.get("anxin");
       if (command && command.handleInteraction) {
@@ -196,10 +206,20 @@ client.on("interactionCreate", async (interaction) => {
       }
     }
     // Kiểm tra Modal của đổi tiền
-    if (interaction.customId.startsWith('exchange_modal_')) {
+    if (interaction.customId.startsWith("exchange_modal_")) {
       // Lấy giá trị từ các trường input trong modal
       const command = client.commands.get("exchange");
-       if (command && command.handleInteraction) {
+      if (command && command.handleInteraction) {
+        try {
+          return await command.handleInteraction(interaction);
+        } catch (error) {
+          console.error("LỖI XỬ LÝ MODAL SUBMIT ĐỔi tiền:", error);
+        }
+      }
+    }
+    if (interaction.customId.startsWith("modal_bc_")) {
+      const command = client.commands.get("baucua");
+      if (command && command.handleInteraction) {
         try {
           return await command.handleInteraction(interaction);
         } catch (error) {
@@ -219,11 +239,12 @@ async function startBot() {
     if (!Token) return console.error(`${errorIcon} BOT_TOKEN missing!`);
 
     // Kiểm tra nếu client đã login rồi thì không login lại
-    client.login(Token)
+    client
+      .login(Token)
       .then(() => {
         console.log("🔑 Login request sent to Discord");
       })
-      .catch(err => {
+      .catch((err) => {
         console.error("❌ Discord login failed:", err);
       });
     // if (!client.readyAt) {
