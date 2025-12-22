@@ -1,173 +1,162 @@
-const { ActionRowBuilder, ButtonBuilder, ButtonStyle,ModalBuilder, TextInputBuilder, TextInputStyle} = require("discord.js");
-const { baucuaIcon,errorIcon } = require("../utils/icon");
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle, ModalBuilder, TextInputBuilder, TextInputStyle } = require("discord.js");
+const { baucuaIcon,verifyIcon,errorIcon } = require("../utils/icon");
 const Money = require('../utils/currency');
-const { maxAmount } = require('../utils/constant');
+const {maxAmount} = require('../utils/constant');
 
 const baucuaLabel = {
-    bau: {
-      icon:baucuaIcon.bau,
-      label:"bầu"
-    },
-    cua: {
-      icon:baucuaIcon.cua,
-      label:'cua'
-    },
-    tom: {
-      icon:baucuaIcon.tom,
-      label:'tôm'
-    },
-    ca: {
-      icon:baucuaIcon.ca,
-      label:'cá'
-    },
-    ga: {
-      icon:baucuaIcon.ga,
-      label:'gà'
-    },
-    nai: {
-      icon:baucuaIcon.nai,
-      label:'nai'
-    }
+    bau: { icon: baucuaIcon.bau, label: "bầu" },
+    cua: { icon: baucuaIcon.cua, label: 'cua' },
+    tom: { icon: baucuaIcon.tom, label: 'tôm' },
+    ca: { icon: baucuaIcon.ca, label: 'cá' },
+    ga: { icon: baucuaIcon.ga, label: 'gà' },
+    nai: { icon: baucuaIcon.nai, label: 'nai' }
 };
+
+// Lưu trữ các phiên cược đang diễn ra
+const activeGames = new Map();
 
 function quayBauCua() {
     const keys = Object.keys(baucuaIcon);
-    // Quay 3 kết quả ngẫu nhiên
-    const results = [
+    return [
         keys[Math.floor(Math.random() * keys.length)],
         keys[Math.floor(Math.random() * keys.length)],
         keys[Math.floor(Math.random() * keys.length)]
     ];
-    return results;
 }
 
 module.exports = {
-  name: "baucua",
-  aliases: ["bc"],
-  description: "Chơi bầu cua tôm cá bằng nút bấm",
-  async execute(message) {
-    const row1 = new ActionRowBuilder().addComponents(
-      new ButtonBuilder()
-        .setCustomId("bc_bau")
-        .setLabel("Bầu")
-        .setEmoji(baucuaIcon.bau)
-        .setStyle(ButtonStyle.Primary),
-      new ButtonBuilder()
-        .setCustomId("bc_cua")
-        .setLabel("Cua")
-        .setEmoji(baucuaIcon.cua)
-        .setStyle(ButtonStyle.Primary),
-      new ButtonBuilder()
-        .setCustomId("bc_tom")
-        .setLabel("Tôm")
-        .setEmoji(baucuaIcon.tom)
-        .setStyle(ButtonStyle.Primary)
-    );
+    name: "baucua",
+    aliases: ["bc"],
+    async execute(message) {
+        const guildId = message.guild.id;
 
-    const row2 = new ActionRowBuilder().addComponents(
-      new ButtonBuilder()
-        .setCustomId("bc_ca")
-        .setLabel("Cá")
-        .setEmoji(baucuaIcon.ca)
-        .setStyle(ButtonStyle.Primary),
-      new ButtonBuilder()
-        .setCustomId("bc_ga")
-        .setLabel("Gà")
-        .setEmoji(baucuaIcon.ga)
-        .setStyle(ButtonStyle.Primary),
-      new ButtonBuilder()
-        .setCustomId("bc_nai")
-        .setLabel("Nai")
-        .setEmoji(baucuaIcon.nai)
-        .setStyle(ButtonStyle.Primary)
-    );
+        if (activeGames.has(guildId)) {
+            return message.reply("Một phiên cược đang diễn ra, hãy nhấn vào các nút ở trên để tham gia!");
+        }
 
-    await message.reply({
-      content: "🎲 **BẦU CUA TÔM CÁ** 🎲\nHãy chọn linh vật bạn muốn đặt cược:",
-      components: [row1, row2],
-    });
-  },
-  async handleInteraction(interaction) {
-    if (interaction.isButton()) {
-      const animal = interaction.customId.split("_")[1];
-      const modal = new ModalBuilder()
-        .setCustomId(`modal_bc_${animal}`)
-        .setTitle(`Đặt cược: ${baucuaLabel[animal].label.toUpperCase()}`);
-
-      const moneyInput = new TextInputBuilder()
-        .setCustomId("bet_amount")
-        .setLabel(`Nhập số tiền cược (Không quá ${maxAmount}):`)
-        .setStyle(TextInputStyle.Short)
-        .setPlaceholder("Ví dụ: 1000")
-        .setRequired(true);
-
-      modal.addComponents(new ActionRowBuilder().addComponents(moneyInput));
-      await interaction.showModal(modal);
-    }
-
-    if (interaction.isModalSubmit()) {
-      const animalChoice = interaction.customId.split("_")[2];
-      const betAmount = parseInt(interaction.fields.getTextInputValue("bet_amount"));
-      const userId = interaction.user.id;
-
-      if (isNaN(betAmount) || betAmount <= 0) {
-        return interaction.reply({ content: "Số tiền không hợp lệ!", ephemeral: true });
-      }
-
-      if (betAmount > maxAmount) {
-        return interaction.reply({
-          content: `${errorIcon} Mức cược tối đa mỗi lượt là **${maxAmount} ${Money.getIcon}**!`,
-          ephemeral: true,
-        });
-      }
-
-      const balance = await Money.getBalance(userId);
-      if (balance < betAmount) {
-        return interaction.reply({
-          content: `Bạn không đủ Mora! Số dư hiện tại: ${balance.toLocaleString()}`,
-          ephemeral: true,
-        });
-      }
-
-      // --- BẮT ĐẦU HIỆU ỨNG QUAY ---
-      await interaction.deferReply(); // Trả lời tạm thời để xử lý logic lâu hơn
-      await Money.removeMoney(userId, betAmount);
-
-      const animationFrames = 3; // Số lần đổi icon để tạo hiệu ứng quay
-      
-      for (let i = 0; i < animationFrames; i++) {
-        // Lấy ngẫu nhiên các icon để hiển thị lúc đang quay
-        const randomFrame = [
-          Object.values(baucuaIcon)[Math.floor(Math.random() * 6)],
-          Object.values(baucuaIcon)[Math.floor(Math.random() * 6)],
-          Object.values(baucuaIcon)[Math.floor(Math.random() * 6)]
-        ];
+        // Thiết lập thời gian kết thúc (30 giây từ hiện tại)
+        const duration = 30000;
+        const endTime = Date.now() + duration;
         
-        await interaction.editReply({
-          content: `Đang lắc... **[ ${randomFrame.join(" | ")} ]**`
+        // Tạo Discord Timestamp (chia 1000 để đổi sang giây)
+        // Định dạng <t:TIMESTAMP:R> sẽ hiển thị: "trong 30 giây" và tự đếm ngược
+        const discordTimestamp = Math.floor(endTime / 1000);
+
+        activeGames.set(guildId, {
+            players: [], 
+            endTime: endTime
         });
-        
-        // Đợi 0.8 giây giữa mỗi lần "lắc"
-        await new Promise(resolve => setTimeout(resolve, 800));
-      }
 
-      // --- KẾT QUẢ CUỐI CÙNG ---
-      const results = quayBauCua(); //
-      const matchCount = results.filter((r) => r === animalChoice).length; //
-      const icons = results.map((r) => baucuaIcon[r]); //
-      const choiceLabel = baucuaLabel[animalChoice].label; //
+        const row1 = new ActionRowBuilder().addComponents(
+            new ButtonBuilder().setCustomId('bc_bau').setLabel('Bầu').setEmoji(baucuaIcon.bau).setStyle(ButtonStyle.Primary),
+            new ButtonBuilder().setCustomId('bc_cua').setLabel('Cua').setEmoji(baucuaIcon.cua).setStyle(ButtonStyle.Primary),
+            new ButtonBuilder().setCustomId('bc_tom').setLabel('Tôm').setEmoji(baucuaIcon.tom).setStyle(ButtonStyle.Primary)
+        );
+        const row2 = new ActionRowBuilder().addComponents(
+            new ButtonBuilder().setCustomId('bc_ca').setLabel('Cá').setEmoji(baucuaIcon.ca).setStyle(ButtonStyle.Primary),
+            new ButtonBuilder().setCustomId('bc_ga').setLabel('Gà').setEmoji(baucuaIcon.ga).setStyle(ButtonStyle.Primary),
+            new ButtonBuilder().setCustomId('bc_nai').setLabel('Nai').setEmoji(baucuaIcon.nai).setStyle(ButtonStyle.Primary)
+        );
 
-      let msg = `Kết quả: **${icons.join(" | ")}**\n\n`; //
+        const mainMsg = await message.channel.send({
+            content: `🎲 **PHIÊN CƯỢC BẦU CUA BẮT ĐẦU** 🎲\n` +
+                     `Kết thúc cược: <t:${discordTimestamp}:R>\n` + // Đồng hồ đếm ngược tự động ở đây
+                     `(Tối đa ${maxAmount} ${Money.getIcon()} mỗi lượt)`,
+            components: [row1, row2]
+        });
 
-      if (matchCount > 0) {
-        const winAmount = betAmount + matchCount * betAmount; //
-        await Money.addMoney(userId, winAmount); //
-        msg += `🎉 Bạn chọn **${choiceLabel}** và trúng **${matchCount}** lần! Nhận được **${winAmount.toLocaleString()}** ${Money.getIcon()}.`; //
-      } else {
-        msg += `💸 Rất tiếc, không có con **${choiceLabel}** nào. Bạn mất **${betAmount.toLocaleString()}** ${Money.getIcon()}.`; //
-      }
+        // Xử lý kết thúc sau 30 giây
+        setTimeout(async () => {
+            const gameData = activeGames.get(guildId);
+            if (!gameData) return;
+            activeGames.delete(guildId);
 
-      await interaction.editReply({ content: msg });
+            // Vô hiệu hóa nút bấm
+            const disabledRows = [row1, row2].map(row => {
+                const newRow = ActionRowBuilder.from(row);
+                newRow.components.forEach(c => c.setDisabled(true));
+                return newRow;
+            });
+            
+            await mainMsg.edit({ content: "⌛ **Đã hết thời gian đặt cược! Đang lắc...**", components: disabledRows });
+
+            // Hiệu ứng lắc (2 giây)
+            await new Promise(r => setTimeout(r, 2000));
+
+            const results = quayBauCua(); //
+            const icons = results.map(r => baucuaIcon[r]); //
+            
+            let resultSummary = `🎲 Kết quả: **${icons.join(" | ")}** 🎲\n\n`; //
+            let winnersText = "";
+
+            if (gameData.players.length === 0) {
+                resultSummary += "Không có ai tham gia phiên này."; //
+            } else {
+                for (const player of gameData.players) {
+                    const matchCount = results.filter(r => r === player.choice).length; //
+                    if (matchCount > 0) {
+                        const winAmount = player.amount + (matchCount * player.amount); //
+                        await Money.addMoney(player.userId, winAmount); //
+                        winnersText += `${verifyIcon} **${player.userName}** lụm **${winAmount.toLocaleString()}** ${Money.getIcon()} (${player.choice})\n`; //
+                    } else {
+                        winnersText += `${errorIcon} **${player.userName}** toạch **${player.amount.toLocaleString()}** ${Money.getIcon()} (${player.choice})\n`; //
+                    }
+                }
+            }
+
+            await mainMsg.edit({ content: resultSummary + (winnersText || "") });
+        }, duration);
+    },
+
+    async handleInteraction(interaction) {
+        const guildId = interaction.guild.id;
+
+        if (interaction.isButton()) {
+            if (!activeGames.has(guildId)) {
+                return interaction.reply({ content: "Phiên cược này đã kết thúc!", ephemeral: true });
+            }
+            const animal = interaction.customId.split("_")[1];
+            const modal = new ModalBuilder()
+                .setCustomId(`modal_bc_${animal}`)
+                .setTitle(`Đặt cược: ${baucuaLabel[animal].label.toUpperCase()}`);
+
+            const moneyInput = new TextInputBuilder()
+                .setCustomId("bet_amount")
+                .setLabel(`Nhập số Mora cược (Tối đa ${maxAmount}):`)
+                .setStyle(TextInputStyle.Short)
+                .setRequired(true);
+
+            modal.addComponents(new ActionRowBuilder().addComponents(moneyInput));
+            await interaction.showModal(modal);
+        }
+
+        if (interaction.isModalSubmit()) {
+            const gameData = activeGames.get(guildId);
+            if (!gameData) return interaction.reply({ content: "Hết thời gian đặt cược!", ephemeral: true });
+
+            const animalChoice = interaction.customId.split("_")[2];
+            const betAmount = parseInt(interaction.fields.getTextInputValue("bet_amount"));
+            const userId = interaction.user.id;
+
+            if (isNaN(betAmount) || betAmount <= 0 || betAmount > 10000) {
+                return interaction.reply({ content: `Tiền cược không hợp lệ (1 - ${maxAmount})!`, ephemeral: true });
+            }
+
+            const balance = await Money.getBalance(userId);
+            if (balance < betAmount) {
+                return interaction.reply({ content: "Bạn không đủ tiền!", ephemeral: true });
+            }
+
+            // Trừ tiền ngay khi đặt cược
+            await Money.removeMoney(userId, betAmount);
+            gameData.players.push({
+                userId,
+                userName: interaction.user.username,
+                choice: animalChoice,
+                amount: betAmount
+            });
+
+            await interaction.reply({ content: `Bạn đã cược **${betAmount.toLocaleString()}** vào **${baucuaLabel[animalChoice].label}**!`, ephemeral: true });
+        }
     }
-  },
 };
