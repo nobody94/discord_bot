@@ -59,7 +59,7 @@ module.exports = {
         );
 
         const mainMsg = await message.channel.send({
-            content: `🎲 **PHIÊN CƯỢC BẦU CUA BẮT ĐẦU** 🎲\n` +
+            content: `**PHIÊN CƯỢC BẦU CUA BẮT ĐẦU**\n` +
                      `Kết thúc cược: <t:${discordTimestamp}:R>\n` + // Đồng hồ đếm ngược tự động ở đây
                      `(Tối đa ${maxAmount} ${Money.getIcon()} mỗi lượt)`,
             components: [row1, row2]
@@ -86,7 +86,7 @@ module.exports = {
             const results = quayBauCua(); //
             const icons = results.map(r => baucuaIcon[r]); //
             
-            let resultSummary = `🎲 Kết quả: **${icons.join(" | ")}** 🎲\n\n`; //
+            let resultSummary = `Kết quả: **${icons.join(" | ")}**\n\n`; //
             let winnersText = "";
 
             if (gameData.players.length === 0) {
@@ -97,9 +97,9 @@ module.exports = {
                     if (matchCount > 0) {
                         const winAmount = player.amount + (matchCount * player.amount); //
                         await Money.addMoney(player.userId, winAmount); //
-                        winnersText += `${verifyIcon} **${player.userName}** lụm **${winAmount.toLocaleString()}** ${Money.getIcon()} (${player.choice})\n`; //
+                        winnersText += `${verifyIcon} **${player.userName}** lụm **${winAmount.toLocaleString()}** ${Money.getIcon()} (${baucuaLabel[player.choice].label})\n`; //
                     } else {
-                        winnersText += `${errorIcon} **${player.userName}** toạch **${player.amount.toLocaleString()}** ${Money.getIcon()} (${player.choice})\n`; //
+                        winnersText += `${errorIcon} **${player.userName}** toạch **${player.amount.toLocaleString()}** ${Money.getIcon()} (${baucuaLabel[player.choice].label})\n`; //
                     }
                 }
             }
