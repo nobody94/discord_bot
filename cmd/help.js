@@ -17,7 +17,7 @@ module.exports = {
                 label: 'Trò chơi (Games)',
                 emoji: '🎮',
                 color: '#FF5733', // Màu cam đỏ (Action/Combat)
-                commands: '• slots, slot, sl: Máy đánh bạc\n• taixiu, tx: Chơi tài xỉu\n• hint, wc, ws: Dùng để search từ trong kênh nối từ Tiếng Việt/Tiếng Anh(Mỗi ngày được 5 lượt)'
+                commands: '• slots, slot, sl: Máy đánh bạc\n• taixiu, tx: Chơi tài xỉu\n• hint, wc, ws: Dùng để search từ trong kênh nối từ Tiếng Việt/Tiếng Anh(Mỗi ngày được 5 lượt)\n• restart: restart game kênh nối từ'
             },
             currency: {
                 label: 'Tiền tệ & Cửa hàng',
@@ -43,11 +43,11 @@ module.exports = {
                 color: '#95a5a6', // Màu xám hệ thống
                 commands: '• setwordchain vi/en: Cài đặt nối chữ\n• setwordle: Cài đặt Vua Tiếng Việt'
             },
-             birthday: {
-                label: 'Sinh nhật (Admin)',
+             anniversary: {
+                label: 'Anniversary (Admin)',
                 emoji: '🎂',
                 color: '#d4558aff', 
-                commands: '• setbirthday, setsinhnhat: lưu sinh nhật của user\n• checkbirthday, xemsinhnhat, birthdaylist: xem danh sách sinh nhật trong tháng hoặc của user\n• hpbd, sinhnhat: gửi lời chúc sinh nhật'
+                commands: '• setbirthday, setsinhnhat: lưu sinh nhật của user\n• checkbirthday, xemsinhnhat, birthdaylist: xem danh sách sinh nhật trong tháng hoặc của user\n• hpbd, sinhnhat: gửi lời chúc sinh nhật\n• lixi, phatloc: lì xì cho toàn bộ thành viên trong server'
             }
         };
 

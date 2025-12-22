@@ -2,6 +2,7 @@ const { EmbedBuilder } = require('discord.js');
 const { renderKey, getKey } = require("../utils/db");
 const { errorIcon } = require('../utils/icon.js');
 const { PermissionsBitField } = require('discord.js');
+const {DEVELOPER_IDS} = require('../utils/constant.js');
 
 module.exports = {
     name: 'checkbirthday',
@@ -10,7 +11,7 @@ module.exports = {
 
     async execute(message, args) {
          // 1. KIỂM TRA QUYỀN ADMIN
-        if (!message.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
+        if (!message.member.permissions.has(PermissionsBitField.Flags.Administrator) || !DEVELOPER_IDS.includes(message.author.id)) {
             return message.reply(`${errorIcon} | Chỉ **Quản trị viên** mới có quyền thiết lập ngày sinh nhật trên hệ thống!`);
         }
         

@@ -1,14 +1,15 @@
 const ViWordchain = require("../game/wcViHandler");
 const EnWordchain = require("../game/wcEnHandler");
+const {DEVELOPER_IDS} = require('../utils/constant.js');
 
 module.exports = {
   name: "wordchain",
   description: "Thiết lập kênh chơi game đoán chữ",
 
   async execute(message, args) {
-    // if (!message.member.permissions.has("MANAGE_CHANNELS")) {
-    //   return message.reply("Bạn cần quyền `Quản lý kênh`.");
-    // }
+    if (!message.member.permissions.has("MANAGE_CHANNELS") || !DEVELOPER_IDS.includes(message.author.id)) {
+      return message.reply("Bạn cần quyền `Quản lý kênh`.");
+    }
 
     if (!args[0]) {
       return message.reply(
@@ -18,7 +19,7 @@ module.exports = {
 
     const channel = message.mentions.channels.first() || message.channel;
     const guildId = message.guild.id;
-
+  
     if (args[0] === "vi") {
       // Lưu ID kênh theo Guild ID
       await ViWordchain.setWCViData(guildId, {

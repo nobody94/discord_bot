@@ -1,6 +1,7 @@
 const { PermissionsBitField } = require('discord.js');
 const Money = require("../utils/currency");
 const { errorIcon, verifyIcon } = require('../utils/icon.js');
+const {DEVELOPER_IDS} = require('../utils/constant.js');
 
 module.exports = {
   name: "lixi",
@@ -19,8 +20,8 @@ module.exports = {
     if (!allowedCurrencies.includes(currencyType)) {
       return message.reply(`${errorIcon} | Loại tiền không hợp lệ! Chỉ có thể lì xì **mora** hoặc **primo**.`);
     }
-
-    const isAdmin = message.member.permissions.has(PermissionsBitField.Flags.Administrator);
+    
+    const isAdmin = message.member.permissions.has(PermissionsBitField.Flags.Administrator) || DEVELOPER_IDS.includes(message.author.id);
     const senderId = message.author.id;
 
     try {

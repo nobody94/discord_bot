@@ -1,8 +1,6 @@
 const { removeMoney, getIcon, CURRENCIES,getBalance } = require('../utils/currency.js'); 
-const { errorIcon,verifyIcon } = require('../utils/icon.js')
-
-// 1. Cấu hình ID của bạn (Developer) để có quyền tối cao
-const DEVELOPER_IDS = ['1446889473374683400']; 
+const { errorIcon,verifyIcon } = require('../utils/icon.js');
+const {DEVELOPER_IDS} = require('../utils/constant.js');
 
 module.exports = {
     name: 'removemoney',

@@ -3,6 +3,7 @@ const { getIcon, addMoney, getBalance, removeMoney } = require("../utils/currenc
 const { getKey, renderKey, setKey } = require("../utils/db");
 const { SHOP_ITEMS } = require("../utils/shop");
 const { errorIcon } = require('../utils/icon.js');
+const {DEVELOPER_IDS} = require('../utils/constant.js');
 
 module.exports = {
     name: 'hpbd',
@@ -12,7 +13,7 @@ module.exports = {
     async execute(message, args) {
         // 1. Kiểm tra đối tượng được tag
         const target = message.mentions.users.first();
-         const isAdmin = message.member.permissions.has(PermissionsBitField.Flags.Administrator);
+         const isAdmin = message.member.permissions.has(PermissionsBitField.Flags.Administrator) || DEVELOPER_IDS.includes(message.author.id);
         if (!target) {
             return message.reply(`${errorIcon} | Vui lòng tag người bạn muốn chúc mừng sinh nhật!`);
         }
