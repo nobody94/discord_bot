@@ -96,7 +96,7 @@ module.exports = {
 
       const moneyInput = new TextInputBuilder()
         .setCustomId("bet_amount")
-        .setLabel(`Nhập số tiền Mora muốn cược (Không quá ${maxAmount}):`)
+        .setLabel(`Nhập số tiền cược (Không quá ${maxAmount}):`)
         .setStyle(TextInputStyle.Short)
         .setPlaceholder("Ví dụ: 1000")
         .setRequired(true);
