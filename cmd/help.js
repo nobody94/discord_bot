@@ -17,7 +17,7 @@ module.exports = {
                 label: 'Trò chơi (Games)',
                 emoji: '🎮',
                 color: '#FF5733', // Màu cam đỏ (Action/Combat)
-                commands: '• slots, slot, sl: Máy đánh bạc\n• taixiu, tx: Chơi tài xỉu\n• baucua, bc: Chơi bầu cua \n•hint, wc, ws: Dùng để search từ trong kênh nối từ Tiếng Việt/Tiếng Anh(Mỗi ngày được 5 lượt)\n• restart: restart game kênh nối từ'
+                commands: '• slots, slot, sl: Máy đánh bạc\n• taixiu, tx: Chơi tài xỉu\n• baucua, bc: Chơi bầu cua \n• caoveso, scratch,sc: cào vé số\n• hint, wc, ws: Dùng để search từ trong kênh nối từ Tiếng Việt/Tiếng Anh(Mỗi ngày được 5 lượt)\n• restart: restart game kênh nối từ'
             },
             currency: {
                 label: 'Tiền tệ & Cửa hàng',
@@ -35,7 +35,7 @@ module.exports = {
                 label: 'Tương tác',
                 emoji: '❤️',
                 color: '#FFB6C1', // Màu hồng tình cảm
-                commands: '• Hạnh phúc: kiss, hug, cuddle, cheek, airkiss, lick, nibled\n• Vui vẻ: laugh, highfive, pat, stare, pinch,\n• Mạnh bạo: slap, poke, punch, kick, fight, bonk'
+                commands: '• Hạnh phúc: kiss, hug, cuddle, cheek, airkiss, lick, nibled\n• Vui vẻ: laugh, highfive, pat, stare, pinch\n• Mạnh bạo: slap, poke, punch, kick, fight, bonk, rip'
             },
             admin: {
                 label: 'Cấu hình (Admin)',

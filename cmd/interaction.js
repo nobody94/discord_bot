@@ -136,6 +136,18 @@ const interactions = {
       "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHpxY3pjZmp1dHJzY2RpeTRhdzZjOTB2eGwxZXNvanZtcm1yeGZwYiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/KmG26GNmdWOUE/giphy.gif",
       "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHpxY3pjZmp1dHJzY2RpeTRhdzZjOTB2eGwxZXNvanZtcm1yeGZwYiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/1xONKAmjT1GHFpkLRd/giphy.gif"
     ]
+  },
+  rip: {
+    tag: "rip",
+    color: "#FF4500",
+    msg: "thành kính tưởng nhớ",
+    images: [
+      "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExMGhveWxrd3J3c2hxc3RmcjltcnVpb3cybDVjaW5yMXZnazJ2azV3NCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/JoV2BiMWVZ96taSewG/giphy.gif",
+      "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExMGhveWxrd3J3c2hxc3RmcjltcnVpb3cybDVjaW5yMXZnazJ2azV3NCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/12UPyerJpVC2PzWkrz/giphy.gif",
+      "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExMGhveWxrd3J3c2hxc3RmcjltcnVpb3cybDVjaW5yMXZnazJ2azV3NCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/56MCwZ3SCzp1NjSirn/giphy.gif",
+      "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3c2V6N2lqaHNleWJ0cnk5MWlkYjl6eTVzNzdnY3lvN2RmeDQwajFtNCZlcD12MV9naWZzX3JlbGF0ZWQmY3Q9Zw/j6ZlX8ghxNFRknObVk/giphy.gif",
+      "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3YTV1OW0wMWdvNzFwOHFleGkzaWw4d3dsMnZjamk2NDV2cnBtcXMxYSZlcD12MV9naWZzX3JlbGF0ZWQmY3Q9Zw/cJ4F7Tj2PZaDiLNvW5/giphy.gif",
+    ]
   }
 };
 
