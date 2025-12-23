@@ -11,6 +11,7 @@ async function wordchainProcess(message, wordchain) {
   // 1. Kiểm tra định dạng (Regex) trước - Bỏ qua nếu có icon/số
   const cleanRegex = /^[\p{L}\s]+$/u;
   if (!cleanRegex.test(content)) return; 
+  if (result.reason === "INVALID_CHAR" || result.reason =="LENGTH_OVER") return;
 
   // 2. Kiểm tra người chơi lặp lại 
   // Phải kiểm tra cái này TRƯỚC khi gọi gameProcess để chặn đứng Race Condition
@@ -37,8 +38,7 @@ async function wordchainProcess(message, wordchain) {
       `Từ tiếp theo phải bắt đầu bằng **"${result.nextRequiredWord}"**.`
     );
   } else {
-    // Chỉ xử lý lỗi nếu không phải lỗi ký tự (đã chặn ở bước 1)
-    if (result.reason === "INVALID_CHAR" || result.reason =="LENGTH_OVER") return;
+    // Chỉ xử lý lỗi nếu không phải lỗi ký tự (đã chặn ở bước 1)    
 
     let replyMessage = result.message;
     
