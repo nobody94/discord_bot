@@ -37,7 +37,7 @@ async function wordchainProcess(message, wordchain) {
     await Money.addMoney(userId, tienThuong);
 
     await message.channel.send(
-      `Từ hợp lệ **${message.author.username}** được thưởng ${tienThuong} ${getIcon}\n` +
+      `Từ hợp lệ **${message.author.username}** được thưởng ${tienThuong} ${getIcon()}\n` +
         `Từ tiếp theo phải bắt đầu bằng **"${result.nextRequiredWord}"**.`
     );
   } else {
@@ -50,7 +50,7 @@ async function wordchainProcess(message, wordchain) {
       await Money.addMoney(userId, bonusReward);
 
       await message.reply({
-        content: `${replyMessage}\n🎉 **${message.author.username}** đã kết thúc chuỗi và nhận thưởng **${bonusReward}** ${getIcon}`,
+        content: `${replyMessage}\n🎉 **${message.author.username}** đã kết thúc chuỗi và nhận thưởng **${bonusReward}** ${getIcon()}`,
         allowedMentions: { repliedUser: false },
       });
 

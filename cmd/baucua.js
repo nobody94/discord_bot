@@ -89,7 +89,7 @@ module.exports = {
     );
 
     const mainMsg = await message.channel.send({
-      content: `${gameTitle}\n⏳ Kết thúc cược: <t:${discordTimestamp}:R>\n(Tối đa ${maxAmount.toLocaleString()} Mora/lượt)`,
+      content: `${gameTitle}\n⏳ Kết thúc cược: <t:${discordTimestamp}:R>\n(Tối đa ${maxAmount.toLocaleString()} ${Money.getIcon()}/lượt)`,
       components: [row1, row2],
     });
 

@@ -182,7 +182,7 @@ module.exports = {
         `Chọn Tài/ Xỉu , Chẵn/Lẻ để đặt cược.\nSau khi chọn, nhập số **MORA** bạn muốn cược\n\n` +
         `• **Xỉu**: 4-10 điểm | **Tài**: 11-17 điểm\n` +
         `• **Bão**: 3 mặt giống nhau (Nhà cái ăn hết)\n` +
-        `• Cược tối đa: **${maxAmount.toLocaleString()}** Mora`
+        `• Cược tối đa: **${maxAmount.toLocaleString()}** ${getIcon()}`
       );
 
     await message.channel.send({ embeds: [embed] });
@@ -255,7 +255,7 @@ module.exports = {
       const balance = await getBalance(userId);
       if (betAmount > balance)
         return interaction.editReply(
-          `💸 | Bạn không đủ Mora để cược (Hiện có: **${balance.toLocaleString()}** ${getIcon()}).`
+          `💸 | Bạn không đủ tiền để cược (Hiện có: **${balance.toLocaleString()}** ${getIcon()}).`
         );
 
       // Trừ tiền và ghi nhận cược

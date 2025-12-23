@@ -8,7 +8,7 @@ const {DEVELOPER_IDS} = require('../utils/constant.js');
 module.exports = {
     name: 'hpbd',
     aliases: ['sinhnhat', 'birthday'],
-    description: 'Chúc mừng sinh nhật (Admin tặng Bánh + Mora, Mem tặng Mora)',
+    description: 'Chúc mừng sinh nhật',
 
     async execute(message, args) {
         // 1. Kiểm tra đối tượng được tag
