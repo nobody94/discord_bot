@@ -68,7 +68,7 @@ async function nextQuestion(message, guildId, isTimeout = false) {
   });
 
   await message.channel.send(
-    `📝 Câu tiếp theo **Lượt ${nextTurn}/5**: **${nextShuffled}**\n*(Bạn có 2 phút để trả lời)*`
+    `📝 Câu tiếp theo\n**Lượt ${nextTurn}/5**: **${nextShuffled}**\n*(Bạn có 2 phút để trả lời)*`
   );
 
   // Thiết lập bộ đếm giờ mới: 2 phút (120.000 ms)
