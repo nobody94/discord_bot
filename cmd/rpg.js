@@ -53,14 +53,14 @@ module.exports = {
 
             const embed = new EmbedBuilder()
                 .setTitle("⚔️ KHÁM PHÁ NGUYÊN TỐ")
-                .setDescription("Chọn hệ để bắt đầu: `.rpg choose [tên_hệ]`")
+                .setDescription("Chọn hệ để bắt đầu: `.rpg choose [key]`\n")
                 .setColor(0x2f3136);
 
             Object.keys(ELEMENTS_CONFIG).forEach(id => {
                 const el = ELEMENTS_CONFIG[id];
                 embed.addFields({ 
                     name: `${el.emoji} Hệ ${el.name}`, 
-                    value: `ATK: ${el.stats.atk} | HP: ${el.stats.hp}`, 
+                    value: `Key: ${id}\nATK: ${el.stats.atk} | HP: ${el.stats.hp}`, 
                     inline: true 
                 });
             });
