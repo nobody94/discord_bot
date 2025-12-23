@@ -173,7 +173,7 @@ module.exports = {
 
       const moneyInput = new TextInputBuilder()
         .setCustomId("bet_amount")
-        .setLabel(`Nhập số Mora cược (Tối đa ${maxAmount}):`)
+        .setLabel(`Nhập số tiền cược (Tối đa ${maxAmount}):`)
         .setStyle(TextInputStyle.Short)
         .setRequired(true);
 

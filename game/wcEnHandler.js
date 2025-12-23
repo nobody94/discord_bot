@@ -12,6 +12,7 @@ async function getWCEnData(guildId) {
       lastUserId: null,
       wordHistory: [],
       channelId: null,
+      lastTimestamp: 0,
     }
   );
 }
@@ -122,7 +123,7 @@ async function setLastUser(guildId, userId) {
 }
 
 async function gameProcess(guildId, newWord) {
-  const enState = await getWCEnData(guildId);
+  const enState = await getWCEnData(guildId);   
 
   if (!enState.gameActive)
     return {
@@ -130,6 +131,18 @@ async function gameProcess(guildId, newWord) {
       reason: "NOT_ACTIVE",
       message: "Game chưa hoạt động",
     };
+
+   // 2 giây giữa mỗi lần trả lời đúng
+  const now = Date.now();
+  const cooldownAmount = 2000; 
+  if (now - enState.lastTimestamp < cooldownAmount) {
+    return {
+      success: false,
+      reason: "COOLDOWN",
+      message: "⏱️ Bạn đang thao tác quá nhanh, vui lòng đợi một chút!"
+    };
+  }
+
   const dictionary = enDictionary;
   const secondWord = getSecondPart(newWord);
   const parts = newWord.split(/\s+/);
