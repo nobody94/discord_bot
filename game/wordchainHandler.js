@@ -1,19 +1,19 @@
 const Money = require("../utils/currency");
 const ViWordchain = require("./wcViHandler");
 const EnWordchain = require("./wcEnHandler");
-const {errorIcon,verifyIcon} = require('../utils/icon');
+const { errorIcon, verifyIcon } = require("../utils/icon");
 
 async function wordchainProcess(message, wordchain) {
   const guildId = message.guildId;
   const userId = message.author.id;
-  const content = message.content.trim().toLowerCase();  
-  
+  const content = message.content.trim().toLowerCase();
+
   // 1. Kiểm tra định dạng (Regex) trước - Bỏ qua nếu có icon/số
   const cleanRegex = /^[\p{L}\s]+$/u;
-  if (!cleanRegex.test(content)) return; 
-  if (result.reason === "INVALID_CHAR" || result.reason =="LENGTH_OVER") return;
+  if (!cleanRegex.test(content)) return;
+  if(content.split(/\s+/).length >2) return;
 
-  // 2. Kiểm tra người chơi lặp lại 
+  // 2. Kiểm tra người chơi lặp lại
   // Phải kiểm tra cái này TRƯỚC khi gọi gameProcess để chặn đứng Race Condition
   if (await wordchain.isRepeatPlayer(guildId, userId)) {
     return message.reply({
@@ -24,28 +24,30 @@ async function wordchainProcess(message, wordchain) {
 
   // 3. BÂY GIỜ MỚI KHAI BÁO 'result'
   const result = await wordchain.gameProcess(guildId, content);
+  if (result.reason === "INVALID_CHAR" || result.reason == "LENGTH_OVER")
+    return;
 
   // 4. Xử lý kết quả sau khi đã có biến 'result'
   if (result.success) {
     const tienThuong = 50;
-    
+
     // Cập nhật người dùng cuối ngay lập tức
     await wordchain.setLastUser(guildId, userId);
     await Money.addMoney(userId, tienThuong);
 
     await message.channel.send(
       `Từ hợp lệ **${message.author.username}** được thưởng ${tienThuong} Mora\n` +
-      `Từ tiếp theo phải bắt đầu bằng **"${result.nextRequiredWord}"**.`
+        `Từ tiếp theo phải bắt đầu bằng **"${result.nextRequiredWord}"**.`
     );
   } else {
-    // Chỉ xử lý lỗi nếu không phải lỗi ký tự (đã chặn ở bước 1)    
+    // Chỉ xử lý lỗi nếu không phải lỗi ký tự (đã chặn ở bước 1)
 
     let replyMessage = result.message;
-    
+
     if (result.reason === "OUT_OF_WORD") {
       const bonusReward = 500;
       await Money.addMoney(userId, bonusReward);
-      
+
       await message.reply({
         content: `${replyMessage}\n🎉 **${message.author.username}** đã kết thúc chuỗi và nhận thưởng **${bonusReward}** Mora`,
         allowedMentions: { repliedUser: false },
@@ -66,7 +68,8 @@ async function wordchainProcess(message, wordchain) {
     }
 
     // Các lỗi khác (sai từ bắt đầu, không có trong từ điển...)
-    await message.reply({
+    await message
+      .reply({
         content: replyMessage,
         allowedMentions: { repliedUser: false },
       })
@@ -79,7 +82,7 @@ async function wordchainProcess(message, wordchain) {
 async function wordchainHandler(message) {
   const guildId = message.guildId;
   const viState = await ViWordchain.getWCViData(guildId);
-  const enState = await EnWordchain.getWCEnData(guildId);  
+  const enState = await EnWordchain.getWCEnData(guildId);
 
   if (message.channelId === viState.channelId) {
     if (viState.gameActive) {
