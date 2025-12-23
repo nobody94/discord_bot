@@ -1,0 +1,165 @@
+const {
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+  ComponentType,
+} = require("discord.js");
+const Money = require("../utils/currency");
+const { getIcon } = require("../utils/currency");
+const { errorIcon, verifyIcon } = require("../utils/icon");
+const { maxAmount } = require("../utils/constant");
+const { renderKey, getKey, setKey } = require("../utils/db");
+
+// Hàm hỗ trợ tính điểm bài
+function calculatePoints(hand) {
+  let points = hand.reduce((acc, card) => acc + (card > 10 ? 10 : card), 0);
+  // Xử lý lá Ace (11) nếu bị quắc (bust) thì tính là 1
+  let aceCount = hand.filter((card) => card === 11).length;
+  while (points > 21 && aceCount > 0) {
+    points -= 10;
+    aceCount--;
+  }
+  return points;
+}
+
+// Hàm rút lá bài ngẫu nhiên
+function drawCard() {
+  const cards = [2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10, 11];
+  return cards[Math.floor(Math.random() * cards.length)];
+}
+
+module.exports = {
+  name: "blackjack",
+  aliases: ["bj"],
+  description: "Chơi Blackjack với bot dùng nút bấm",
+
+  async execute(message, args) {
+    const userId = message.author.id;
+    const dbKey = renderKey("blackjack", userId);
+
+    const isPlaying = await getKey(dbKey);
+
+    if (isPlaying && isPlaying.active) {
+        return message.reply(`${errorIcon} Bạn đang có một ván Blackjack chưa kết thúc! Hãy hoàn thành nó trước.`);
+    }
+
+    const betAmount = parseInt(args[0]);
+
+    // 1. Kiểm tra tiền cược
+    if (
+      !betAmount ||
+      isNaN(betAmount) ||
+      betAmount < 100 ||
+      betAmount > maxAmount
+    ) {
+      return message.reply(
+        `${errorIcon} Vui lòng cược từ 100 đến ${maxAmount} ${getIcon()}.`
+      );
+    }
+
+    const userMoney = await Money.getBalance(userId);
+    if (userMoney < betAmount) {
+      return message.reply(`${errorIcon} Bạn không đủ tiền để cược.`);
+    }
+
+    // 2. Trừ tiền và khởi tạo ván bài
+    await Money.removeMoney(userId, betAmount);
+    await setKey(dbKey, { active: true });
+
+    let playerHand = [drawCard(), drawCard()];
+    let botHand = [drawCard(), drawCard()];    
+
+    // 3. Tạo hàng nút bấm
+    const row = new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
+        .setCustomId("hit")
+        .setLabel("Rút bài")
+        .setStyle(ButtonStyle.Primary),
+      new ButtonBuilder()
+        .setCustomId("stand")
+        .setLabel("Dừng")
+        .setStyle(ButtonStyle.Danger)
+    );
+
+    const embedContent = () => `
+🃏 **Ván bài Blackjack** (Cược: ${betAmount} ${getIcon()})
+- **Bạn:** ${playerHand.join(", ")} (Tổng: ${calculatePoints(playerHand)})
+- **Bot:** ${botHand[0]}, ?
+        `;
+
+    const response = await message.reply({
+      content: embedContent(),
+      components: [row],
+    });
+
+    // 4. XỬ LÝ SỰ KIỆN NÚT BẤM TẠI ĐÂY
+    const collector = response.createMessageComponentCollector({
+      componentType: ComponentType.Button,
+      time: 30000, // Hết hạn sau 30 giây
+    });
+
+    collector.on("collect", async (interaction) => {
+      // Chỉ người gọi lệnh mới được bấm nút
+      if (interaction.user.id !== userId) {
+        return interaction.reply({
+          content: "Đây không phải ván bài của bạn!",
+          ephemeral: true,
+        });
+      }
+
+      if (interaction.customId === "hit") {
+        playerHand.push(drawCard());
+        const points = calculatePoints(playerHand);
+
+        if (points > 21) {
+          collector.stop("bust");
+        } else {
+          await interaction.update({ content: embedContent() });
+        }
+      } else if (interaction.customId === "stand") {
+        collector.stop("stand");
+        await interaction.deferUpdate(); // Thông báo đã nhận lệnh
+      }
+    });
+
+    collector.on("end", async (collected, reason) => {
+      let finalPoints = calculatePoints(playerHand);
+      let botPoints = calculatePoints(botHand);
+
+      // Logic Bot rút bài nếu người chơi Stand (Bot rút đến khi >= 17)
+      if (reason === "stand") {
+        while (botPoints < 17) {
+          botHand.push(drawCard());
+          botPoints = calculatePoints(botHand);
+        }
+      }
+
+      let result = "";
+      if (reason === "bust" || finalPoints > 21) {
+        result = `❌ **BẠN ĐÃ QUẮC!** (${finalPoints} điểm). Bạn mất ${betAmount} ${getIcon()}.`;
+      } else if (botPoints > 21 || finalPoints > botPoints) {
+        const winAmount = betAmount * 2;
+        await Money.addMoney(userId, winAmount);
+        result = `🎉 **BẠN THẮNG!** Bot: ${botPoints}. Bạn nhận được ${winAmount} ${getIcon()}.`;
+      } else if (finalPoints < botPoints) {
+        result = `😔 **BẠN THUA!** Bot: ${botPoints}. Bạn mất ${betAmount} ${getIcon()}.`;
+      } else {
+        await Money.addMoney(userId, betAmount); // Hoàn tiền
+        result = `🤝 **HÒA!** Cả hai đều có ${finalPoints} điểm. Bạn được hoàn tiền.`;
+      }
+
+      await setKey(dbKey, { active: false });
+
+      // Cập nhật tin nhắn cuối cùng (Xóa nút bấm)
+      await response.edit({
+        content: `
+**KẾT QUẢ BLACKJACK**
+- **Bạn:** ${playerHand.join(", ")} (${finalPoints} điểm)
+- **Bot:** ${botHand.join(", ")} (${botPoints} điểm)
+---------------------------
+${result}`,
+        components: [],
+      });
+    });
+  },
+};
