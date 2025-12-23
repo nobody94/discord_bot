@@ -52,7 +52,9 @@ function getRandomWords() {
 
 function isValidWord(word) {
   const dictionary = viDictionary;
-  return dictionary.includes(word.toLowerCase());
+  // console.log('word',word, dictionary.includes(word.toLowerCase()));
+  return dictionary.includes(word.toLowerCase());  
+  // return false
 }
 
 function getSecondPart(word) {
@@ -165,33 +167,19 @@ async function gameProcess(guildId, newWord) {
     };
   }
   // --- PHẦN THÊM MỚI: KIỂM TRA KÝ TỰ ĐẶC BIỆT VÀ SỐ ---
-  // Regex hỗ trợ đầy đủ Unicode Tiếng Việt, chữ cái và khoảng trắng
-  // const regex =
-  //   /^[a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂÂÊÔƠƯSauàáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵ\s|_]+$/;
+  // Regex hỗ trợ đầy đủ Unicode Tiếng Việt, chữ cái và khoảng trắng 
   const regex = /^[\p{L}\s]+$/u;
+  const vnRegex =
+    /^[a-vxyỳọáầảấờễàáâãèéêìíòóôõùúăđĩũơưăâêôơưàáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵ\s]+$/i;
 
-  if (!regex.test(newWord)) {
+  if (!regex.test(newWord) || !vnRegex.test(newWord)) {
     return {
       success: false,
-      reason: "INVALID_CHARACTERS",
-      message: `${errorIcon} Từ không được chứa số hoặc ký tự đặc biệt!`,
+      reason: "INVALID_CHAR",
+      message:''
+      // message: `${errorIcon} Từ không được chứa số hoặc ký tự đặc biệt!`,
     };
-  }
-  // Lấy tất cả cụm 2 từ chưa dùng và bắt đầu bằng secondWord
-  const nextOptions = dictionary.filter((p) => {
-    if (viState.wordHistory.includes(p)) return false;
-    return p.split(" ")[0] === secondWord;
-  });
-
-  //hết từ nối
-  if (nextOptions.length === 0) {
-    return {
-      success: false,
-      reason: "OUT_OF_WORD",
-      message: "Hết từ để nối tiếp",
-    };
-  }
-
+  } 
   // Kiểm tra hợp lệ theo từ điển
   if (!isValidWord(newWord)) {
     return {
@@ -215,6 +203,20 @@ async function gameProcess(guildId, newWord) {
       success: false,
       reason: "WRONG_START_WORD",
       message: `${errorIcon} Từ cần bắt đầu bằng ${currentLastWord}`,
+    };
+  }
+  // Lấy tất cả cụm 2 từ chưa dùng và bắt đầu bằng secondWord
+  const nextOptions = dictionary.filter((p) => {
+    if (viState.wordHistory.includes(p)) return false;
+    return p.split(" ")[0] === secondWord;
+  });
+
+  //hết từ nối
+  if (nextOptions.length === 0) {
+    return {
+      success: false,
+      reason: "OUT_OF_WORD",
+      message: "Hết từ để nối tiếp",
     };
   }
 
