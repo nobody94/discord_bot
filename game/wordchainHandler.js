@@ -38,7 +38,7 @@ async function wordchainProcess(message, wordchain) {
     );
   } else {
     // Chỉ xử lý lỗi nếu không phải lỗi ký tự (đã chặn ở bước 1)
-    if (result.reason === "INVALID_CHAR") return;
+    if (result.reason === "INVALID_CHAR" || result.reason =="LENGTH_OVER") return;
 
     let replyMessage = result.message;
     
