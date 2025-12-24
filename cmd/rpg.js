@@ -208,7 +208,7 @@ module.exports = {
 
     if (!user?.data) return message.reply(`${errorIcon} | Hãy chọn hệ trước!`);
 
-   // --- KIỂM TRA CHỐNG SPAM (30 GIÂY) ---
+    // --- KIỂM TRA CHỐNG SPAM (30 GIÂY) ---
     const actionCommands = ["hunt", "battle", "dungeon"];
     if (actionCommands.includes(subCommand)) {
       const lastAction = cooldowns.get(userId);
@@ -216,13 +216,17 @@ module.exports = {
       const cooldownTime = 30 * 1000; // 30 giây
 
       if (lastAction && now - lastAction < cooldownTime) {
-        // Tính toán số giây còn lại và làm tròn lên để không bị hiển thị 0 giây khi vẫn còn thời gian chờ thực tế
         const remaining = Math.ceil((cooldownTime - (now - lastAction)) / 1000);
-        return message.reply(
-          `${errorIcon} | Bạn đang mệt, vui lòng nghỉ ngơi **${remaining} giây** nữa.`
-        );
+
+        // Gửi tin nhắn và tự động xóa sau 5 giây
+        return message
+          .reply(
+            `${errorIcon} | Bạn đang mệt, vui lòng nghỉ ngơi **${remaining} giây** nữa.`
+          )
+          .then((msg) => {
+            setTimeout(() => msg.delete().catch(() => null), 5000);
+          });
       }
-      // Chỉ cập nhật thời gian hành động mới nếu người dùng không bị vướng cooldown
       cooldowns.set(userId, now);
     }
     // Lấy kỹ năng của người chơi dựa trên hệ
@@ -356,7 +360,7 @@ module.exports = {
 
   async checkLevelUp(message, key, originalMsg) {
     const updated = await getKey(key);
-    
+
     // Kiểm tra nếu đã đạt cấp tối đa 60
     if (updated.data.level >= 60) {
       if (originalMsg) return message.reply(originalMsg);
@@ -366,20 +370,20 @@ module.exports = {
     const reqXP = getRequiredXP(updated.data.level);
     if (updated.data.xp >= reqXP) {
       const newLevel = updated.data.level + 1;
-      
+
       // Xử lý tăng cấp
       await setKey(`${key}.data.level`, newLevel);
       await setKey(`${key}.data.xp`, updated.data.xp - reqXP);
       await addKey(`${key}.data.atk`, 7);
       await addKey(`${key}.data.hp`, 25);
-      
+
       let lvMsg = `\n🎊 **CHÚC MỪNG!** **${message.author.username}** đã đột phá lên cấp **${newLevel}**!`;
-      
+
       // Thông báo đặc biệt khi đạt mốc 60
       if (newLevel === 60) {
         lvMsg += `\n👑 **HUYỀN THOẠI!** Bạn đã chạm mốc cấp độ cao nhất: **Level 60**!`;
       }
-      
+
       return message.reply((originalMsg || "") + lvMsg);
     }
     if (originalMsg) return message.reply(originalMsg);
