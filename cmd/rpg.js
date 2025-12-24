@@ -229,7 +229,7 @@ module.exports = {
 
     // --- HUNT ---
     if (subCommand === "hunt") {
-      const xp = Math.floor(Math.random() * 10) + 10;
+      const xp = Math.floor(Math.random() * 10) + 5;
       await addKey(`${key}.data.xp`, xp);
       if (
         user.data.quest?.type === "hunt" &&
@@ -255,7 +255,7 @@ module.exports = {
       const target = monsters[Math.floor(Math.random() * monsters.length)];
       const win = Math.random() > 0.3;
       if (win) {
-        const xp = Math.floor(Math.random() * 50) + 50;
+        const xp = Math.floor(Math.random() * 50) + 10;
         await addKey(`${key}.data.xp`, xp);
         if (
           user.data.quest?.type === "battle" &&
@@ -287,7 +287,7 @@ module.exports = {
 
       const win = Math.random() > 0.5;
       if (win) {
-        const xp = Math.floor(Math.random() * 50) + 50;
+        const xp = Math.floor(Math.random() * 50) + 10;
         await addKey(`${key}.data.xp`, xp);
         if (
           user.data.quest?.type === "dungeon" &&
