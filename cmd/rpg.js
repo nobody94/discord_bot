@@ -144,7 +144,6 @@ const QUESTS = {
   ],
 };
 
-
 const getRequiredXP = (level) => Math.floor(Math.pow(level, 1.5) * 100);
 const getVietnamRPGDay = () =>
   new Date(new Date().getTime() + 3 * 60 * 60 * 1000)
@@ -165,9 +164,24 @@ module.exports = {
     const todayStr = getVietnamRPGDay();
 
     if (!subCommand) {
-      if (user?.data?.element)
+      if (user && user.data && user.data.element) {
         return this.showProfile(message, user.data, todayStr);
-      return message.reply("Vui lòng chọn hệ trước bằng `.rpg choose [key]`");
+      }
+
+      const embed = new EmbedBuilder()
+        .setTitle("⚔️ KHÁM PHÁ NGUYÊN TỐ")
+        .setDescription("Chọn hệ để bắt đầu: `.rpg choose [key]`\n")
+        .setColor(0x2f3136);
+
+      Object.keys(ELEMENTS_CONFIG).forEach((id) => {
+        const el = ELEMENTS_CONFIG[id];
+        embed.addFields({
+          name: `${el.emoji} Hệ ${el.name}`,
+          value: `Key: ${id}\nATK: ${el.stats.atk} | HP: ${el.stats.hp}`,
+          inline: true,
+        });
+      });
+      return message.reply({ embeds: [embed] });
     }
 
     if (subCommand === "choose") {
@@ -193,7 +207,7 @@ module.exports = {
     }
 
     if (!user?.data) return message.reply(`${errorIcon} | Hãy chọn hệ trước!`);
-   
+
     // --- KIỂM TRA CHỐNG SPAM (30 GIÂY) ---
     const actionCommands = ["hunt", "battle", "dungeon"];
     if (actionCommands.includes(subCommand)) {
@@ -203,12 +217,14 @@ module.exports = {
 
       if (lastAction && now - lastAction < cooldownTime) {
         const remaining = Math.ceil((cooldownTime - (now - lastAction)) / 1000);
-        return message.reply(`${errorIcon} | Bạn đang mệt, vui lòng nghỉ ngơi **${remaining} giây** nữa.`);
+        return message.reply(
+          `${errorIcon} | Bạn đang mệt, vui lòng nghỉ ngơi **${remaining} giây** nữa.`
+        );
       }
       cooldowns.set(userId, now);
     }
 
-     // Lấy kỹ năng của người chơi dựa trên hệ
+    // Lấy kỹ năng của người chơi dựa trên hệ
     const userSkill = user.data.skill || "Đòn đánh thường";
 
     // --- HUNT ---
