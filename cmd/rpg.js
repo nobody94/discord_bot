@@ -3,6 +3,9 @@ const { getKey, setKey, addKey, renderKey } = require("../utils/db");
 const { errorIcon, verifyIcon } = require("../utils/icon.js");
 const { addMoney, getIcon } = require("../utils/currency");
 
+// --- CHỐNG SPAM ---
+const cooldowns = new Map();
+
 // --- CẤU HÌNH ---
 const ELEMENTS_CONFIG = {
   hoa: {
@@ -190,8 +193,22 @@ module.exports = {
     }
 
     if (!user?.data) return message.reply(`${errorIcon} | Hãy chọn hệ trước!`);
+   
+    // --- KIỂM TRA CHỐNG SPAM (30 GIÂY) ---
+    const actionCommands = ["hunt", "battle", "dungeon"];
+    if (actionCommands.includes(subCommand)) {
+      const lastAction = cooldowns.get(userId);
+      const now = Date.now();
+      const cooldownTime = 30 * 1000; // 30 giây
 
-    // Lấy kỹ năng của người chơi dựa trên hệ
+      if (lastAction && now - lastAction < cooldownTime) {
+        const remaining = Math.ceil((cooldownTime - (now - lastAction)) / 1000);
+        return message.reply(`${errorIcon} | Bạn đang mệt, vui lòng nghỉ ngơi **${remaining} giây** nữa.`);
+      }
+      cooldowns.set(userId, now);
+    }
+
+     // Lấy kỹ năng của người chơi dựa trên hệ
     const userSkill = user.data.skill || "Đòn đánh thường";
 
     // --- HUNT ---
