@@ -325,7 +325,7 @@ module.exports = {
         .addFields(
           {
             name: "Tiến độ",
-            value: `📊 \`${q.current}/${q.target}\``,
+            value: `📊 \`${q.current ?? 0}/${q.target}\``,
             inline: true,
           },
           {
