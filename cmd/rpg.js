@@ -345,16 +345,19 @@ module.exports = {
               q.rewardGems
             }\` ${iconPrimo}`,
             inline: true,
-          }
+          }          
         )
+        .setFooter(q.current == q.target ? 'Bạn đã hoàn thành nhiệm vụ hôm nay' : q.claimed ? 'Bạn đã nhận thưởng hôm nay' : 'Dùng .rpg claim để nhận thưởng')
         .setColor(q.current >= q.target ? 0x00ff00 : 0xffff00);
       return message.reply({ embeds: [embed] });
     }
 
     if (subCommand === "claim") {
       const q = user.data.quest;
-      if (!q || q.date !== todayStr || q.current < q.target || q.claimed)
+      if (!q || q.date !== todayStr || q.current < q.target)
         return message.reply(`${errorIcon} | Không thể nhận thưởng!`);
+      if(q.claimed) return message.reply(`${errorIcon} | Bạn đã nhận thưởng rồi!`);
+      
       await addMoney(userId, q.rewardMora, "mora");
       await addMoney(userId, q.rewardGems, "primo");
       await setKey(`${key}.data.quest.claimed`, true);
