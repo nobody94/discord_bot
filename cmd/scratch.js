@@ -53,11 +53,11 @@ module.exports = {
     if (winRate < 0.05) {
       // 5% trúng giải Độc Đắc (x10 lần cược)
       reward = betAmount * 5;
-      resultMessage = `🎰 **GIẢI ĐỘC ĐẮC!** Bạn đã trúng x10: **${reward}** ${getIcon()}!`;
+      resultMessage = `🎰 **GIẢI ĐỘC ĐẮC!** Bạn đã trúng x5: **${reward}** ${getIcon()}!`;
     } else if (winRate < 0.15) {
       // 10% trúng giải Nhì (x5 lần cược)
       reward = betAmount * 3;
-      resultMessage = `🎉 **Giải Nhì!** Bạn đã trúng x5: **${reward}** ${getIcon()}!`;
+      resultMessage = `🎉 **Giải Nhì!** Bạn đã trúng x3: **${reward}** ${getIcon()}!`;
     } else if (winRate < 0.35) {
       // 20% trúng giải Ba (x2 lần cược)
       reward = betAmount * 2;

@@ -3,7 +3,7 @@ const { getKey, setKey, addKey, renderKey } = require("../utils/db");
 const { errorIcon, verifyIcon } = require('../utils/icon.js');
 const { addMoney, getIcon } = require("../utils/currency");
 
-// --- CẤU HÌNH HỆ ---
+// --- CẤU HÌNH ---
 const ELEMENTS_CONFIG = {
     "hoa": { name: "Hỏa", emoji: "🔥", ref: 0xff4500, stats: { atk: 25, hp: 100 }, skill: "Hỏa Cầu" },
     "bang": { name: "Băng", emoji: "❄️", ref: 0x00ffff, stats: { atk: 10, hp: 180 }, skill: "Băng Vĩnh Cửu" },
@@ -13,166 +13,160 @@ const ELEMENTS_CONFIG = {
     "loi":  { name: "Lôi", emoji: "⚡", ref: 0x9932cc, stats: { atk: 22, hp: 110 }, skill: "Thiên Lôi" }
 };
 
-// --- DANH SÁCH NHIỆM VỤ ---
-const RANDOM_QUESTS = [
-    { id: "q1", name: "Thợ săn tập sự", target: 20, rewardMora: 25000, rewardGems: 10, desc: "Thực hiện 20 lần đi săn" },
-    { id: "q2", name: "Kẻ hủy diệt", target: 60, rewardMora: 70000, rewardGems: 30, desc: "Thực hiện 60 lần đi săn" },
-    { id: "q3", name: "Cày thuê Teyvat", target: 40, rewardMora: 45000, rewardGems: 20, desc: "Thực hiện 40 lần đi săn" }
-];
+const QUESTS = {
+    hunt: [{ id: "h1", name: "Thợ săn tập sự", target: 20, rewardMora: 25000, rewardGems: 10, desc: "Săn 20 lần (hunt)", type: "hunt" }],
+    battle: [{ id: "b1", name: "Chiến binh tinh nhuệ", target: 10, rewardMora: 45000, rewardGems: 20, desc: "Thắng 10 trận (battle)", type: "battle" }],
+    dungeon: [{ id: "d1", name: "Kẻ chinh phục Phó bản", target: 5, rewardMora: 100000, rewardGems: 50, desc: "Vượt 5 lần Phó bản (dungeon)", type: "dungeon" }]
+};
 
-// --- HÀM TÍNH NGÀY RPG THEO MÚI GIỜ VN (RESET 4H SÁNG) ---
-function getVietnamRPGDay() {
-    const now = new Date();
-    // Chuyển sang giờ VN (UTC+7) rồi trừ đi 4 tiếng để tính mốc reset
-    // Tổng cộng: UTC + 7h - 4h = UTC + 3h
-    const offsetDate = new Date(now.getTime() + (3 * 60 * 60 * 1000));
-    
-    // Trả về chuỗi ngày (Ví dụ: "2024-05-20")
-    return offsetDate.toISOString().split('T')[0];
-}
+const getRequiredXP = (level) => Math.floor(Math.pow(level, 1.5) * 100);
+const getVietnamRPGDay = () => new Date(new Date().getTime() + (3 * 60 * 60 * 1000)).toISOString().split('T')[0];
 
 module.exports = {
     name: "rpg",
-    description: "Hệ thống RPG đa nguyên tố - Reset 4h sáng VN",
+    description: "Hệ thống RPG - Thông báo kỹ năng & chiến đấu",
 
     async execute(message, args) {
         const userId = message.author.id;
         const key = await renderKey('rpg_user', userId);
         const subCommand = args[0]?.toLowerCase();
         let user = await getKey(key);
-
         const iconMora = getIcon('mora');
         const iconPrimo = getIcon('primo');
-        const todayStr = getVietnamRPGDay(); // Lấy ngày RPG hiện tại (VN 4AM)
+        const todayStr = getVietnamRPGDay();
 
-        // 1. MENU CHÍNH / PROFILE
         if (!subCommand) {
-            if (user && user.data && user.data.element) {
-                return this.showProfile(message, user.data, todayStr);
-            }
-
-            const embed = new EmbedBuilder()
-                .setTitle("⚔️ KHÁM PHÁ NGUYÊN TỐ")
-                .setDescription("Chọn hệ để bắt đầu: `.rpg choose [key]`\n")
-                .setColor(0x2f3136);
-
-            Object.keys(ELEMENTS_CONFIG).forEach(id => {
-                const el = ELEMENTS_CONFIG[id];
-                embed.addFields({ 
-                    name: `${el.emoji} Hệ ${el.name}`, 
-                    value: `Key: ${id}\nATK: ${el.stats.atk} | HP: ${el.stats.hp}`, 
-                    inline: true 
-                });
-            });
-            return message.reply({ embeds: [embed] });
+            if (user?.data?.element) return this.showProfile(message, user.data, todayStr);
+            return message.reply("Vui lòng chọn hệ trước bằng `.rpg choose [key]`");
         }
 
-        // 2. CHỌN HỆ
         if (subCommand === 'choose') {
             if (user?.data?.element) return message.reply(`${errorIcon} | Bạn đã chọn hệ rồi!`);
             const choice = args[1]?.toLowerCase();
             const el = ELEMENTS_CONFIG[choice];
             if (!el) return message.reply(`${errorIcon} | Hệ không tồn tại!`);
-
-            const stats = {
-                data: {
-                    element: el.name, level: 1, xp: 0,
-                    atk: el.stats.atk, hp: el.stats.hp, skill: el.skill,
-                    quest: null 
-                }
-            };
-            await setKey(key, stats);
+            await setKey(key, { data: { element: el.name, level: 1, xp: 0, atk: el.stats.atk, hp: el.stats.hp, skill: el.skill, quest: null } });
             return message.reply(`${verifyIcon} | Gia nhập hệ **${el.name}** thành công!`);
         }
 
         if (!user?.data) return message.reply(`${errorIcon} | Hãy chọn hệ trước!`);
 
-        // 3. DAILY QUEST
-        if (subCommand === 'daily') {
-            // Kiểm tra reset quest theo ngày VN (4h sáng)
-            if (!user.data.quest || user.data.quest.date !== todayStr) {
-                const randomQ = RANDOM_QUESTS[Math.floor(Math.random() * RANDOM_QUESTS.length)];
-                const newQuest = { ...randomQ, current: 0, date: todayStr, claimed: false };
-                await setKey(`${key}.data.quest`, newQuest);
-                user.data.quest = newQuest;
-            }
+        // Lấy kỹ năng của người chơi dựa trên hệ
+        const userSkill = user.data.skill || "Đòn đánh thường";
 
+        // --- HUNT ---
+        if (subCommand === 'hunt') {
+            const xp = Math.floor(Math.random() * 15) + 10;
+            await addKey(`${key}.data.xp`, xp);
+            if (user.data.quest?.type === 'hunt' && user.data.quest.current < user.data.quest.target) {
+                await addKey(`${key}.data.quest.current`, 1);
+            }
+            const msg = `🏹 **${message.author.username}** đã dùng **[${userSkill}]** tiêu diệt lợn rừng và nhận được **${xp} XP**.`;
+            return this.checkLevelUp(message, key, msg);
+        }
+
+        // --- BATTLE ---
+        if (subCommand === 'battle') {
+            if (user.data.level < 10) return message.reply(`${errorIcon} | Cần cấp **10** để sử dụng Battle!`);
+            const monsters = ["Slime Khổng Lồ", "Hilichurl Thủ Lĩnh", "Pháp Sư Vực Thẳm"];
+            const target = monsters[Math.floor(Math.random() * monsters.length)];
+            
+            const win = Math.random() > 0.4;
+            if (win) {
+                const xp = Math.floor(Math.random() * 50) + 50;
+                await addKey(`${key}.data.xp`, xp);
+                if (user.data.quest?.type === 'battle' && user.data.quest.current < user.data.quest.target) {
+                    await addKey(`${key}.data.quest.current`, 1);
+                }
+                const msg = `⚔️ **${message.author.username}** đã triển khai **[${userSkill}]**, đánh bại **${target}** và nhận được **${xp} XP**!`;
+                return this.checkLevelUp(message, key, msg);
+            }
+            return message.reply(`💀 **${message.author.username}** đã bị **${target}** đánh bại dù đã cố dùng **${userSkill}**...`);
+        }
+
+        // --- DUNGEON ---
+        if (subCommand === 'dungeon') {
+            if (user.data.level < 20) return message.reply(`${errorIcon} | Cần cấp **20** để sử dụng Dungeon!`);
+            
+            const monsters = ["Slime Khổng Lồ", "Hilichurl Thủ Lĩnh", "Pháp Sư Vực Thẳm"];
+            const target = monsters[Math.floor(Math.random() * monsters.length)];
+            
+            const win = Math.random() > 0.4;
+            if (win) {
+                const xp = Math.floor(Math.random() * 50) + 50;
+                await addKey(`${key}.data.xp`, xp);
+                if (user.data.quest?.type === 'battle' && user.data.quest.current < user.data.quest.target) {
+                    await addKey(`${key}.data.quest.current`, 1);
+                }
+                const msg = `⚔️ **${message.author.username}** đã triển khai **[${userSkill}]**, đánh bại **${target}** và nhận được **${xp} XP**!`;
+                return this.checkLevelUp(message, key, msg);
+            }
+            return message.reply(`💀 **${message.author.username}** đã bị **${target}** đánh bại dù đã cố dùng **${userSkill}**...`);
+        }
+
+        // --- CÁC LỆNH KHÁC (Daily, Claim...) ---
+        if (subCommand === 'daily') {
+            if (!user.data.quest || user.data.quest.date !== todayStr) {
+                let pool = [...QUESTS.hunt];
+                if (user.data.level >= 10) pool = pool.concat(QUESTS.battle);
+                if (user.data.level >= 20) pool = pool.concat(QUESTS.dungeon);
+                const randomQ = pool[Math.floor(Math.random() * pool.length)];
+                await setKey(`${key}.data.quest`, { ...randomQ, current: 0, date: todayStr, claimed: false });
+                user.data.quest = randomQ;
+            }
             const q = user.data.quest;
             const embed = new EmbedBuilder()
                 .setTitle(`📜 NHIỆM VỤ: ${q.name}`)
-                .setDescription(`${q.desc}\n*(Reset vào 4h sáng hàng ngày)*`)
+                .setDescription(q.desc)
                 .addFields(
                     { name: "Tiến độ", value: `📊 \`${q.current}/${q.target}\``, inline: true },
                     { name: "Thưởng", value: `💰 \`${q.rewardMora.toLocaleString()}\` ${iconMora}\n✨ \`${q.rewardGems}\` ${iconPrimo}`, inline: true }
                 )
                 .setColor(q.current >= q.target ? 0x00ff00 : 0xffff00);
-
-            if (q.current >= q.target && !q.claimed) embed.setFooter({ text: "Gõ '.rpg claim' để nhận thưởng!" });
-            if (q.claimed) embed.setFooter({ text: "Bạn đã nhận thưởng nhiệm vụ hôm nay rồi." });
-
             return message.reply({ embeds: [embed] });
         }
 
-        // 4. CLAIM THƯỞNG
         if (subCommand === 'claim') {
             const q = user.data.quest;
-            if (!q || q.date !== todayStr) return message.reply(`${errorIcon} | Chưa có nhiệm vụ hôm nay!`);
-            if (q.current < q.target) return message.reply(`${errorIcon} | Bạn chưa hoàn thành nhiệm vụ!`);
-            if (q.claimed) return message.reply(`${errorIcon} | Bạn đã nhận thưởng rồi.`);
-
+            if (!q || q.date !== todayStr || q.current < q.target || q.claimed) return message.reply(`${errorIcon} | Không thể nhận thưởng!`);
             await addMoney(userId, q.rewardMora, 'mora');
             await addMoney(userId, q.rewardGems, 'primo');
             await setKey(`${key}.data.quest.claimed`, true);
-
-            return message.reply(`${verifyIcon} | Nhận thành công **${q.rewardMora.toLocaleString()}** ${iconMora} và **${q.rewardGems}** ${iconPrimo}!`);
+            return message.reply(`${verifyIcon} | **${message.author.username}** đã nhận thưởng nhiệm vụ thành công!`);
         }
+    },
 
-        // 5. ĐI SĂN
-        if (subCommand === 'hunt') {
-            const randXP = Math.floor(Math.random() * 15) + 5;
-            const randMora = Math.floor(Math.random() * 300) + 100;
-
-            await addKey(`${key}.data.xp`, randXP);
-            await addMoney(userId, randMora, 'mora');
-
-            // Cập nhật tiến độ quest nếu cùng ngày RPG VN
-            if (user.data.quest && user.data.quest.date === todayStr && user.data.quest.current < user.data.quest.target) {
-                await addKey(`${key}.data.quest.current`, 1);
-            }
-
-            let msg = `⚔️ **${message.author.username}** săn quái nhận được **${randXP} XP** và **${randMora}** ${iconMora}.`;
-            
-            const updated = await getKey(key);
-            if (updated.data.xp >= 100) {
-                await addKey(`${key}.data.level`, 1);
-                await setKey(`${key}.data.xp`, 0);
-                await addKey(`${key}.data.atk`, 3);
-                await addKey(`${key}.data.hp`, 10);
-                msg += `\n🎊 **LEVEL UP!** Bạn đạt cấp **${updated.data.level + 1}**!`;
-            }
-            return message.reply(msg);
+    async checkLevelUp(message, key, originalMsg) {
+        const updated = await getKey(key);
+        const reqXP = getRequiredXP(updated.data.level);
+        if (updated.data.xp >= reqXP) {
+            const newLevel = updated.data.level + 1;
+            await setKey(`${key}.data.level`, newLevel);
+            await setKey(`${key}.data.xp`, updated.data.xp - reqXP);
+            await addKey(`${key}.data.atk`, 7);
+            await addKey(`${key}.data.hp`, 25);
+            let lvMsg = `\n🎊 **CHÚC MỪNG!** **${message.author.username}** đã đột phá lên cấp **${newLevel}**!`;
+            return message.reply((originalMsg || "") + lvMsg);
         }
+        if (originalMsg) return message.reply(originalMsg);
     },
 
     async showProfile(message, d, todayStr) {
         const elConfig = Object.values(ELEMENTS_CONFIG).find(e => e.name === d.element);
-        const q = d.quest;
-        // Kiểm tra xem quest hiển thị có phải của hôm nay không
-        const progressStr = (q && q.date === todayStr) ? `\`${q.current}/${q.target}\`` : `\`0/--\``;
-
+        const reqXP = getRequiredXP(d.level);
         const embed = new EmbedBuilder()
-            .setTitle(`🛡️ Profile: ${message.author.username}`)
+            .setTitle(`🛡️ Thông tin Nhà Lữ Hành`)
             .setColor(elConfig?.ref || 0x2f3136)
-            .addFields(
-                { name: 'Hệ', value: `${elConfig ? elConfig.emoji : ''} ${d.element}`, inline: true },
-                { name: 'Cấp độ', value: `⭐ ${d.level}`, inline: true },
-                { name: 'Tấn công', value: `⚔️ ${d.atk}`, inline: true },
-                { name: 'Máu', value: `❤️ ${d.hp}`, inline: true },
-                { name: 'Daily Quest', value: `📈 ${progressStr}`, inline: true }
-            )
             .setThumbnail(message.author.displayAvatarURL())
-            .setFooter({ text: "Nhiệm vụ reset lúc 4:00 AM" });
-
+            .addFields(
+                { name: '👤 Nhà lữ hành', value: `**${message.author.username}**`, inline: true },
+                { name: '✨ Nguyên tố', value: `${elConfig?.emoji} ${d.element}`, inline: true },
+                { name: '⭐ Cấp độ', value: `Level ${d.level}`, inline: true },
+                { name: '📖 Kinh nghiệm', value: `\`${d.xp.toLocaleString()} / ${reqXP.toLocaleString()}\` XP`, inline: false },
+                { name: '⚔️ Tấn công', value: `\`${d.atk}\``, inline: true },
+                { name: '❤️ Sinh lực', value: `\`${d.hp}\``, inline: true },
+                { name: '🔥 Kỹ năng', value: `**${d.skill}**`, inline: true }
+            );
         return message.reply({ embeds: [embed] });
     }
 };
