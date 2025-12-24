@@ -208,7 +208,7 @@ module.exports = {
 
     if (!user?.data) return message.reply(`${errorIcon} | Hãy chọn hệ trước!`);
 
-    // --- KIỂM TRA CHỐNG SPAM (30 GIÂY) ---
+   // --- KIỂM TRA CHỐNG SPAM (30 GIÂY) ---
     const actionCommands = ["hunt", "battle", "dungeon"];
     if (actionCommands.includes(subCommand)) {
       const lastAction = cooldowns.get(userId);
@@ -216,14 +216,15 @@ module.exports = {
       const cooldownTime = 30 * 1000; // 30 giây
 
       if (lastAction && now - lastAction < cooldownTime) {
+        // Tính toán số giây còn lại và làm tròn lên để không bị hiển thị 0 giây khi vẫn còn thời gian chờ thực tế
         const remaining = Math.ceil((cooldownTime - (now - lastAction)) / 1000);
         return message.reply(
           `${errorIcon} | Bạn đang mệt, vui lòng nghỉ ngơi **${remaining} giây** nữa.`
         );
       }
+      // Chỉ cập nhật thời gian hành động mới nếu người dùng không bị vướng cooldown
       cooldowns.set(userId, now);
     }
-
     // Lấy kỹ năng của người chơi dựa trên hệ
     const userSkill = user.data.skill || "Đòn đánh thường";
 
