@@ -242,7 +242,13 @@ module.exports = {
       ) {
         await addKey(`${key}.data.quest.current`, 1);
       }
-      const msg = `🏹 **${message.author.username}** đã dùng **[${userSkill}]** tiêu diệt lợn rừng và nhận được **${xp} XP**.`;
+      const monsters = [
+        "Lợn rừng",
+        "Chim bồ câu",
+        "Cá sấu",
+      ];
+      const target = monsters[Math.floor(Math.random() * monsters.length)];
+      const msg = `🏹 **${message.author.username}** đã dùng **${userSkill}** tiêu diệt ${target} và nhận được **${xp} XP**.`;
       return this.checkLevelUp(message, key, msg);
     }
 
