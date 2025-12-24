@@ -229,7 +229,7 @@ module.exports = {
 
     // --- HUNT ---
     if (subCommand === "hunt") {
-      const xp = Math.floor(Math.random() * 15) + 10;
+      const xp = Math.floor(Math.random() * 10) + 10;
       await addKey(`${key}.data.xp`, xp);
       if (
         user.data.quest?.type === "hunt" &&
@@ -355,14 +355,30 @@ module.exports = {
 
   async checkLevelUp(message, key, originalMsg) {
     const updated = await getKey(key);
+    
+    // Kiểm tra nếu đã đạt cấp tối đa 60
+    if (updated.data.level >= 60) {
+      if (originalMsg) return message.reply(originalMsg);
+      return;
+    }
+
     const reqXP = getRequiredXP(updated.data.level);
     if (updated.data.xp >= reqXP) {
       const newLevel = updated.data.level + 1;
+      
+      // Xử lý tăng cấp
       await setKey(`${key}.data.level`, newLevel);
       await setKey(`${key}.data.xp`, updated.data.xp - reqXP);
       await addKey(`${key}.data.atk`, 7);
       await addKey(`${key}.data.hp`, 25);
+      
       let lvMsg = `\n🎊 **CHÚC MỪNG!** **${message.author.username}** đã đột phá lên cấp **${newLevel}**!`;
+      
+      // Thông báo đặc biệt khi đạt mốc 60
+      if (newLevel === 60) {
+        lvMsg += `\n👑 **HUYỀN THOẠI!** Bạn đã chạm mốc cấp độ cao nhất: **Level 60**!`;
+      }
+      
       return message.reply((originalMsg || "") + lvMsg);
     }
     if (originalMsg) return message.reply(originalMsg);
