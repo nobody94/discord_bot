@@ -7,7 +7,7 @@ const { baloHandler } = require('../game/baloHandler.js');
 
 module.exports = {
   name: "balo",
-  aliases: ["tui", "inventory", "inv"],
+  aliases: ["tui"],
   description: "Xem các vật phẩm bạn đang sở hữu.",
 
   async execute(message, args) {

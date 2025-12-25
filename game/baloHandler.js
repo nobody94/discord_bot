@@ -239,10 +239,11 @@ async function baloHandler(args, message, inventory, invKey, userId) {
             responseContent += `\n${goldenNotes.join("\n")}`;
         }
 
-        return message.reply({
+        message.reply({
             content: responseContent,
             allowedMentions: { repliedUser: false }
         });
+        return true
     }
     return false;
 }
