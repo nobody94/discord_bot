@@ -28,6 +28,26 @@ async function pushKey(key,data){
     return await db.push(key, data)
 }
 
+// Hàm cập nhật bảng xếp hạng
+async function updateLeaderboard(type, userId, username) {
+  const key = `leaderboard_${type}`; // leaderboard_miss hoặc leaderboard_trash
+  let data = (await getKey(key)) || [];
+  
+  let userEntry = data.find(u => u.id === userId);
+  if (userEntry) {
+    userEntry.count += 1;
+    userEntry.name = username; // Cập nhật tên mới nhất
+  } else {
+    data.push({ id: userId, name: username, count: 1 });
+  }
+  
+  // Sắp xếp và chỉ giữ lại Top 10 để tránh nặng DB
+  data.sort((a, b) => b.count - a.count);
+  data = data.slice(0, 10);
+  
+  await setKey(key, data);
+}
+
 module.exports={
-    db,renderKey,setKey,getKey,pushKey,addKey
+    db,renderKey,setKey,getKey,pushKey,addKey,updateLeaderboard
 }

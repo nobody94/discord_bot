@@ -1,73 +1,36 @@
 const { EmbedBuilder } = require("discord.js");
-const { renderKey, getAllData } = require("../utils/db"); // Giả sử bạn có hàm getAllData để lấy toàn bộ DB
-const { errorIcon } = require('../utils/icon.js');
+const { getKey } = require("../utils/db");
 const {DEVELOPER_IDS} = require('../utils/constant.js');
 const { PermissionsBitField } = require('discord.js');
 
 module.exports = {
   name: "fishrank",
   aliases: ["fr", "topca"],
-  description: "Xem bảng xếp hạng những ngư thủ 'vận đen' nhất server.",
-
   async execute(message, args) {
-     if (!message.member.permissions.has(PermissionsBitField.Flags.ManageChannels)|| !DEVELOPER_IDS.includes(message.author.id)) {
-      return message.reply(`${errorIcon} Bạn không có quyền sử dụng lệnh này.`);
-    }
-    // 1. LẤY TOÀN BỘ DỮ LIỆU TỪ DATABASE
-    // Lưu ý: Tùy vào loại DB bạn dùng, cách lấy tất cả các key có thể khác nhau.
-    // Ở đây giả định hệ thống DB của bạn có thể trả về một object chứa tất cả data.
-    const allData = await getAllData(); 
-    if (!allData) return message.reply(`${errorIcon} | Không thể truy xuất dữ liệu bảng xếp hạng.`);
-
-    let missLeadeboard = [];
-    let trashLeaderboard = [];
-
-    // 2. LỌC DỮ LIỆU THEO TIỀN TỐ STATS
-    for (const key in allData) {
-      // Lọc rank hụt cá
-      if (key.startsWith("stats_miss_")) {
-        const userId = key.replace("stats_miss_", "");
-        missLeadeboard.push({ userId, count: allData[key] });
-      }
-      // Lọc rank câu rác
-      if (key.startsWith("stats_trash_")) {
-        const userId = key.replace("stats_trash_", "");
-        trashLeaderboard.push({ userId, count: allData[key] });
-      }
+    if (!message.member.permissions.has(PermissionsBitField.Flags.ManageChannels) || !DEVELOPER_IDS.includes(message.author.id)) {
+      return message.reply("Bạn không có quyền sử dụng lệnh này.");
     }
 
-    // 3. SẮP XẾP GIẢM DẦN
-    missLeadeboard.sort((a, b) => b.count - a.count);
-    trashLeaderboard.sort((a, b) => b.count - a.count);
+    const topMiss = (await getKey("leaderboard_miss")) || [];
+    const topTrash = (await getKey("leaderboard_trash")) || [];
 
-    // Lấy Top 5 mỗi loại
-    const topMiss = missLeadeboard.slice(0, 5);
-    const topTrash = trashLeaderboard.slice(0, 5);
-
-    // 4. TẠO EMBED HIỂN THỊ
-    const rankEmbed = new EmbedBuilder()
-      .setTitle("🏆 BẢNG XẾP HẠNG NGƯ THỦ 'VẬN ĐEN'")
+    const embed = new EmbedBuilder()
+      .setTitle("🏆 BẢNG XẾP HẠNG NGƯ THỦ VẬN ĐEN")
       .setColor("#e67e22")
-      .setThumbnail(message.guild.iconURL())
       .addFields(
         { 
-          name: "💨 VUA HỤT CẦN (Miss nhiều nhất)", 
-          value: topMiss.length > 0 
-            ? topMiss.map((u, i) => `**${i + 1}.** <@${u.userId}>: \`${u.count}\` lần`).join("\n") 
-            : "Chưa có dữ liệu",
-          inline: false 
+          name: "💨 TOP HỤT CẦN", 
+          value: topMiss.map((u, i) => `**${i+1}.** ${u.name}: \`${u.count}\` lần`).join("\n") || "Trống",
+          inline: true 
         },
         { 
-          name: "♻️ CHÚA TỂ RÁC THẢI (Câu rác nhiều nhất)", 
-          value: topTrash.length > 0 
-            ? topTrash.map((u, i) => `**${i + 1}.** <@${u.userId}>: \`${u.count}\` món`).join("\n") 
-            : "Chưa có dữ liệu",
-          inline: false 
+          name: "♻️ TOP NHẶT RÁC", 
+          value: topTrash.map((u, i) => `**${i+1}.** ${u.name}: \`${u.count}\` món`).join("\n") || "Trống",
+          inline: true 
         }
       )
-      .setFooter({ text: "Càng đen rank càng cao! Cố gắng lên các ngư thủ." })
-      .setTimestamp();
+      .setFooter({ text: "Càng đen rank càng cao!" });
 
-    await message.reply({ embeds: [rankEmbed] });
+    message.reply({ embeds: [embed] });
   }
 };
