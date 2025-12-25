@@ -28,7 +28,7 @@ module.exports = {
         
         // Kiểm tra nếu có nhập tiền và tiền phải là số dương
         if (isAdmin){
-            giftMora = 5000;
+            giftMora = 100000;
         }
         if (amountArg && !isNaN(amountArg)) {
             giftMora = parseInt(amountArg);
