@@ -25,7 +25,7 @@ const FISH_LIST = {
         emoji: "🐳", 
         sellPrice: 50, 
         currency: "primo", 
-        chance: 0.02 // 2% xuất hiện
+        chance: 0.005 // 0.5% xuất hiện
     }
 };
 
