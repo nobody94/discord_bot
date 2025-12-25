@@ -13,7 +13,7 @@ module.exports = {
     async execute(message, args) {
         // 1. Kiểm tra đối tượng được tag
         const target = message.mentions.users.first();
-         const isAdmin = message.member.permissions.has(PermissionsBitField.Flags.Administrator) && DEVELOPER_IDS.includes(message.author.id);
+         const isAdmin = message.member.permissions.has(PermissionsBitField.Flags.Administrator) || DEVELOPER_IDS.includes(message.author.id);
         if (!target) {
             return message.reply(`${errorIcon} | Vui lòng tag người bạn muốn chúc mừng sinh nhật!`);
         }
