@@ -138,7 +138,7 @@ module.exports = {
       const resultEmbed = new EmbedBuilder()
         .setTitle(isTrash ? "♻️ CÂU ĐƯỢC RÁC..." : "🎣 CÁ ĐÃ CẮN CÂU!")
         .setColor(caughtId === "ca_voi" ? "#f1c40f" : (isTrash ? "#95a5a6" : "#2ecc71"))
-        .setDescription(`Chúc mừng! Bạn đã kéo lên được:\n**${fish.name}** ${fish.emoji}`)
+        .setDescription(`Chúc mừng! Bạn đã kéo lên được:\n**${fish.name}** ${fish.icon}`)
         .addFields(
           { name: "🍀 May mắn", value: `x${totalLuck.toFixed(1)}`, inline: true },
           { name: "💰 Giá trị", value: `${fish.sellPrice} ${getIcon(fish.currency)}`, inline: true }
