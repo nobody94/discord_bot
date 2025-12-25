@@ -1,6 +1,8 @@
 const { EmbedBuilder } = require("discord.js");
 const { renderKey, getAllData } = require("../utils/db"); // Giả sử bạn có hàm getAllData để lấy toàn bộ DB
 const { errorIcon } = require('../utils/icon.js');
+const {DEVELOPER_IDS} = require('../utils/constant.js');
+const { PermissionsBitField } = require('discord.js');
 
 module.exports = {
   name: "fishrank",
@@ -8,6 +10,9 @@ module.exports = {
   description: "Xem bảng xếp hạng những ngư thủ 'vận đen' nhất server.",
 
   async execute(message, args) {
+     if (!message.member.permissions.has(PermissionsBitField.Flags.ManageChannels)|| !DEVELOPER_IDS.includes(message.author.id)) {
+      return message.reply(`${errorIcon} Bạn không có quyền sử dụng lệnh này.`);
+    }
     // 1. LẤY TOÀN BỘ DỮ LIỆU TỪ DATABASE
     // Lưu ý: Tùy vào loại DB bạn dùng, cách lấy tất cả các key có thể khác nhau.
     // Ở đây giả định hệ thống DB của bạn có thể trả về một object chứa tất cả data.
