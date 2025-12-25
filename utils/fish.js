@@ -1,56 +1,56 @@
 const FISH_LIST = {
   "chiec_ung_cu": { 
         name: "Chiếc Ủng Cũ", 
-        emoji: "🥾", 
+        icon: "🥾", 
         sellPrice: 5, 
         currency: "mora", 
         chance: 0.10 // 10% xuất hiện
     },
     "vo_chai_bia": { 
         name: "Vỏ Chuối", 
-        emoji: "🍌", 
+        icon: "🍌", 
         sellPrice: 3, 
         currency: "mora", 
         chance: 0.18 // 8% xuất hiện
     },
     "tui_nilon": { 
         name: "Túi Nilon", 
-        emoji: "🛍️", 
+        icon: "🛍️", 
         sellPrice: 2, 
         currency: "mora", 
         chance: 0.15 // 12% xuất hiện
     },
     "xuong_ca": { 
         name: "Bộ Xương Cá", 
-        emoji: "🦴", 
+        icon: "🦴", 
         sellPrice: 1, 
         currency: "mora", 
         chance: 0.12 
     },
     "ca_long_tong": { 
         name: "Cá Lòng Tong", 
-        emoji: "🐟", 
+        icon: "🐟", 
         sellPrice: 50, 
         currency: "mora", 
         chance: 0.50 // 50% xuất hiện
     },
     "ca_chep": { 
         name: "Cá Chép Vàng", 
-        emoji: "🎏", 
+        icon: "🎏", 
         sellPrice: 300, 
         currency: "mora", 
         chance: 0.30 // 30% xuất hiện
     },
     "ca_map": { 
         name: "Cá Mập Trắng", 
-        emoji: "🦈", 
+        icon: "🦈", 
         sellPrice: 5000, 
         currency: "mora", 
         chance: 0.05 // 8% xuất hiện
     },
     "ca_voi": { 
         name: "Cá Voi Xanh", 
-        emoji: "🐳", 
+        icon: "🐳", 
         sellPrice: 50, 
         currency: "primo", 
         chance: 0.005 // 0.5% xuất hiện
