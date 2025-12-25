@@ -2,6 +2,7 @@ const { EmbedBuilder } = require("discord.js");
 const { getKey, renderKey, setKey, updateLeaderboard } = require("../utils/db");
 const { FISH_LIST, FISH_SHOP_ITEMS } = require("../utils/fish");
 const { errorIcon } = require('../utils/icon.js');
+const {getIcon} = require('../utils/currency.js');
 
 module.exports = {
   name: "cauca",
@@ -77,7 +78,7 @@ module.exports = {
     // 5. XỬ LÝ KẾT QUẢ (Sau 3 giây)
     setTimeout(async () => {
       // --- A. TỈ LỆ HỤT (Giảm khi Luck cao) ---
-      const missRate = Math.max(0.05, 0.15 - (totalLuck * 0.02));
+      const missRate = Math.max(0.01, 0.15 - (totalLuck * 0.025));
       if (Math.random() < missRate) {
         await updateLeaderboard("miss", userId, username); // Ghi danh vua hụt
 
@@ -105,7 +106,7 @@ module.exports = {
           weight *= totalLuck;
           if (totalLuck < 2.0) weight *= 0.4; // Phạt cần gỗ
         } else if (data.sellPrice < 10) {
-          weight /= totalLuck; // Giảm rác khi cần xịn
+          weight /= Math.pow(totalLuck, 2); // Giảm rác khi cần xịn
         }
         return { id, weight };
       });
@@ -137,11 +138,10 @@ module.exports = {
       const resultEmbed = new EmbedBuilder()
         .setTitle(isTrash ? "♻️ CÂU ĐƯỢC RÁC..." : "🎣 CÁ ĐÃ CẮN CÂU!")
         .setColor(caughtId === "ca_voi" ? "#f1c40f" : (isTrash ? "#95a5a6" : "#2ecc71"))
-        .setThumbnail(isTrash ? "https://i.imgur.com/8B1nNIn.png" : null) // Link icon rác nếu có
         .setDescription(`Chúc mừng! Bạn đã kéo lên được:\n**${fish.name}** ${fish.emoji}`)
         .addFields(
           { name: "🍀 May mắn", value: `x${totalLuck.toFixed(1)}`, inline: true },
-          { name: "💰 Giá trị", value: `${fish.sellPrice} ${fish.currency}`, inline: true }
+          { name: "💰 Giá trị", value: `${fish.sellPrice} ${getIcon(fish.currency)}`, inline: true }
         );
 
       if (rodBroken) {

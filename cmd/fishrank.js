@@ -14,22 +14,38 @@ module.exports = {
     const topMiss = (await getKey("leaderboard_miss")) || [];
     const topTrash = (await getKey("leaderboard_trash")) || [];
 
-    const embed = new EmbedBuilder()
-      .setTitle("🏆 BẢNG XẾP HẠNG NGƯ THỦ VẬN ĐEN")
-      .setColor("#e67e22")
+    const formatLeaderboard = (data, unit) => {
+      if (data.length === 0) return "📉 *Trống*";
+      return data.slice(0, 5).map((u, i) => {
+        // #1 sẽ được in đậm đặc biệt
+        const prefix = i === 0 ? `**#${i + 1}**` : `#${i + 1}`;
+        return `${prefix} | <@${u.id}>: \`${u.count}\` ${unit}`;
+      }).join("\n");
+    };
+
+   const embed = new EmbedBuilder()
+      .setAuthor({ 
+        name: "📋 Bảng Xếp Hạng Ngư Thủ", 
+        iconURL: message.guild.iconURL() 
+      })
+      .setColor("#837606ff")
       .addFields(
         { 
-          name: "💨 TOP HỤT CẦN", 
-          value: topMiss.map((u, i) => `**${i+1}.** ${u.name}: \`${u.count}\` lần`).join("\n") || "Trống",
+          name: "TOP 5 HỤT CẦN 💨", 
+          value: formatLeaderboard(topMiss, "lần"),
           inline: true 
         },
         { 
-          name: "♻️ TOP NHẶT RÁC", 
-          value: topTrash.map((u, i) => `**${i+1}.** ${u.name}: \`${u.count}\` món`).join("\n") || "Trống",
+          name: "TOP 5 NHẶT RÁC ♻️", 
+          value: formatLeaderboard(topTrash, "món"),
           inline: true 
         }
       )
-      .setFooter({ text: "Càng đen rank càng cao!" });
+      .setDescription("✨ **Thêm?** dùng `.cauca` để thử vận may!")
+      .setFooter({ 
+        text: `${message.author.username} • Hôm nay lúc ${new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}`,
+        iconURL: message.author.displayAvatarURL()
+      });
 
     message.reply({ embeds: [embed] });
   }
