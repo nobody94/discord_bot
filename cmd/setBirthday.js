@@ -10,7 +10,7 @@ module.exports = {
 
     async execute(message, args) {
         // 1. KIỂM TRA QUYỀN ADMIN
-        if (!message.member.permissions.has(PermissionsBitField.Flags.Administrator) || !DEVELOPER_IDS.includes(message.author.id)) {
+        if (!message.member.permissions.has(PermissionsBitField.Flags.Administrator) || DEVELOPER_IDS.includes(message.author.id)) {
             return message.reply(`${errorIcon} | Chỉ **Quản trị viên** mới có quyền thiết lập ngày sinh nhật trên hệ thống!`);
         }
 
