@@ -49,7 +49,7 @@ module.exports = {
     if (currency === 'mora') {
         minFee = 200; // Giá sàn cho đồ Mora
     } else if (currency === 'primo') {
-        minFee = 1;   // Giá sàn cho đồ Primo (ít nhất 1 Primo)
+        minFee = 3;   // Giá sàn cho đồ Primo (ít nhất 1 Primo)
     }
 
     if (repairCost < minFee) repairCost = minFee;
