@@ -1,13 +1,12 @@
 const { EmbedBuilder } = require("discord.js");
 const { getKey, renderKey, setKey } = require("../utils/db");
-const { getKey: getBalance } = require("../utils/db"); // Tùy chỉnh theo hệ thống của bạn
 const { FISH_LIST, FISH_SHOP_ITEMS } = require("../utils/fish");
 const { errorIcon } = require('../utils/icon.js');
 
 module.exports = {
   name: "cauca",
   aliases: ["fish", "cc"],
-  description: "Đi câu cá với hệ thống độ bền, may mắn và tỉ lệ hụt thông minh.",
+  description: "Đi câu cá với hệ thống độ bền, may mắn, giảm rác và ghi nhận kỷ lục.",
 
   async execute(message, args) {
     const userId = message.author.id;
@@ -15,7 +14,7 @@ module.exports = {
     // 1. KIỂM TRA COOLDOWN (15s)
     const cooldownKey = renderKey("cooldown_cauca", userId);
     const lastUsed = await getKey(cooldownKey);
-    const cooldownTime = 5 * 1000; 
+    const cooldownTime = 15 * 1000; 
     const now = Date.now();
 
     if (lastUsed && now - lastUsed < cooldownTime) {
@@ -52,14 +51,14 @@ module.exports = {
 
     await setKey(cooldownKey, now);
 
-    // 3. XỬ LÝ ĐỘ BỀN VÀ THÔNG SỐ LUCK
+    // 3. THIẾT LẬP THÔNG SỐ
     const rodEntry = fishInventory[bestRodIndex];
     const rodData = FISH_SHOP_ITEMS[rodEntry.id];
     const baitId = fishInventory[baitIndex];
     const baitInfo = FISH_SHOP_ITEMS[baitId];
     const totalLuck = rodLuck * (baitInfo.luck || 1.0);
 
-    // Giảm độ bền và mất mồi
+    // Tiêu thụ độ bền và mồi
     rodEntry.durability -= 1;
     fishInventory.splice(baitIndex, 1);
 
@@ -79,7 +78,7 @@ module.exports = {
     const waitingEmbed = new EmbedBuilder()
       .setColor("#3498db")
       .setTitle("🎣 ĐANG THẢ CẦN...")
-      .setDescription(`Sử dụng: **${rodData.name}** & **${baitInfo.name}**\nMay mắn: **x${totalLuck.toFixed(1)}**\n\n⏳ Cá sẽ cắn câu sau: **${timer}s**`);
+      .setDescription(`Sử dụng: **${rodData.name}** & **${baitInfo.name}**\nĐộ bền: **${Math.max(0, rodEntry.durability)}/${rodData.maxDurability}**\n\n⏳ Cá sẽ cắn câu sau: **${timer}s**`);
 
     const msg = await message.reply({ embeds: [waitingEmbed] });
 
@@ -89,38 +88,40 @@ module.exports = {
         clearInterval(countdownInterval);
         processFishingResult();
       } else {
-        waitingEmbed.setDescription(`Sử dụng: **${rodData.name}** & **${baitInfo.name}**\nMay mắn: **x${totalLuck.toFixed(1)}**\n\n⏳ Cá sẽ cắn câu sau: **${timer}s**`);
+        waitingEmbed.setDescription(`Sử dụng: **${rodData.name}** & **${baitInfo.name}**\nĐộ bền: **${Math.max(0, rodEntry.durability)}/${rodData.maxDurability}**\n\n⏳ Cá sẽ cắn câu sau: **${timer}s**`);
         await msg.edit({ embeds: [waitingEmbed] }).catch(() => clearInterval(countdownInterval));
       }
     }, 1000);
 
-    // 5. LOGIC KẾT QUẢ (GIẢM HỤT & GIẢM RÁC THEO LUCK)
+    // 5. LOGIC KẾT QUẢ
     async function processFishingResult() {
-      // --- A. TỈ LỆ HỤT (MISS RATE) ---
-      // Cần càng xịn, Luck càng cao thì càng khó bị hụt.
+      // --- A. XỬ LÝ HỤT CÁ (Giảm theo Luck) ---
       const baseMissRate = 0.15;
       const missRate = Math.max(0.05, baseMissRate - (totalLuck * 0.02)); 
 
       if (Math.random() < missRate) {
+        // Tăng stats hụt cho Rank
+        const missCountKey = renderKey("stats_miss", userId);
+        const currentMiss = (await getKey(missCountKey)) || 0;
+        await setKey(missCountKey, currentMiss + 1);
+
         const missMessages = [
-            "Con cá ăn sạch mồi rồi để lại mẩu giấy: 'Mồi này hơi lạt, lần sau thêm tí muối nhé!'",
+            "Con cá ăn sạch mồi rồi để lại mẩu giấy: 'Mồi này hơi lạt, thêm tí muối nhé!'",
             "Bạn vừa kéo lên thì thấy một con cá đang đứng trên mặt nước... vẫy tay chào tạm biệt.",
-            "Con cá không những ăn mất mồi mà còn để lại lời nhắn: 'Mồi dở quá, lần sau mua mồi xịn hơn nhé!'",
-            "Phao rung rất mạnh, nhưng hóa ra là một con cua đang nhảy múa dưới đó...",
+            "Con cá đớp mất mồi và để lại tờ giấy: 'Mồi dở quá, lần sau mua mồi xịn hơn nhé!'",
             "Bạn nghe thấy tiếng cá thì thầm: 'Cần câu đẹp đấy, nhưng mồi thì... còn lâu nhé!'"
         ];
-        const randomMsg = missMessages[Math.floor(Math.random() * missMessages.length)];
         
         const missEmbed = new EmbedBuilder()
           .setTitle("💨 HỤT MẤT RỒI!")
           .setColor("#e74c3c")
-          .setDescription(`${randomMsg}\n\n*(Tỉ lệ hụt lượt này: ${(missRate * 100).toFixed(1)}%)*`);
+          .setDescription(missMessages[Math.floor(Math.random() * missMessages.length)]);
 
         if (rodBroken) missEmbed.addFields({ name: "⚠️ THÔNG BÁO", value: `Cú kéo mạnh của cá đã làm gãy chiếc **${rodData.name}**!` });
         return await msg.edit({ embeds: [missEmbed] });
       }
 
-      // --- B. TỈ LỆ CÁ & RÁC ---
+      // --- B. XỬ LÝ TỈ LỆ CÁ & RÁC ---
       const roll = Math.random();
       let cumulative = 0;
       let caughtFishId = "ca_long_tong";
@@ -128,12 +129,12 @@ module.exports = {
       const adjustedChances = Object.entries(FISH_LIST).map(([id, data]) => {
         let weight = data.chance;
 
-        // 1. Cá hiếm (Cá Mập, Cá Voi): Tăng mạnh theo Luck, phạt nặng nếu Luck thấp
+        // Tăng cá hiếm, phạt cần cùi (Luck < 2.0)
         if (id === "ca_map" || id === "ca_voi") {
           weight *= totalLuck;
-          if (totalLuck < 2.0) weight *= 0.5; 
+          if (totalLuck < 2.0) weight *= 0.4; 
         } 
-        // 2. Đồ rác (Giá < 10): Giảm mạnh khi Luck cao
+        // Giảm rác khi Luck cao (Item giá < 10 là rác)
         else if (data.sellPrice < 10) {
           weight = weight / totalLuck;
         }
@@ -152,14 +153,23 @@ module.exports = {
       }
 
       const fish = FISH_LIST[caughtFishId];
+      const isTrash = fish.sellPrice < 10;
+
+      // Cập nhật Rank rác nếu trúng rác
+      if (isTrash) {
+        const trashCountKey = renderKey("stats_trash", userId);
+        const currentTrash = (await getKey(trashCountKey)) || 0;
+        await setKey(trashCountKey, currentTrash + 1);
+      }
+
+      // Lưu cá vào bể
       const tankKey = renderKey("fishtank", userId);
       const tank = (await getKey(tankKey)) || [];
       tank.push(caughtFishId);
       await setKey(tankKey, tank);
     
-      const isTrash = fish.sellPrice < 10;
       const resultEmbed = new EmbedBuilder()
-        .setTitle(isTrash ? "♻️ CÂU ĐƯỢC... RÁC?" : "🎣 CÁ ĐÃ CẮN CÂU!")
+        .setTitle(isTrash ? "♻️ CÂU ĐƯỢC RÁC..." : "🎣 CÁ ĐÃ CẮN CÂU!")
         .setColor(caughtFishId === "ca_voi" ? "#f1c40f" : (isTrash ? "#95a5a6" : "#2ecc71"))
         .setDescription(`Bạn đã kéo lên được: **${fish.name}** ${fish.emoji}`)
         .addFields({ name: "🍀 May mắn", value: `x${totalLuck.toFixed(1)}`, inline: true })
