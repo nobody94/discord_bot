@@ -8,7 +8,7 @@ module.exports = {
   description: "Thiết lập kênh và bắt đầu game đoán chữ",
   
   async execute(message, args) {
-    if (!message.member.permissions.has(PermissionsBitField.Flags.ManageChannels)|| !DEVELOPER_IDS.includes(message.author.id)) {
+    if (!message.member.permissions.has(PermissionsBitField.Flags.ManageChannels) && !DEVELOPER_IDS.includes(message.author.id)) {
       return message.reply(`${errorIcon} Bạn cần quyền Quản lý kênh.`);
     }
 

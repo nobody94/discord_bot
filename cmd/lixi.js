@@ -21,7 +21,7 @@ module.exports = {
       return message.reply(`${errorIcon} | Loại tiền không hợp lệ! Chỉ có thể lì xì **mora** hoặc **primo**.`);
     }
     
-    const isAdmin = message.member.permissions.has(PermissionsBitField.Flags.Administrator) || DEVELOPER_IDS.includes(message.author.id);
+    const isAdmin = message.member.permissions.has(PermissionsBitField.Flags.Administrator) && DEVELOPER_IDS.includes(message.author.id);
     const senderId = message.author.id;
 
     try {

@@ -7,7 +7,7 @@ module.exports = {
   name: "fishrank",
   aliases: ["fr", "topca"],
   async execute(message, args) {
-    if (!message.member.permissions.has(PermissionsBitField.Flags.ManageChannels) || !DEVELOPER_IDS.includes(message.author.id)) {
+    if (!message.member.permissions.has(PermissionsBitField.Flags.ManageChannels) && !DEVELOPER_IDS.includes(message.author.id)) {
       return message.reply("Bạn không có quyền sử dụng lệnh này.");
     }
 
