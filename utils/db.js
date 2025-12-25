@@ -48,6 +48,35 @@ async function updateLeaderboard(type, userId, username,guildId) {
   await setKey(key, data);
 }
 
+async function migrateLeaderboard(type, guildId) {
+  const oldKey = `leaderboard_${type}`;
+  const newKey = `leaderboard_${type}_${guildId}`;
+
+  const oldData = await getKey(oldKey);
+  if (!oldData) return false;
+
+  let newData = (await getKey(newKey)) || [];
+
+  // Gộp dữ liệu cũ vào dữ liệu mới của server này
+  oldData.forEach(oldEntry => {
+    let existing = newData.find(u => u.id === oldEntry.id);
+    if (existing) {
+      existing.count += oldEntry.count; // Gộp số lần nếu đã tồn tại
+    } else {
+      newData.push(oldEntry);
+    }
+  });
+
+  // Sắp xếp lại và lưu
+  newData.sort((a, b) => b.count - a.count);
+  await setKey(newKey, newData.slice(0, 10));
+  
+  // (Tùy chọn) Xóa key cũ sau khi chuyển đổi thành công
+  // await setKey(oldKey, null); 
+  
+  return true;
+}
+
 module.exports={
-    db,renderKey,setKey,getKey,pushKey,addKey,updateLeaderboard
+    db,renderKey,setKey,getKey,pushKey,addKey,updateLeaderboard,migrateLeaderboard
 }
