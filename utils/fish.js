@@ -18,7 +18,7 @@ const FISH_LIST = {
         emoji: "🦈", 
         sellPrice: 5000, 
         currency: "mora", 
-        chance: 0.08 // 8% xuất hiện
+        chance: 0.05 // 8% xuất hiện
     },
     "ca_voi": { 
         name: "Cá Voi Xanh", 
