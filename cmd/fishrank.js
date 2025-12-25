@@ -29,7 +29,7 @@ module.exports = {
         name: "📋 Bảng Xếp Hạng Ngư Thủ", 
         iconURL: message.guild.iconURL() 
       })
-      .setColor("#837606ff")
+      .setColor("#e74c3c")
       .addFields(
         { 
           name: "TOP 5 HỤT CẦN 💨", 
