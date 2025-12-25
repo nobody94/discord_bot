@@ -42,7 +42,7 @@ const FISH_SHOP_ITEMS = {
   "cancau_carbon": {
     name: "Cần Câu Sợi Carbon",
     icon: "🎋",
-    price: 50000,
+    price: 100000,
     luck: 1.5,
     maxDurability: 60,
     currency: "mora",
@@ -51,7 +51,7 @@ const FISH_SHOP_ITEMS = {
   "cancau_hoang_kim": {
     name: "Cần Câu Hoàng Kim",
     icon: "🔱",
-    price: 20,
+    price: 150,
     luck: 3.0,
     maxDurability: 100,
     currency: "primo", // Bán bằng tiền hiếm
