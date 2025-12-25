@@ -80,7 +80,7 @@ module.exports = {
       // --- A. TỈ LỆ HỤT (Giảm khi Luck cao) ---
       const missRate = Math.max(0.01, 0.15 - (totalLuck * 0.025));
       if (Math.random() < missRate) {
-        await updateLeaderboard("miss", userId, username); // Ghi danh vua hụt
+        await updateLeaderboard("miss", userId, username,message.guild.id); // Ghi danh vua hụt
 
         const missMsgs = [
           "Con cá ăn sạch mồi rồi để lại giấy: 'Mồi dở quá, mua mồi xịn đi!'",
@@ -126,7 +126,7 @@ module.exports = {
 
       const fish = FISH_LIST[caughtId];
       const isTrash = fish.sellPrice < 10;
-      if (isTrash) await updateLeaderboard("trash", userId, username); // Ghi danh vua rác
+      if (isTrash) await updateLeaderboard("trash", userId, username,message.guild.id); // Ghi danh vua rác
 
       // Lưu cá vào bể
       const tankKey = renderKey("fishtank", userId);

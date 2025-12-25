@@ -29,8 +29,8 @@ async function pushKey(key,data){
 }
 
 // Hàm cập nhật bảng xếp hạng
-async function updateLeaderboard(type, userId, username) {
-  const key = `leaderboard_${type}`; // leaderboard_miss hoặc leaderboard_trash
+async function updateLeaderboard(type, userId, username,guildId) {
+  const key = `leaderboard_${type}_${guildId}}`; // leaderboard_miss hoặc leaderboard_trash
   let data = (await getKey(key)) || [];
   
   let userEntry = data.find(u => u.id === userId);

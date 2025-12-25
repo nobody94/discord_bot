@@ -1,5 +1,5 @@
 const { EmbedBuilder } = require("discord.js");
-const { getKey } = require("../utils/db");
+const { getKey,renderKey } = require("../utils/db");
 const {DEVELOPER_IDS} = require('../utils/constant.js');
 const { PermissionsBitField } = require('discord.js');
 
@@ -11,8 +11,9 @@ module.exports = {
       return message.reply("Bạn không có quyền sử dụng lệnh này.");
     }
 
-    const topMiss = (await getKey("leaderboard_miss")) || [];
-    const topTrash = (await getKey("leaderboard_trash")) || [];
+    const guildId = message.guild.id;
+    const topMiss = (await getKey(`leaderboard_miss_${guildId}`)) || [];
+    const topTrash = (await getKey(`leaderboard_trash_${guildId}`)) || [];
 
     const formatLeaderboard = (data, unit) => {
       if (data.length === 0) return "📉 *Trống*";
