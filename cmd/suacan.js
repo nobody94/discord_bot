@@ -42,7 +42,7 @@ module.exports = {
     const lostPercentage = durabilityLost / itemData.maxDurability;
     
     // Phí sửa tối đa là 40% giá trị mua mới
-    let repairCost = Math.floor((itemData.price * 0.15) * lostPercentage);
+    let repairCost = Math.floor((itemData.price * 0.35) * lostPercentage);
 
     // --- THIẾT LẬP GIÁ SÀN BẢO TRÌ ---
     let minFee = 0;
