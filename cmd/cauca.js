@@ -101,13 +101,22 @@ module.exports = {
 
       // --- B. TỈ LỆ CÁ / RÁC ---
       const adjustedChances = Object.entries(FISH_LIST).map(([id, data]) => {
-        let weight = data.chance;
+      let weight = data.chance;
+
+        // Tăng tỉ lệ cho Cá Voi và Cá Mập dựa trên Luck
         if (id === "ca_voi" || id === "ca_map") {
           weight *= totalLuck;
-          if (totalLuck < 2.0) weight *= 0.4; // Phạt cần gỗ
+          
+          // ƯU TIÊN RIÊNG CHO CẦN HOÀNG KIM
+          if (rodEntry.id === "cancau_hoang_kim" && id === "ca_voi") {
+            weight *= 5; // Tăng thêm gấp 5 lần tỉ lệ xuất hiện Cá Voi cho cần này
+          }
+
+          if (totalLuck < 2.0) weight *= 0.4; // Phạt cần gỗ hoặc cần yếu
         } else if (data.sellPrice < 10) {
-          weight /= Math.pow(totalLuck, 2); // Giảm rác khi cần xịn
+          weight /= Math.pow(totalLuck, 2); // Giảm rác khi dùng cần xịn
         }
+        
         return { id, weight };
       });
 
