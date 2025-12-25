@@ -1,4 +1,32 @@
 const FISH_LIST = {
+  "chiec_ung_cu": { 
+        name: "Chiếc Ủng Cũ", 
+        emoji: "🥾", 
+        sellPrice: 1, 
+        currency: "mora", 
+        chance: 0.10 // 10% xuất hiện
+    },
+    "vo_chai_bia": { 
+        name: "Vỏ Chuối", 
+        emoji: "🍌", 
+        sellPrice: 2, 
+        currency: "mora", 
+        chance: 0.18 // 8% xuất hiện
+    },
+    "tui_nilon": { 
+        name: "Túi Nilon", 
+        emoji: "🛍️", 
+        sellPrice: 1, 
+        currency: "mora", 
+        chance: 0.15 // 12% xuất hiện
+    },
+    "xuong_ca": { 
+        name: "Bộ Xương Cá", 
+        emoji: "🦴", 
+        sellPrice: 1, 
+        currency: "mora", 
+        chance: 0.12 
+    },
     "ca_long_tong": { 
         name: "Cá Lòng Tong", 
         emoji: "🐟", 
