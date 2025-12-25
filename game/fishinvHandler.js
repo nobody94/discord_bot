@@ -89,7 +89,7 @@ async function fishInvHandler(args, message, inventory, invKey, userId) {
         const durabilityFactor = itemEntry.durability / itemData.maxDurability;
         sellPrice = Math.floor(sellPrice * durabilityFactor);
 
-        const floorPrice = Math.floor(itemData.price * 0.05);
+        const floorPrice = Math.floor(itemData.price * 0.01);
         if (sellPrice < floorPrice) sellPrice = floorPrice;
       }
 
