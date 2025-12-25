@@ -254,9 +254,9 @@ module.exports = {
 
     // --- BATTLE ---
     if (subCommand === "battle") {
-      if (user.data.level < 10)
+      if (user.data.level < 20)
         return message.reply(
-          `${errorIcon} | Cần cấp **10** để sử dụng Battle!`
+          `${errorIcon} | Cần cấp **20** để sử dụng Battle!`
         );
       const monsters = [
         "Slime Khổng Lồ",
@@ -264,9 +264,9 @@ module.exports = {
         "Pháp Sư Vực Thẳm",
       ];
       const target = monsters[Math.floor(Math.random() * monsters.length)];
-      const win = Math.random() > 0.3;
+      const win = Math.random() > 0.4;
       if (win) {
-        const xp = Math.floor(Math.random() * 40) + 40;
+        const xp = user.data.level < 30  ? Math.floor(Math.random() * 15) + 15 : Math.floor(Math.random() * 30) + 30;
         await addKey(`${key}.data.xp`, xp);
         if (
           user.data.quest?.type === "battle" &&
@@ -284,9 +284,9 @@ module.exports = {
 
     // --- DUNGEON ---
     if (subCommand === "dungeon") {
-      if (user.data.level < 20)
+      if (user.data.level < 40)
         return message.reply(
-          `${errorIcon} | Cần cấp **20** để sử dụng Dungeon!`
+          `${errorIcon} | Cần cấp **40** để sử dụng Dungeon!`
         );
 
       const monsters = [
@@ -296,9 +296,9 @@ module.exports = {
       ];
       const target = monsters[Math.floor(Math.random() * monsters.length)];
 
-      const win = Math.random() > 0.5;
+      const win = Math.random() > 0.6;
       if (win) {
-        const xp = Math.floor(Math.random() * 60) + 60;
+        const xp = Math.floor(Math.random() * 50) + 50;
         await addKey(`${key}.data.xp`, xp);
         if (
           user.data.quest?.type === "dungeon" &&
@@ -347,8 +347,10 @@ module.exports = {
             inline: true,
           }          
         )
-        .setFooter(q.current == q.target ? 'Bạn đã hoàn thành nhiệm vụ hôm nay' : q.claimed ? 'Bạn đã nhận thưởng hôm nay' : 'Dùng .rpg claim để nhận thưởng')
-        .setColor(q.current >= q.target ? 0x00ff00 : 0xffff00);
+        .setFooter({
+          text:q?.current == q?.target ? 'Bạn đã hoàn thành nhiệm vụ hôm nay' : q?.claimed ? 'Bạn đã nhận thưởng hôm nay' : 'Dùng .rpg claim để nhận thưởng'
+        })
+        .setColor(q?.current >= q?.target ? 0x00ff00 : 0xffff00);
       return message.reply({ embeds: [embed] });
     }
 
