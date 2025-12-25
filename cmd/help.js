@@ -51,7 +51,7 @@ module.exports = {
       anniversary: {
         label: "Anniversary (Admin)",
         emoji: "🎂",
-        color: "#d4558aff",
+        color: "#d4558a",
         commands:
           "• setbirthday, setsinhnhat: lưu sinh nhật của user\n• checkbirthday, xemsinhnhat, birthdaylist: xem danh sách sinh nhật trong tháng hoặc của user\n• hpbd, sinhnhat: gửi lời chúc sinh nhật\n• lixi, phatloc: lì xì cho toàn bộ thành viên trong server",
       },
