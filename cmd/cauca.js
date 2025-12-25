@@ -127,7 +127,8 @@ module.exports = {
           "Phao rung rất mạnh, nhưng hóa ra là một con cua đang nhảy múa dưới đó...",
           "Bạn nghe thấy tiếng cá thì thầm: 'Cần câu đẹp đấy, nhưng mồi thì... còn lâu nhé!'",
         ];
-        const randomMsg = missMessages[Math.floor(Math.random() * missMessages.length)];
+        const randomMsg =
+          missMessages[Math.floor(Math.random() * missMessages.length)];
         // TRƯỜNG HỢP: CÂU HỤT
         const missEmbed = new EmbedBuilder()
           .setTitle("💨 HỤT MẤT RỒI!")
@@ -155,7 +156,17 @@ module.exports = {
 
       const adjustedChances = Object.entries(FISH_LIST).map(([id, data]) => {
         let weight = data.chance;
-        if (id === "ca_map" || id === "ca_voi") weight *= totalLuck;
+
+        if (id === "ca_map" || id === "ca_voi") {
+          // Nếu là cá hiếm, áp dụng công thức nhân Luck
+          weight *= totalLuck;
+
+          // PHẠT TỈ LỆ NẾU LUCK THẤP (Dành cho cần gỗ)
+          // Nếu tổng Luck dưới 2.0 (Cần gỗ + mồi thường/xịn), giảm thêm 50% tỉ lệ cá hiếm
+          if (totalLuck < 2.0) {
+            weight *= 0.5;
+          }
+        }
         return { id, weight };
       });
 
