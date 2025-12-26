@@ -91,7 +91,7 @@ module.exports = {
 
         const adjustedChances = Object.entries(FISH_LIST).map(([id, data]) => {
             let weight = data.chance;
-            if (id === "ca_voi" || id === "ca_map") {
+            if (data.currency == 'primo' || data.sellPrice >= 1000) {
                 weight *= totalLuck;
                 if (rodEntry.id === "cancau_hoang_kim" && data.currency == 'primo') weight *= 3;
                 if (totalLuck < 2.0) weight *= 0.4;                
