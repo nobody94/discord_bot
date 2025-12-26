@@ -70,7 +70,6 @@ module.exports = {
     const tank = (await getKey(tankKey)) || [];
     let caughtFishList = [];
     let missCount = 0;
-    let trashCount = 0;
     let totalLuck = rodLuck; // Tính toán luck dựa trên mồi đầu tiên (đơn giản hóa)
 
     // Trừ độ bền và mồi
@@ -111,7 +110,6 @@ module.exports = {
                 const fish = FISH_LIST[f.id];
                 // KIỂM TRA CÁ RÁC (Giá < 10)
                 if (fish.sellPrice < 10) {
-                    trashCount++;
                     await updateLeaderboard("trash", userId, username, guildId);
                 }
                 caughtFishList.push(f.id);
@@ -146,9 +144,11 @@ module.exports = {
         const resultEmbed = new EmbedBuilder()
             .setTitle(times > 1 ? `🎣 KẾT QUẢ CÂU ${times} LẦN` : `🎣 KẾT QUẢ CÂU CÁ`)
             .setColor("#2ecc71");
+        let description = "";
 
         if (caughtFishList.length === 0) {
-            resultEmbed.setDescription("Thật không may, tất cả các lần thả cần đều hụt mất cá! 💨").setColor("#e74c3c");
+            resultEmbed.setColor("#e74c3c");
+            description = "Thật không may, tất cả các lần thả cần đều hụt mất cá! 💨";
         } else {
             const summary = {};
             caughtFishList.forEach(id => summary[id] = (summary[id] || 0) + 1);
@@ -158,13 +158,13 @@ module.exports = {
                 return `${f.icon} **${f.name}** x${count}`;
             }).join("\n");
 
-            resultEmbed.setDescription(`Bạn đã kéo lên được:\n${display}`);
+            description = `Bạn đã kéo lên được:\n${display}`;
         }
-
-        if (trashCount > 0) stats.push(`♻️ Đã thu gom **${trashCount}** món đồ rác.`);
+        
         if (missCount > 0 && times > 1) {
-            description += `\n\n💨 Có **${missCount}** lần cá đã thoát mất!`;
+            description += `\n💨 Có **${missCount}** lần cá đã thoát mất!`;
         }
+        resultEmbed.setDescription(description);
         if (rodBroken) resultEmbed.addFields({ name: "⚠️ RẮC!", value: "Cần câu của bạn đã gãy sau chuyến đi này!" });
         if (times > 1) resultEmbed.setFooter({ text: "Bạn đã dùng câu hàng loạt, cooldown: 1 phút" });
 
