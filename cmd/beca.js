@@ -22,7 +22,7 @@ module.exports = {
       .setTitle(`🐠 BỂ CÁ CỦA ${message.author.username.toUpperCase()}`)
       .setColor("#00fbff")
       .setFooter({
-        text: "Dùng .beca sell [ID] [số lượng] để đổi cá lấy tiền.\nDùng .beca sell all để dọn sạch bể.",
+        text: ".beca sell [ID] [SL] | .beca sell all (giữ cá hiếm)\n.beca give @User [ID] [SL] để tặng cá.",
       });
 
     if (fishTank.length === 0) {
