@@ -13,6 +13,13 @@ const FISH_LIST = {
         currency: "mora", 
         chance: 0.18 // 8% xuất hiện
     },
+    "vo_chai_bia": { 
+        name: "Vỏ Chai bia", 
+        icon: "🍾", 
+        sellPrice: 3, 
+        currency: "mora", 
+        chance: 0.18 // 8% xuất hiện
+    },
     "tui_nilon": { 
         name: "Túi Nilon", 
         icon: "🛍️", 
@@ -41,12 +48,40 @@ const FISH_LIST = {
         currency: "mora", 
         chance: 0.30 // 30% xuất hiện
     },
+    "sua": { 
+        name: "Sứa", 
+        icon: "🪼", 
+        sellPrice: 500, 
+        currency: "mora", 
+        chance: 0.50 
+    },
+     "tom_hum": { 
+        name: "Tôm hùm", 
+        icon: "🦞", 
+        sellPrice: 1000, 
+        currency: "mora", 
+        chance: 0.1 
+    },
+    "bach_tuoc": { 
+        name: "Bạch Tuộc Khổng Lồ", 
+        icon: "🐙", 
+        sellPrice: 7000, 
+        currency: "mora", 
+        chance: 0.03 
+    },   
     "ca_map": { 
         name: "Cá Mập Trắng", 
         icon: "🦈", 
         sellPrice: 5000, 
         currency: "mora", 
         chance: 0.05 // 8% xuất hiện
+    },    
+    "rua_bien": { 
+        name: "Rùa Biển", 
+        icon: "🐢", 
+        sellPrice: 30, 
+        currency: "primo", 
+        chance: 0.008 
     },
     "ca_voi": { 
         name: "Cá Voi Xanh", 
@@ -54,7 +89,14 @@ const FISH_LIST = {
         sellPrice: 50, 
         currency: "primo", 
         chance: 0.005 // 0.5% xuất hiện
-    }
+    },
+     "ca_heo": { 
+        name: "Cá Heo", 
+        icon: "🐬", 
+        sellPrice: 80, 
+        currency: "primo", 
+        chance: 0.002 
+    }, 
 };
 
 const FISH_SHOP_ITEMS = {
