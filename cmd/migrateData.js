@@ -1,54 +1,47 @@
 const { DEVELOPER_IDS } = require("../utils/constant.js");
-const { migrateData } = require("../utils/db.js");
+const { getKey, setKey } = require("../utils/db.js");
+const { verifyIcon, errorIcon } = require('../utils/icon.js');
 
 module.exports = {
   name: "migrate",
   async execute(message, args) {
-    // Chỉ Developer mới được chạy
     if (!DEVELOPER_IDS.includes(message.author.id)) return;
 
-    const msg = await message.reply(
-      "⏳ Đang bắt đầu quá trình chuyển đổi dữ liệu..."
-    );
+    const msg = await message.reply("⏳ Đang bắt đầu chuyển đổi dữ liệu (Có thể mất 1-2 phút)...");
 
     try {
       const guildId = message.guild.id;
       const newKey = `birthday_${guildId}`;
+      
+      // Khắc phục lỗi Timeout: Tăng thời gian chờ lên 60s
+      const members = await message.guild.members.fetch({ time: 60000 }).catch(() => null);
+      
+      if (!members) return msg.edit(`${errorIcon} | Lỗi: Không thể tải danh sách thành viên. Kiểm tra 'Server Members Intent'.`);
 
-      // 1. Lấy toàn bộ thành viên trong Guild
-      // Lưu ý: Cần bật Server Members Intent trong Developer Portal
-      const members = await message.guild.members.fetch();
       let newGuildData = (await getKey(newKey)) || {};
       let count = 0;
 
       for (const [userId, member] of members) {
-        // Key cũ theo logic renderKey("user_birthday", userId)
-        // là: nobody_bot_user_birthday_ID
+        // Cấu trúc cũ bạn đang dùng là renderKey("user_birthday", userId)
+        // Trong db.js renderKey mặc định thêm prefix "nobody_bot"
         const oldKey = `nobody_bot_user_birthday_${userId}`;
         const oldData = await getKey(oldKey);
 
-        if (oldData) {
-          // Nếu chưa có trong data mới thì mới cập nhật hoặc ghi đè
-          if (!newGuildData[userId]) {
-            newGuildData[userId] = oldData;
-            count++;
-          }
+        if (oldData && !newGuildData[userId]) {
+          newGuildData[userId] = oldData;
+          count++;
         }
       }
 
       if (count > 0) {
         await setKey(newKey, newGuildData);
-        return msg.edit(
-          `${verifyIcon} | Hoàn tất! Đã chuyển đổi **${count}** dữ liệu sinh nhật sang cấu trúc mới cho Server này.`
-        );
+        return msg.edit(`${verifyIcon} | Hoàn tất! Đã gộp **${count}** sinh nhật vào key Server: \`${newKey}\`.`);
       } else {
-        return msg.edit("ℹ️ | Không tìm thấy dữ liệu cũ nào cần chuyển đổi.");
+        return msg.edit("ℹ️ | Không tìm thấy dữ liệu cũ hoặc dữ liệu đã được gộp trước đó.");
       }
     } catch (error) {
-      console.error("Lỗi migratebirth:", error);
-      return msg.edit(
-        `${errorIcon} | Đã xảy ra lỗi trong quá trình chuyển đổi: ${error.message}`
-      );
+      console.error("Lỗi migrate:", error);
+      return msg.edit(`${errorIcon} | Lỗi: ${error.message}`);
     }
   },
 };
