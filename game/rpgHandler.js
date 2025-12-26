@@ -9,7 +9,7 @@ const getVietnamRPGDay = () =>
     .toISOString()
     .split("T")[0];
 
-async function rpgHandler(args, message, key, user) {
+async function rpgHandler(args, message, key, user,userId) {
   const subCommand = args[0]?.toLowerCase();
   const todayStr = getVietnamRPGDay();
   const iconMora = getIcon("mora");

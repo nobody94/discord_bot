@@ -93,7 +93,7 @@ module.exports = {
             let weight = data.chance;
             if (data.currency == 'primo' || data.sellPrice >= 1000) {
                 weight *= totalLuck;
-                if (rodEntry.id === "cancau_hoang_kim" && data.currency == 'primo') weight *= 3;
+                if (rodEntry.id === "cancau_hoang_kim" && data.currency == 'primo') weight *= 2;
                 if (totalLuck < 2.0) weight *= 0.4;                
             } else if (data.sellPrice < 10) {
                 weight /= Math.pow(totalLuck, 2);

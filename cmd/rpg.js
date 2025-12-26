@@ -45,7 +45,7 @@ module.exports = {
       return message.reply({ embeds: [embed] });
     }
 
-    const isHandled = await rpgHandler(args, message, key, user);
+    const isHandled = await rpgHandler(args, message, key, user,userId);
     if (isHandled) return;
 
     if (!user?.data) return message.reply(`${errorIcon} | Hãy chọn hệ trước!`);

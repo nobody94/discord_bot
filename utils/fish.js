@@ -67,7 +67,7 @@ const FISH_LIST = {
         icon: "🐙", 
         sellPrice: 7000, 
         currency: "mora", 
-        chance: 0.03 
+        chance: 0.02 
     },   
     "ca_map": { 
         name: "Cá Mập Trắng", 
@@ -124,7 +124,7 @@ const FISH_SHOP_ITEMS = {
     price: 150,
     luck: 3.0,
     maxDurability: 100,
-    currency: "primo", // Bán bằng tiền hiếm
+    currency: "primo", 
     description: "Cần câu huyền thoại, tăng tỉ lệ gặp cá hiếm cực cao.",
   },
 

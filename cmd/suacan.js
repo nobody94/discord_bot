@@ -42,16 +42,16 @@ module.exports = {
         const lostPercentage = durabilityLost / itemData.maxDurability;
 
         // Phí sửa tối đa là 40% giá trị mua mới
-        let repairRate = (currency === 'mora') ? 0.60 : 0.35;
+        let repairRate = (currency === 'mora') ? 0.80 : 0.60;
 
         let repairCost = Math.floor((itemData.price * repairRate) * lostPercentage);
 
         // --- THIẾT LẬP GIÁ SÀN BẢO TRÌ ---
         let minFee = 0;
         if (currency === 'mora') {
-            minFee = 200; // Giá sàn cho đồ Mora
+            minFee = 500; // Giá sàn cho đồ Mora
         } else if (currency === 'primo') {
-            minFee = 2;   // Giá sàn cho đồ Primo (ít nhất 1 Primo)
+            minFee = 5;   // Giá sàn cho đồ Primo (ít nhất 1 Primo)
         }
 
         if (repairCost < minFee) repairCost = minFee;
