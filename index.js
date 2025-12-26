@@ -230,33 +230,32 @@ client.on("interactionCreate", async (interaction) => {
   }
 });
 
+
 async function startBot() {
   try {
-    console.log("--- BẮT ĐẦU QUÁ TRÌNH KHỞI ĐỘNG ---");
+    // Chỉ nên kết nối DB và Login khi Server Express đã sẵn sàng
+    await db.connect();
+    console.log("✅ Đã kết nối MongoDB thành công!");
+    console.log("--- ĐANG CHUẨN BỊ LOGIN ---");
 
-    // 1. Kiểm tra Token
-    if (!Token) {
-      console.error("❌ LỖI: BOT_TOKEN bị thiếu trong môi trường!");
-      return;
-    }
+    if (!Token) return console.error(`${errorIcon} BOT_TOKEN missing!`);
 
-    // 2. Đăng nhập Discord trước và ĐỢI nó xong (Dùng await)
-    console.log("🚀 Đang tiến hành đăng nhập Discord...");
-    await client.login(Token); 
-    console.log("🔑 Đã login Discord thành công!");
-
-    // 3. Khởi tạo Database sau khi Bot đã online
-    console.log("⏳ Đang kết nối Database...");
-    db.on("ready", () => console.log("✅ QuickMongo Event: Ready!"));
-
-    if (typeof db.connect === 'function') {
-      await db.connect();
-      console.log("✅ Đã kết nối MongoDB thành công!");
-    }
-
+    // Kiểm tra nếu client đã login rồi thì không login lại
+    client
+      .login(Token)
+      .then(() => {
+        console.log("🔑 Login request sent to Discord");
+      })
+      .catch((err) => {
+        console.error("❌ Discord login failed:", err);
+      });
+    // if (!client.readyAt) {
+    //   await client.login(Token);
+    //   console.log("Bot đã đăng nhập thành công!");
+    // }
   } catch (error) {
-    console.error("❌ Lỗi nghiêm trọng trong startBot:");
-    console.error(error);
+    console.error("Lỗi khởi động:", error);
+    process.exit(1);
   }
 }
 // Chạy hàm khởi động
