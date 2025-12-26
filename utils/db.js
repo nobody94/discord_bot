@@ -30,7 +30,7 @@ async function pushKey(key,data){
 
 // Hàm cập nhật bảng xếp hạng
 async function updateLeaderboard(type, userId, username,guildId) {
-  const key = `leaderboard_${type}_${guildId}}`; // leaderboard_miss hoặc leaderboard_trash
+  const key = `leaderboard_${type}_${guildId}`; // leaderboard_miss hoặc leaderboard_trash
   let data = (await getKey(key)) || [];
   
   let userEntry = data.find(u => u.id === userId);
@@ -48,8 +48,8 @@ async function updateLeaderboard(type, userId, username,guildId) {
   await setKey(key, data);
 }
 
-async function migrateLeaderboard(type, guildId) {
-  const oldKey = `leaderboard_${type}`;
+async function migrateData(type, guildId) {
+  const oldKey = `leaderboard_${type}_${guildId}}`;
   const newKey = `leaderboard_${type}_${guildId}`;
 
   const oldData = await getKey(oldKey);
@@ -78,5 +78,5 @@ async function migrateLeaderboard(type, guildId) {
 }
 
 module.exports={
-    db,renderKey,setKey,getKey,pushKey,addKey,updateLeaderboard,migrateLeaderboard
+    db,renderKey,setKey,getKey,pushKey,addKey,updateLeaderboard,migrateData
 }
