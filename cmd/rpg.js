@@ -1,173 +1,34 @@
 const { EmbedBuilder } = require("discord.js");
 const { getKey, setKey, addKey, renderKey } = require("../utils/db");
-const { errorIcon, verifyIcon } = require("../utils/icon.js");
-const { addMoney, getIcon } = require("../utils/currency");
+const { errorIcon } = require("../utils/icon.js");
+const { ELEMENTS_CONFIG } = require("../utils/rpg.js");
+const { rpgHandler } = require("../game/rpgHandler.js");
 
 // --- CHỐNG SPAM ---
 const cooldowns = new Map();
 
-// --- CẤU HÌNH ---
-const ELEMENTS_CONFIG = {
-  hoa: {
-    name: "Hỏa",
-    emoji: "🔥",
-    ref: 0xff4500,
-    stats: { atk: 25, hp: 100 },
-    skill: "Hỏa Cầu",
-  },
-  bang: {
-    name: "Băng",
-    emoji: "❄️",
-    ref: 0x00ffff,
-    stats: { atk: 10, hp: 180 },
-    skill: "Băng Vĩnh Cửu",
-  },
-  thuy: {
-    name: "Thủy",
-    emoji: "💧",
-    ref: 0x1e90ff,
-    stats: { atk: 15, hp: 150 },
-    skill: "Sóng Thần",
-  },
-  thao: {
-    name: "Thảo",
-    emoji: "🌿",
-    ref: 0x32cd32,
-    stats: { atk: 18, hp: 130 },
-    skill: "Dây Leo Quấn",
-  },
-  nham: {
-    name: "Nham",
-    emoji: "🪨",
-    ref: 0xffd700,
-    stats: { atk: 12, hp: 200 },
-    skill: "Địa Chấn",
-  },
-  loi: {
-    name: "Lôi",
-    emoji: "⚡",
-    ref: 0x9932cc,
-    stats: { atk: 22, hp: 110 },
-    skill: "Thiên Lôi",
-  },
-};
-
-const QUESTS = {
-  hunt: [
-    {
-      id: "h1",
-      name: "Thợ săn tập sự",
-      target: 20,
-      rewardMora: 80000,
-      rewardGems: 10,
-      desc: "Săn 20 lần (hunt)",
-      type: "hunt",
-    },
-    {
-      id: "h2",
-      name: "Thợ săn lành nghề",
-      target: 40,
-      rewardMora: 150000,
-      rewardGems: 30,
-      desc: "Săn 40 lần (hunt)",
-      type: "hunt",
-    },
-    {
-      id: "h3",
-      name: "Vua săn mồi",
-      target: 80,
-      rewardMora: 300000,
-      rewardGems: 70,
-      desc: "Săn 80 lần (hunt)",
-      type: "hunt",
-    },
-  ],
-
-  battle: [
-    {
-      id: "b1",
-      name: "Chiến binh tinh nhuệ",
-      target: 10,
-      rewardMora: 200000,
-      rewardGems: 20,
-      desc: "Thắng 10 trận (battle)",
-      type: "battle",
-    },
-    {
-      id: "b2",
-      name: "Chiến binh bất bại",
-      target: 30,
-      rewardMora: 500000,
-      rewardGems: 40,
-      desc: "Thắng 30 trận (battle)",
-      type: "battle",
-    },
-    {
-      id: "b3",
-      name: "Huyền thoại chiến trường",
-      target: 50,
-      rewardMora: 800000,
-      rewardGems: 80,
-      desc: "Thắng 50 trận (battle)",
-      type: "battle",
-    },
-  ],
-
-  dungeon: [
-    {
-      id: "d1",
-      name: "Kẻ chinh phục Phó bản",
-      target: 5,
-      rewardMora: 300000,
-      rewardGems: 50,
-      desc: "Vượt 5 lần Phó bản (dungeon)",
-      type: "dungeon",
-    },
-    {
-      id: "d2",
-      name: "Nhà thám hiểm Phó bản",
-      target: 15,
-      rewardMora: 800000,
-      rewardGems: 100,
-      desc: "Vượt 15 lần Phó bản (dungeon)",
-      type: "dungeon",
-    },
-    {
-      id: "d3",
-      name: "Bá chủ Phó bản",
-      target: 30,
-      rewardMora: 1000000,
-      rewardGems: 200,
-      desc: "Vượt 30 lần Phó bản (dungeon)",
-      type: "dungeon",
-    },
-  ],
-};
-
 const getRequiredXP = (level) => Math.floor(Math.pow(level, 1.5) * 100);
-const getVietnamRPGDay = () =>
-  new Date(new Date().getTime() + 3 * 60 * 60 * 1000)
-    .toISOString()
-    .split("T")[0];
 
 module.exports = {
   name: "rpg",
-  description: "Hệ thống RPG - Thông báo kỹ năng & chiến đấu",
+  description: "Hệ thống RPG",
 
   async execute(message, args) {
     const userId = message.author.id;
     const key = await renderKey("rpg_user", userId);
     const subCommand = args[0]?.toLowerCase();
     let user = await getKey(key);
-    const iconMora = getIcon("mora");
-    const iconPrimo = getIcon("primo");
-    const todayStr = getVietnamRPGDay();
+
+    // 1. XỬ LÝ SỐ LẦN ĐÁNH (args[1]) - Mặc định 1, tối đa 5
+    let times = parseInt(args[1]) || 1;
+    if (times < 1) times = 1;
+    if (times > 5) times = 5;
 
     if (!subCommand) {
       if (user && user.data && user.data.element) {
-        return this.showProfile(message, user.data, todayStr);
+        return this.showProfile(message, user.data);
       }
-
+      // ... (Phần hiển thị chọn hệ giữ nguyên)
       const embed = new EmbedBuilder()
         .setTitle("⚔️ KHÁM PHÁ NGUYÊN TỐ")
         .setDescription("Chọn hệ để bắt đầu: `.rpg choose [key]`\n")
@@ -184,223 +45,152 @@ module.exports = {
       return message.reply({ embeds: [embed] });
     }
 
-    if (subCommand === "choose") {
-      if (user?.data?.element)
-        return message.reply(`${errorIcon} | Bạn đã chọn hệ rồi!`);
-      const choice = args[1]?.toLowerCase();
-      const el = ELEMENTS_CONFIG[choice];
-      if (!el) return message.reply(`${errorIcon} | Hệ không tồn tại!`);
-      await setKey(key, {
-        data: {
-          element: el.name,
-          level: 1,
-          xp: 0,
-          atk: el.stats.atk,
-          hp: el.stats.hp,
-          skill: el.skill,
-          quest: null,
-        },
-      });
-      return message.reply(
-        `${verifyIcon} | Gia nhập hệ **${el.name}** thành công!`
-      );
-    }
+    const isHandled = await rpgHandler(args, message, key, user);
+    if (isHandled) return;
 
     if (!user?.data) return message.reply(`${errorIcon} | Hãy chọn hệ trước!`);
 
-    // --- KIỂM TRA CHỐNG SPAM (30 GIÂY) ---
+    // --- KIỂM TRA COOLDOWN ĐỘNG ---
     const actionCommands = ["hunt", "battle", "dungeon"];
     if (actionCommands.includes(subCommand)) {
-      const lastAction = cooldowns.get(userId);
+      const lastAction = cooldowns.get(`${userId}_${subCommand}`);
       const now = Date.now();
-      const cooldownTime = 30 * 1000; // 30 giây
 
-      if (lastAction && now - lastAction < cooldownTime) {
-        const remaining = Math.ceil((cooldownTime - (now - lastAction)) / 1000);
+      // Kiểm tra dựa trên giới hạn (limit) của lần đánh TRƯỚC ĐÓ
+      if (lastAction) {
+        const elapsed = now - lastAction.time;
+        if (elapsed < lastAction.limit) {
+          const remaining = Math.ceil((lastAction.limit - elapsed) / 1000);
+          let timeText =
+            remaining >= 60
+              ? `**${Math.floor(remaining / 60)} phút ${remaining % 60} giây**`
+              : `**${remaining} giây**`;
 
-        // Gửi tin nhắn và tự động xóa sau 5 giây
-        return message
-          .reply(
-            `${errorIcon} | Bạn đang mệt, vui lòng nghỉ ngơi **${remaining} giây** nữa.`
-          )
-          .then((msg) => {
-            setTimeout(() => msg.delete().catch(() => null), 5000);
-          });
+          return message
+            .reply(
+              `${errorIcon} | Bạn vẫn đang trong thời gian hồi sức! Chờ thêm ${timeText}.`
+            )
+            .then((msg) =>
+              setTimeout(() => msg.delete().catch(() => null), 5000)
+            );
+        }
       }
-      cooldowns.set(userId, now);
+
+      // Thiết lập Cooldown mới cho lượt NÀY
+      const currentLimit = times > 1 ? 240000 : 30000; // Đánh nhanh 4p, lẻ 30s
+      cooldowns.set(`${userId}_${subCommand}`, {
+        time: now,
+        limit: currentLimit,
+      });
     }
-    // Lấy kỹ năng của người chơi dựa trên hệ
+
     const userSkill = user.data.skill || "Đòn đánh thường";
+    let totalXP = 0;
+    let wins = 0;
+    let losses = 0;
+    const difficultyMultiplier = 1 + (times - 1) * 0.15; // Tăng tỉ lệ thua khi đánh nhiều
 
-    // --- HUNT ---
+    // --- XỬ LÝ LOGIC CHIẾN ĐẤU ---
     if (subCommand === "hunt") {
-      const xp = Math.floor(Math.random() * 8) + 8;
-      await addKey(`${key}.data.xp`, xp);
-      if (
-        user.data.quest?.type === "hunt" &&
-        user.data.quest.current < user.data.quest.target
-      ) {
-        await addKey(`${key}.data.quest.current`, 1);
+      for (let i = 0; i < times; i++) {
+        // Tỉ lệ thắng cơ bản của Hunt là 95%, giảm dần nếu đánh nhiều lần
+        const winChance = 0.95 / difficultyMultiplier;
+
+        if (Math.random() < winChance) {
+          const xp = Math.floor(Math.random() * 8) + 8;
+          totalXP += xp;
+          wins++;
+
+          // Cập nhật tiến độ nhiệm vụ nếu có
+          if (
+            user.data.quest?.type === "hunt" &&
+            user.data.quest.current < user.data.quest.target
+          ) {
+            user.data.quest.current += 1;
+            await setKey(`${key}.data.quest.current`, user.data.quest.current);
+          }
+        } else {
+          losses++;
+        }
       }
-      const monsters = [
-        "Lợn rừng",
-        "Chim bồ câu",
-        "Cá sấu",
-      ];
-      const target = monsters[Math.floor(Math.random() * monsters.length)];
-      const msg = `🏹 **${message.author.username}** đã dùng **${userSkill}** tiêu diệt ${target} và nhận được **${xp} XP**.`;
-      return this.checkLevelUp(message, key, msg);
+
+      await addKey(`${key}.data.xp`, totalXP);
+
+      // Thông báo kết quả có sử dụng userSkill
+      let huntResult = `🏹 **${message.author.username}** đã sử dụng **${userSkill}** để đi săn **${times}** hiệp:\n`;
+      huntResult += `🔥 Thắng: **${wins}** | 💀 Thua: **${losses}**\n✨ Tổng XP nhận được: **+${totalXP}**`;
+
+      if (losses > 0) {
+        huntResult += `\n*(Do đánh nhanh, một số con thú đã chạy thoát hoặc phản công khiến bạn thất bại!)*`;
+      }
+
+      return this.checkLevelUp(message, key, huntResult);
     }
 
-    // --- BATTLE ---
     if (subCommand === "battle") {
       if (user.data.level < 20)
-        return message.reply(
-          `${errorIcon} | Cần cấp **20** để sử dụng Battle!`
-        );
-      const monsters = [
-        "Slime Khổng Lồ",
-        "Hilichurl Thủ Lĩnh",
-        "Pháp Sư Vực Thẳm",
-      ];
-      const target = monsters[Math.floor(Math.random() * monsters.length)];
-      const win = Math.random() > 0.4;
-      if (win) {
-        const xp = user.data.level < 30  ? Math.floor(Math.random() * 15) + 15 : Math.floor(Math.random() * 30) + 30;
-        await addKey(`${key}.data.xp`, xp);
-        if (
-          user.data.quest?.type === "battle" &&
-          user.data.quest.current < user.data.quest.target
-        ) {
-          await addKey(`${key}.data.quest.current`, 1);
+        return message.reply(`${errorIcon} | Cần cấp **20** để Battle!`);
+
+      for (let i = 0; i < times; i++) {
+        const winChance = 0.6 / difficultyMultiplier; // Giảm tỉ lệ thắng
+        if (Math.random() < winChance) {
+          const xp =
+            user.data.level < 30
+              ? Math.floor(Math.random() * 15) + 15
+              : Math.floor(Math.random() * 30) + 30;
+          totalXP += xp;
+          wins++;
+          if (user.data.quest?.type === "battle")
+            await addKey(`${key}.data.quest.current`, 1);
+        } else {
+          losses++;
         }
-        const msg = `⚔️ **${message.author.username}** đã triển khai **[${userSkill}]**, đánh bại **${target}** và nhận được **${xp} XP**!`;
-        return this.checkLevelUp(message, key, msg);
       }
-      return message.reply(
-        `💀 **${message.author.username}** đã bị **${target}** đánh bại dù đã cố dùng **${userSkill}**...`
-      );
+      await addKey(`${key}.data.xp`, totalXP);
+      const resMsg = `**${message.author.username}** đã sử dụng ${userSkill} để đánh quái\n⚔️ **KẾT QUẢ BATTLE (${times} LẦN)**\n🔥 Thắng: ${wins} | 💀 Thua: ${losses}\n✨ Tổng XP: +${totalXP}`;
+      return this.checkLevelUp(message, key, resMsg);
     }
 
-    // --- DUNGEON ---
     if (subCommand === "dungeon") {
       if (user.data.level < 40)
-        return message.reply(
-          `${errorIcon} | Cần cấp **40** để sử dụng Dungeon!`
-        );
+        return message.reply(`${errorIcon} | Cần cấp **40** để Dungeon!`);
 
-      const monsters = [
-        "Thực Thể Bóng Đêm",
-        "Vong Linh Vực Sâu",
-        "Hắc Linh Thức Tỉnh",
-      ];
-      const target = monsters[Math.floor(Math.random() * monsters.length)];
-
-      const win = Math.random() > 0.6;
-      if (win) {
-        const xp = Math.floor(Math.random() * 50) + 50;
-        await addKey(`${key}.data.xp`, xp);
-        if (
-          user.data.quest?.type === "dungeon" &&
-          user.data.quest.current < user.data.quest.target
-        ) {
-          await addKey(`${key}.data.quest.current`, 1);
+      for (let i = 0; i < times; i++) {
+        const winChance = 0.4 / difficultyMultiplier; // Dungeon cực khó khi đánh nhanh
+        if (Math.random() < winChance) {
+          const xp = Math.floor(Math.random() * 50) + 50;
+          totalXP += xp;
+          wins++;
+          if (user.data.quest?.type === "dungeon")
+            await addKey(`${key}.data.quest.current`, 1);
+        } else {
+          losses++;
         }
-        const msg = `⚔️ **${message.author.username}** đã triển khai **[${userSkill}]**, đánh bại **${target}** và nhận được **${xp} XP**!`;
-        return this.checkLevelUp(message, key, msg);
       }
-      return message.reply(
-        `💀 **${message.author.username}** đã bị **${target}** đánh bại dù đã cố dùng **${userSkill}**...`
-      );
-    }
-
-    // --- CÁC LỆNH KHÁC (Daily, Claim...) ---
-    if (subCommand === "daily") {
-      if (!user.data.quest || user.data.quest.date !== todayStr) {
-        let pool = [...QUESTS.hunt];
-        if (user.data.level >= 10) pool = pool.concat(QUESTS.battle);
-        if (user.data.level >= 20) pool = pool.concat(QUESTS.dungeon);
-        const randomQ = pool[Math.floor(Math.random() * pool.length)];
-        await setKey(`${key}.data.quest`, {
-          ...randomQ,
-          current: 0,
-          date: todayStr,
-          claimed: false,
-        });
-        user.data.quest = randomQ;
-      }
-      const q = user.data.quest;
-      const embed = new EmbedBuilder()
-        .setTitle(`📜 NHIỆM VỤ: ${q.name}`)
-        .setDescription(q.desc)
-        .addFields(
-          {
-            name: "Tiến độ",
-            value: `📊 \`${q.current ?? 0}/${q.target}\``,
-            inline: true,
-          },
-          {
-            name: "Thưởng",
-            value: `💰 \`${q.rewardMora.toLocaleString()}\` ${iconMora}\n✨ \`${
-              q.rewardGems
-            }\` ${iconPrimo}`,
-            inline: true,
-          }          
-        )
-        .setFooter({
-          text:q?.current == q?.target ? 'Bạn đã hoàn thành nhiệm vụ hôm nay' : q?.claimed ? 'Bạn đã nhận thưởng hôm nay' : 'Dùng .rpg claim để nhận thưởng'
-        })
-        .setColor(q?.current >= q?.target ? 0x00ff00 : 0xffff00);
-      return message.reply({ embeds: [embed] });
-    }
-
-    if (subCommand === "claim") {
-      const q = user.data.quest;
-      if (!q || q.date !== todayStr || q.current < q.target)
-        return message.reply(`${errorIcon} | Không thể nhận thưởng!`);
-      if(q.claimed) return message.reply(`${errorIcon} | Bạn đã nhận thưởng rồi!`);
-      
-      await addMoney(userId, q.rewardMora, "mora");
-      await addMoney(userId, q.rewardGems, "primo");
-      await setKey(`${key}.data.quest.claimed`, true);
-      return message.reply(
-        `${verifyIcon} | **${message.author.username}** đã nhận thưởng nhiệm vụ thành công!`
-      );
+      await addKey(`${key}.data.xp`, totalXP);
+      const resMsg = `**${message.author.username}** đã sử dụng ${userSkill} để đánh quái\n🏰 **KẾT QUẢ DUNGEON (${times} LẦN)**\n🔥 Thắng: ${wins} | 💀 Thua: ${losses}\n✨ Tổng XP: +${totalXP}`;
+      return this.checkLevelUp(message, key, resMsg);
     }
   },
 
   async checkLevelUp(message, key, originalMsg) {
     const updated = await getKey(key);
-
-    // Kiểm tra nếu đã đạt cấp tối đa 60
-    if (updated.data.level >= 60) {
-      if (originalMsg) return message.reply(originalMsg);
-      return;
-    }
+    if (updated.data.level >= 60) return message.reply(originalMsg);
 
     const reqXP = getRequiredXP(updated.data.level);
     if (updated.data.xp >= reqXP) {
       const newLevel = updated.data.level + 1;
-
-      // Xử lý tăng cấp
       await setKey(`${key}.data.level`, newLevel);
       await setKey(`${key}.data.xp`, updated.data.xp - reqXP);
       await addKey(`${key}.data.atk`, 7);
       await addKey(`${key}.data.hp`, 25);
-
-      let lvMsg = `\n🎊 **CHÚC MỪNG!** **${message.author.username}** đã đột phá lên cấp **${newLevel}**!`;
-
-      // Thông báo đặc biệt khi đạt mốc 60
-      if (newLevel === 60) {
-        lvMsg += `\n👑 **HUYỀN THOẠI!** Bạn đã chạm mốc cấp độ cao nhất: **Level 60**!`;
-      }
-
-      return message.reply((originalMsg || "") + lvMsg);
+      let lvMsg = `\n🎊 **LEVEL UP!** Bạn đã đạt cấp **${newLevel}**!`;
+      return message.reply(originalMsg + lvMsg);
     }
-    if (originalMsg) return message.reply(originalMsg);
+    return message.reply(originalMsg);
   },
 
-  async showProfile(message, d, todayStr) {
+  async showProfile(message, d) {
     const elConfig = Object.values(ELEMENTS_CONFIG).find(
       (e) => e.name === d.element
     );
@@ -408,27 +198,25 @@ module.exports = {
     const embed = new EmbedBuilder()
       .setTitle(`🛡️ Thông tin Nhà Lữ Hành`)
       .setColor(elConfig?.ref || 0x2f3136)
-      .setThumbnail(message.author.displayAvatarURL())
       .addFields(
         {
-          name: "👤 Nhà lữ hành",
+          name: "👤 Tên",
           value: `**${message.author.username}**`,
           inline: true,
         },
         {
-          name: "✨ Nguyên tố",
+          name: "✨ Hệ",
           value: `${elConfig?.emoji} ${d.element}`,
           inline: true,
         },
-        { name: "⭐ Cấp độ", value: `Level ${d.level}`, inline: true },
+        { name: "⭐ Cấp", value: `Level ${d.level}`, inline: true },
         {
-          name: "📖 Kinh nghiệm",
-          value: `\`${d.xp.toLocaleString()} / ${reqXP.toLocaleString()}\` XP`,
+          name: "📖 XP",
+          value: `\`${d.xp.toLocaleString()} / ${reqXP.toLocaleString()}\``,
           inline: false,
         },
-        { name: "⚔️ Tấn công", value: `\`${d.atk}\``, inline: true },
-        { name: "❤️ Sinh lực", value: `\`${d.hp}\``, inline: true },
-        { name: "🔥 Kỹ năng", value: `**${d.skill}**`, inline: true }
+        { name: "⚔️ ATK", value: `\`${d.atk}\``, inline: true },
+        { name: "❤️ HP", value: `\`${d.hp}\``, inline: true }
       );
     return message.reply({ embeds: [embed] });
   },

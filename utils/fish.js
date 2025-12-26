@@ -6,7 +6,7 @@ const FISH_LIST = {
         currency: "mora", 
         chance: 0.10 // 10% xuất hiện
     },
-    "vo_chai_bia": { 
+    "vo_chuoi": { 
         name: "Vỏ Chuối", 
         icon: "🍌", 
         sellPrice: 3, 
