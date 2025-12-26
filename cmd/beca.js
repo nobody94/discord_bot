@@ -18,14 +18,16 @@ module.exports = {
     const tankKey = renderKey("fishtank", userId);
     let fishTank = (await getKey(tankKey)) || [];
 
-    // 2. CHỈ CHO PHÉP CHỦ SỞ HỮU THỰC HIỆN CÁC LỆNH PHỤ (sell, give...)
-    if (message.author.id === userId) {
-        const isHandled = await becaHandler(args, message, fishTank, tankKey, userId);
-        if (isHandled) return;
-    } else if (args[0] && ["sell", "give"].includes(args[0].toLowerCase())) {
-        return message.reply("❌ Bạn không thể thao tác trên bể cá của người khác!");
-    }
 
+    // 2. CHỈ CHO PHÉP CHỦ SỞ HỮU THỰC HIỆN CÁC LỆNH PHỤ (sell, give...)
+    if (args[0] && ["sell", "give"].includes(args[0].toLowerCase())) {
+      const authorId = message.author.id;
+      const authorTankKey = renderKey("fishtank", authorId);
+      let authorTank = (await getKey(authorTankKey)) || [];
+
+      const isHandled = await becaHandler(args, message, authorTank, authorTankKey, authorId);
+      if (isHandled) return;
+    }
     // 3. HIỂN THỊ EMBED
     const embed = new EmbedBuilder()
       .setTitle(`🐠 BỂ CÁ CỦA ${username.toUpperCase()}`)
