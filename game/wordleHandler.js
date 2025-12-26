@@ -51,11 +51,7 @@ async function nextQuestion(message, guildId, isTimeout = false) {
     await message.channel.send(`⏰ **Hết giờ!** Đáp án của lượt này là: **${wordleData.answer}**`);
   }
 
-  // Kiểm tra nếu đã hết 5 lượt
-  // if (wordleData.turn >= 5) {
-  //   await setWordleData(guildId, { status: false, answer: null, turn: 0 });
-  //   return message.channel.send(`🏁 Game đã kết thúc sau 5 lượt chơi! dùng lệnh .start để bắt đầu game`);
-  // }
+  // Kiểm tra nếu đã hết 5 lượt 
   if (wordleData.turn >= 5) {
     // 1. Xóa bộ đếm giờ cuối cùng để tránh nó tự gọi lại nextQuestion
     if (gameTimers.has(guildId)) {
