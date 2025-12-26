@@ -71,13 +71,10 @@ module.exports = {
 
     let raceEmbed = new EmbedBuilder()
       .setTitle("🏇 CUỘC ĐUA ĐANG DIỄN RA!")
-      .setDescription(renderTrack())
-      .setColor("#3498db")
-      .setFooter({
-        text: `Bạn đã đặt cược: ${betAmount.toLocaleString()} ${getIcon(
+      .setDescription(`Bạn đã đặt cược: ${betAmount.toLocaleString()} ${getIcon(
           currency
-        )} vào ${chosenAnimal.name} ${chosenAnimal.emoji}`,
-      });
+        )} vào ${chosenAnimal.name} ${chosenAnimal.emoji}\n\n`+ renderTrack())
+      .setColor("#3498db");
 
     const raceMsg = await message.channel.send({ embeds: [raceEmbed] });
 
@@ -88,7 +85,9 @@ module.exports = {
       });
 
       await raceMsg
-        .edit({ embeds: [raceEmbed.setDescription(renderTrack())] })
+        .edit({ embeds: [raceEmbed.setDescription(`Bạn đã đặt cược: ${betAmount.toLocaleString()} ${getIcon(
+          currency
+        )} vào ${chosenAnimal.name} ${chosenAnimal.emoji}\n\n` + renderTrack())] })
         .catch(() => null);
 
       const winners = animals.filter((a) => a.position >= trackLength);
@@ -101,7 +100,7 @@ module.exports = {
         const winnerNames = winners
           .map((w) => `${w.name} ${w.emoji}`)
           .join(", ");
-        const winAmount = betAmount * 4;
+        const winAmount = betAmount * 2;
 
         const resultEmbed = new EmbedBuilder()
           .setTitle(isWin ? "🎉 BẠN ĐÃ THẮNG!" : "💸 BẠN ĐÃ THUA!")
