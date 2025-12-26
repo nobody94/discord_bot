@@ -52,9 +52,22 @@ async function nextQuestion(message, guildId, isTimeout = false) {
   }
 
   // Kiểm tra nếu đã hết 5 lượt
+  // if (wordleData.turn >= 5) {
+  //   await setWordleData(guildId, { status: false, answer: null, turn: 0 });
+  //   return message.channel.send(`🏁 Game đã kết thúc sau 5 lượt chơi! dùng lệnh .start để bắt đầu game`);
+  // }
   if (wordleData.turn >= 5) {
+    // 1. Xóa bộ đếm giờ cuối cùng để tránh nó tự gọi lại nextQuestion
+    if (gameTimers.has(guildId)) {
+      clearTimeout(gameTimers.get(guildId));
+      gameTimers.delete(guildId);
+    }
+
+    // 2. Reset trạng thái game trong Database
     await setWordleData(guildId, { status: false, answer: null, turn: 0 });
-    return message.channel.send(`🏁 Game đã kết thúc sau 5 lượt chơi! dùng lệnh .start để bắt đầu game`);
+
+    // 3. Thông báo kết thúc
+    return message.channel.send(`🏁 Game đã kết thúc sau 5 lượt chơi! Dùng lệnh .start để bắt đầu game mới.`);
   }
 
   // Lấy từ mới và tăng số lượt (turn)
