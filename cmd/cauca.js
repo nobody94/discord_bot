@@ -69,6 +69,8 @@ module.exports = {
     const tankKey = renderKey("fishtank", userId);
     const tank = (await getKey(tankKey)) || [];
     let caughtFishList = [];
+    let missCount = 0;
+    let trashCount = 0;
     let totalLuck = rodLuck; // Tính toán luck dựa trên mồi đầu tiên (đơn giản hóa)
 
     // Trừ độ bền và mồi
@@ -83,6 +85,7 @@ module.exports = {
     for (let i = 0; i < times; i++) {
         const missRate = Math.max(0.01, 0.15 - (totalLuck * 0.025));
         if (Math.random() < missRate) {
+            missCount++;
             await updateLeaderboard("miss", userId, username, guildId);
             continue; // Hụt lượt này
         }
@@ -91,6 +94,8 @@ module.exports = {
             let weight = data.chance;
             if (id === "ca_voi" || id === "ca_map") {
                 weight *= totalLuck;
+                if (rodEntry.id === "cancau_hoang_kim" && id === "ca_voi") weight *= 3;
+                if (totalLuck < 2.0) weight *= 0.4;                
             } else if (data.sellPrice < 10) {
                 weight /= Math.pow(totalLuck, 2);
             }
@@ -103,6 +108,12 @@ module.exports = {
         for (const f of adjustedChances) {
             cumulative += f.weight / totalWeight;
             if (roll < cumulative) {
+                const fish = FISH_LIST[f.id];
+                // KIỂM TRA CÁ RÁC (Giá < 10)
+                if (fish.sellPrice < 10) {
+                    trashCount++;
+                    await updateLeaderboard("trash", userId, username, guildId);
+                }
                 caughtFishList.push(f.id);
                 tank.push(f.id);
                 break;
@@ -150,6 +161,10 @@ module.exports = {
             resultEmbed.setDescription(`Bạn đã kéo lên được:\n${display}`);
         }
 
+        if (trashCount > 0) stats.push(`♻️ Đã thu gom **${trashCount}** món đồ rác.`);
+        if (missCount > 0 && times > 1) {
+            description += `\n\n💨 Có **${missCount}** lần cá đã thoát mất!`;
+        }
         if (rodBroken) resultEmbed.addFields({ name: "⚠️ RẮC!", value: "Cần câu của bạn đã gãy sau chuyến đi này!" });
         if (times > 1) resultEmbed.setFooter({ text: "Bạn đã dùng câu hàng loạt, cooldown: 1 phút" });
 

@@ -1,174 +1,165 @@
-const { EmbedBuilder } = require('discord.js');
-const { getKey, setKey, addKey, renderKey } = require("../utils/db"); 
+const { EmbedBuilder } = require("discord.js");
+const { getKey, renderKey, setKey, updateLeaderboard } = require("../utils/db");
+const { FISH_LIST, FISH_SHOP_ITEMS } = require("../utils/fish");
 const { errorIcon, verifyIcon } = require('../utils/icon.js');
-const { addMoney, getIcon } = require("../utils/currency");
-
-// --- CẤU HÌNH HỆ (Đã cập nhật hệ Lôi và Skill Băng ngầu hơn) ---
-const ELEMENTS_CONFIG = {
-    "hoa": { name: "Hỏa", emoji: "🔥", ref: 0xff4500, stats: { atk: 25, hp: 100 }, skill: "Hỏa Long trảm" },
-    "bang": { name: "Băng", emoji: "❄️", ref: 0x00ffff, stats: { atk: 12, hp: 180 }, skill: "Băng Hà Tuyệt Diệt" },
-    "thuy": { name: "Thủy", emoji: "💧", ref: 0x1e90ff, stats: { atk: 15, hp: 150 }, skill: "Thủy Long Ba" },
-    "thao": { name: "Thảo", emoji: "🌿", ref: 0x32cd32, stats: { atk: 18, hp: 130 }, skill: "Thiên Diệp Liên Hoa" },
-    "nham": { name: "Nham", emoji: "🪨", ref: 0xffd700, stats: { atk: 12, hp: 200 }, skill: "Địa Chấn Thiên Lực" },
-    "loi":  { name: "Lôi", emoji: "⚡", ref: 0x9932cc, stats: { atk: 22, hp: 110 }, skill: "Thiên Lôi Vạn Tượng" }
-};
-
-// --- DANH SÁCH NHIỆM VỤ RANDOM ---
-const RANDOM_QUESTS = [
-    { id: "q1", name: "Thợ săn tập sự", target: 20, rewardMora: 25000, rewardGems: 40, desc: "Thực hiện 20 lần đi săn" },
-    { id: "q2", name: "Kẻ hủy diệt Teyvat", target: 50, rewardMora: 60000, rewardGems: 100, desc: "Thực hiện 50 lần đi săn" },
-    { id: "q3", name: "Ủy thác mạo hiểm", target: 40, rewardMora: 45000, rewardGems: 80, desc: "Thực hiện 40 lần đi săn" }
-];
-
-// Hàm tính ngày RPG (Reset 4h sáng VN)
-function getVietnamRPGDay() {
-    const now = new Date();
-    // UTC+7 cộng thêm (7-4)=3h để tính ngày theo mốc 4h sáng VN
-    const offsetDate = new Date(now.getTime() + (3 * 60 * 60 * 1000));
-    return offsetDate.toISOString().split('T')[0];
-}
+const { getIcon } = require('../utils/currency.js');
 
 module.exports = {
-    name: "rpg",
-    aliases: ["r"],
-    description: "Hệ thống RPG đa nguyên tố - Reset 4h sáng VN",
+  name: "cauca",
+  aliases: ["fish", "cc"],
+  description: "Câu cá nhiều lần (Max 5). Ví dụ: .cc 5",
 
-    async execute(message, args) {
-        const userId = message.author.id;
-        const key = await renderKey('rpg_user', userId);
-        const subCommand = args[0]?.toLowerCase();
-        let user = await getKey(key);
+  async execute(message, args) {
+    const userId = message.author.id;
+    const username = message.author.username;
+    const guildId = message.guild.id;
 
-        const iconMora = getIcon('mora');
-        const iconPrimo = getIcon('primo');
-        const todayStr = getVietnamRPGDay();
+    let times = parseInt(args[0]) || 1;
+    if (times < 1) times = 1;
+    if (times > 5) times = 5;
 
-        // 1. MENU CHÍNH / PROFILE
-        if (!subCommand) {
-            if (user && user.data && user.data.element) {
-                return this.showProfile(message, user.data, todayStr);
-            }
+    const cooldownKey = renderKey("cooldown_cauca", userId);
+    const lastUsed = await getKey(cooldownKey);
+    const now = Date.now();
+    
+    const currentCooldown = lastUsed?.limit || 10000; 
 
-            const embed = new EmbedBuilder()
-                .setTitle("⚔️ KHÁM PHÁ NGUYÊN TỐ")
-                .setDescription("Vui lòng chọn một hệ nguyên tố để bắt đầu hành trình!\nSử dụng lệnh: `.rpg choose [tên_hệ]`")
-                .setColor(0x2f3136);
-
-            Object.keys(ELEMENTS_CONFIG).forEach(id => {
-                const el = ELEMENTS_CONFIG[id];
-                embed.addFields({ 
-                    name: `${el.emoji} Hệ ${el.name}`, 
-                    value: `ATK: **${el.stats.atk}** | HP: **${el.stats.hp}**`, 
-                    inline: true 
-                });
-            });
-            return message.reply({ embeds: [embed] });
-        }
-
-        // 2. CHỌN HỆ (.rpg choose [hệ])
-        if (subCommand === 'choose') {
-            if (user?.data?.element) return message.reply(`${errorIcon} | Bạn đã chọn hệ rồi!`);
-            const choice = args[1]?.toLowerCase();
-            const el = ELEMENTS_CONFIG[choice];
-            if (!el) return message.reply(`${errorIcon} | Hệ không tồn tại! Hãy chọn: \`${Object.keys(ELEMENTS_CONFIG).join(', ')}\``);
-
-            const stats = {
-                data: {
-                    element: el.name, level: 1, xp: 0,
-                    atk: el.stats.atk, hp: el.stats.hp, skill: el.skill,
-                    quest: null 
-                }
-            };
-            await setKey(key, stats);
-            return message.reply(`${verifyIcon} | Chúc mừng! Bạn đã sở hữu Vision hệ **${el.name}** ${el.emoji}.`);
-        }
-
-        if (!user?.data) return message.reply(`${errorIcon} | Hãy chọn hệ trước!`);
-
-        // 3. DAILY QUEST (.rpg daily)
-        if (subCommand === 'daily') {
-            if (!user.data.quest || user.data.quest.date !== todayStr) {
-                const randomQ = RANDOM_QUESTS[Math.floor(Math.random() * RANDOM_QUESTS.length)];
-                const newQuest = { ...randomQ, current: 0, date: todayStr, claimed: false };
-                await setKey(`${key}.data.quest`, newQuest);
-                user.data.quest = newQuest;
-            }
-
-            const q = user.data.quest;
-            const embed = new EmbedBuilder()
-                .setTitle(`📜 NHIỆM VỤ: ${q.name}`)
-                .setDescription(`${q.desc}\n*(Tự động reset lúc 4:00 AM mỗi ngày)*`)
-                .addFields(
-                    { name: "Tiến độ", value: `📊 \`${q.current}/${q.target}\` lần săn`, inline: true },
-                    { name: "Phần thưởng", value: `💰 \`${q.rewardMora.toLocaleString()}\` ${iconMora}\n✨ \`${q.rewardGems}\` ${iconPrimo}`, inline: true }
-                )
-                .setColor(q.current >= q.target ? 0x00ff00 : 0xffff00);
-
-            if (q.current >= q.target && !q.claimed) embed.setFooter({ text: "Gõ '.rpg claim' để nhận thưởng!" });
-            if (q.claimed) embed.setFooter({ text: "Bạn đã nhận quà hôm nay, hãy quay lại sau 4h sáng mai!" });
-
-            return message.reply({ embeds: [embed] });
-        }
-
-        // 4. CLAIM THƯỞNG (.rpg claim)
-        if (subCommand === 'claim') {
-            const q = user.data.quest;
-            if (!q || q.date !== todayStr) return message.reply(`${errorIcon} | Bạn chưa có nhiệm vụ cho hôm nay!`);
-            if (q.current < q.target) return message.reply(`${errorIcon} | Bạn chưa hoàn thành mục tiêu nhiệm vụ!`);
-            if (q.claimed) return message.reply(`${errorIcon} | Bạn đã nhận thưởng rồi!`);
-
-            await addMoney(userId, q.rewardMora, 'mora');
-            await addMoney(userId, q.rewardGems, 'primo');
-            await setKey(`${key}.data.quest.claimed`, true);
-
-            return message.reply(`${verifyIcon} | Bạn đã nhận thành công **${q.rewardMora.toLocaleString()}** ${iconMora} và **${q.rewardGems}** ${iconPrimo}!`);
-        }
-
-        // 5. ĐI SĂN (.rpg hunt)
-        if (subCommand === 'hunt') {
-            const randXP = Math.floor(Math.random() * 15) + 5;
-            const randMora = Math.floor(Math.random() * 400) + 150;
-
-            await addKey(`${key}.data.xp`, randXP);
-            await addMoney(userId, randMora, 'mora');
-
-            if (user.data.quest && user.data.quest.date === todayStr && user.data.quest.current < user.data.quest.target) {
-                await addKey(`${key}.data.quest.current`, 1);
-            }
-
-            let msg = `⚔️ **${message.author.username}** sử dụng **${user.data.skill}** càn quét quái vật, nhận được **${randXP} XP** và **${randMora}** ${iconMora}.`;
-            
-            const updated = await getKey(key);
-            if (updated.data.xp >= 100) {
-                await addKey(`${key}.data.level`, 1);
-                await setKey(`${key}.data.xp`, 0);
-                await addKey(`${key}.data.atk`, 4);
-                await addKey(`${key}.data.hp`, 15);
-                msg += `\n🎊 **ĐỘT PHÁ!** Cấp độ của bạn đã tăng lên **${updated.data.level + 1}**!`;
-            }
-            return message.reply(msg);
-        }
-    },
-
-    async showProfile(message, d, todayStr) {
-        const elConfig = Object.values(ELEMENTS_CONFIG).find(e => e.name === d.element);
-        const q = d.quest;
-        const progressStr = (q && q.date === todayStr) ? `\`${q.current}/${q.target}\`` : `\`0/--\``;
-
-        const embed = new EmbedBuilder()
-            .setTitle(`🛡️ Profile Nhà Lữ Hành: ${message.author.username}`)
-            .setColor(elConfig?.ref || 0x2f3136)
-            .addFields(
-                { name: 'Nguyên tố', value: `${elConfig ? elConfig.emoji : ''} ${d.element}`, inline: true },
-                { name: 'Cấp độ', value: `⭐ ${d.level}`, inline: true },
-                { name: 'Tuyệt kỹ', value: `✨ ${d.skill}`, inline: true },
-                { name: 'Tấn công', value: `⚔️ ${d.atk}`, inline: true },
-                { name: 'Máu', value: `❤️ ${d.hp}`, inline: true },
-                { name: 'Tiến độ Daily', value: `📈 ${progressStr}`, inline: true }
-            )
-            .setThumbnail(message.author.displayAvatarURL())
-            .setFooter({ text: "Chúc bạn một ngày săn quái vui vẻ!" });
-
-        return message.reply({ embeds: [embed] });
+    if (lastUsed && now - lastUsed.time < currentCooldown) {
+      const timeLeft = Math.ceil((currentCooldown - (now - lastUsed.time)) / 1000);
+      return message.reply(`${errorIcon} | Chờ **${timeLeft} giây** nữa để tiếp tục!`).then((msg) => {
+        setTimeout(() => msg.delete().catch(() => null), 3000);
+      });
     }
+
+    const fishInvKey = renderKey("fish_inv", userId);
+    let inventory = (await getKey(fishInvKey)) || [];
+
+    let rodIdx = -1, rodLuck = 0;
+    let baitIndices = [];
+
+    inventory.forEach((item, i) => {
+      const itemId = item.id || item;
+      const data = FISH_SHOP_ITEMS[itemId];
+      if (!data) return;
+
+      if (itemId.includes("cancau") && data.luck > rodLuck) {
+        rodLuck = data.luck;
+        rodIdx = i;
+      }
+      if (itemId.includes("moica")) {
+        baitIndices.push(i);
+      }
+    });
+
+    if (rodIdx === -1) return message.reply(`${errorIcon} | Bạn không có cần câu!`);
+    if (baitIndices.length < times) return message.reply(`${errorIcon} | Bạn không đủ mồi để câu **${times}** lần!`);
+
+    const rodEntry = inventory[rodIdx];
+    const rodId = rodEntry.id || rodEntry;
+    const rodData = FISH_SHOP_ITEMS[rodId];
+    
+    if (rodEntry.durability < times) {
+        return message.reply(`${errorIcon} | Cần câu không đủ độ bền để câu **${times}** lần!`);
+    }
+
+    const tankKey = renderKey("fishtank", userId);
+    const tank = (await getKey(tankKey)) || [];
+    let caughtFishList = [];
+    let missCount = 0; // Biến đếm số lần hụt
+
+    rodEntry.durability -= times;
+    for (let i = 0; i < times; i++) {
+        const idx = inventory.findLastIndex(item => (item.id || item).includes("moica"));
+        inventory.splice(idx, 1);
+    }
+
+    for (let i = 0; i < times; i++) {
+        const missRate = Math.max(0.01, 0.15 - (rodLuck * 0.025));
+        if (Math.random() < missRate) {
+            missCount++; // Tăng số lần hụt
+            await updateLeaderboard("miss", userId, username, guildId);
+            continue;
+        }
+
+        const adjustedChances = Object.entries(FISH_LIST).map(([id, data]) => {
+            let weight = data.chance;
+            
+            // TĂNG TỶ LỆ CÁ VOI KHI DÙNG CẦN CÂU HOÀNG KIM
+            if (id === "ca_voi") {
+                const goldenMultiplier = rodId === "cancau_hoangkim" ? 3.5 : 1; // Nhân 3.5 tỷ lệ nếu là cần hoàng kim
+                weight *= (rodLuck * goldenMultiplier);
+            } else if (id === "ca_map") {
+                weight *= rodLuck;
+            } else if (data.sellPrice < 10) {
+                weight /= Math.pow(rodLuck, 2);
+            }
+            return { id, weight };
+        });
+
+        const totalWeight = adjustedChances.reduce((sum, f) => sum + f.weight, 0);
+        const roll = Math.random();
+        let cumulative = 0;
+        for (const f of adjustedChances) {
+            cumulative += f.weight / totalWeight;
+            if (roll < cumulative) {
+                caughtFishList.push(f.id);
+                tank.push(f.id);
+                break;
+            }
+        }
+    }
+
+    let rodBroken = false;
+    if (rodEntry.durability <= 0) {
+        inventory.splice(inventory.indexOf(rodEntry), 1);
+        rodBroken = true;
+    }
+
+    const newCooldownLimit = times > 1 ? 60000 : 10000;
+    await setKey(fishInvKey, inventory);
+    await setKey(tankKey, tank);
+    await setKey(cooldownKey, { time: now, limit: newCooldownLimit });
+
+    const waitEmbed = new EmbedBuilder()
+        .setColor("#3498db")
+        .setTitle(`🎣 ĐANG THẢ CẦN (${times} LẦN)...`)
+        .setDescription(`Cần: **${rodData.name}**\nĐộ bền còn lại: **${rodEntry.durability}**\n\n*Vui lòng chờ kéo cần...*`);
+
+    const msg = await message.reply({ embeds: [waitEmbed] });
+
+    setTimeout(async () => {
+        const resultEmbed = new EmbedBuilder()
+            .setTitle(times > 1 ? `🎣 KẾT QUẢ CÂU ${times} LẦN` : `🎣 KẾT QUẢ CÂU CÁ`)
+            .setColor("#2ecc71");
+
+        let description = "";
+
+        if (caughtFishList.length === 0) {
+            resultEmbed.setColor("#e74c3c");
+            description = "Thật không may, tất cả các lần thả cần đều hụt mất cá! 💨";
+        } else {
+            const summary = {};
+            caughtFishList.forEach(id => summary[id] = (summary[id] || 0) + 1);
+            
+            const display = Object.entries(summary).map(([id, count]) => {
+                const f = FISH_LIST[id];
+                return `${f.icon} **${f.name}** x${count}`;
+            }).join("\n");
+
+            description = `Bạn đã kéo lên được:\n${display}`;
+        }
+
+        // THÔNG BÁO SỐ LẦN HỤT NẾU CÓ
+        if (missCount > 0 && times > 1) {
+            description += `\n\n💨 Có **${missCount}** lần cá đã thoát mất!`;
+        }
+
+        resultEmbed.setDescription(description);
+
+        if (rodBroken) resultEmbed.addFields({ name: "⚠️ RẮC!", value: "Cần câu của bạn đã gãy sau chuyến đi này!" });
+        if (times > 1) resultEmbed.setFooter({ text: "Bạn đã dùng câu hàng loạt, cooldown: 1 phút" });
+
+        await msg.edit({ embeds: [resultEmbed] });
+    }, 3000);
+  }
 };
