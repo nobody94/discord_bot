@@ -232,39 +232,32 @@ client.on("interactionCreate", async (interaction) => {
 
 async function startBot() {
   try {
-    // 1. Kiểm tra Token trước
-    if (!Token) return console.error("❌ BOT_TOKEN missing!");
+    console.log("--- BẮT ĐẦU QUÁ TRÌNH KHỞI ĐỘNG ---");
 
-    // 2. Đăng nhập Discord NGAY LẬP TỨC
-    // Không dùng await ở đây để nó không chặn các dòng code phía dưới
-    client.login(Token).then(() => {
-      console.log("🔑 Yêu cầu đăng nhập Discord đã được gửi!");
-    }).catch(err => {
-      console.error("❌ Lỗi đăng nhập Discord:", err);
-    });
+    // 1. Kiểm tra Token
+    if (!Token) {
+      console.error("❌ LỖI: BOT_TOKEN bị thiếu trong môi trường!");
+      return;
+    }
 
-    // 3. Xử lý Database
-    console.log("⏳ Đang khởi tạo kết nối Database...");
-    
-    // Quickmongo tự kết nối, bạn có thể lắng nghe sự kiện thay vì await connect()
-    db.on("ready", () => {
-      console.log("✅ QuickMongo đã sẵn sàng!");
-    });
+    // 2. Đăng nhập Discord trước và ĐỢI nó xong (Dùng await)
+    console.log("🚀 Đang tiến hành đăng nhập Discord...");
+    await client.login(Token); 
+    console.log("🔑 Đã login Discord thành công!");
 
-    // Nếu bạn vẫn muốn dùng db.connect() (tùy version), hãy bọc nó trong try/catch riêng
-    try {
-        if (typeof db.connect === 'function') {
-            await db.connect();
-            console.log("✅ Đã kết nối MongoDB thành công!");
-        }
-    } catch (dbErr) {
-        console.error("❌ Lỗi khi gọi db.connect():", dbErr.message);
+    // 3. Khởi tạo Database sau khi Bot đã online
+    console.log("⏳ Đang kết nối Database...");
+    db.on("ready", () => console.log("✅ QuickMongo Event: Ready!"));
+
+    if (typeof db.connect === 'function') {
+      await db.connect();
+      console.log("✅ Đã kết nối MongoDB thành công!");
     }
 
   } catch (error) {
-    console.error("❌ Lỗi khởi động hệ thống:", error);
+    console.error("❌ Lỗi nghiêm trọng trong startBot:");
+    console.error(error);
   }
 }
-
 // Chạy hàm khởi động
 startBot();
