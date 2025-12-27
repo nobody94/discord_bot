@@ -112,7 +112,7 @@ module.exports = {
             // Điều chỉnh trọng số (Weight)
             const adjustedChances = Object.entries(FISH_LIST).map(([id, data]) => {
                 let weight = data.chance;
-                if (id === "ca_voi" || id === "ca_map" || id === "ca_heo") {
+                if (data.currency == 'primo' || (data.sellPrice > 1000 && data.currency == 'mora')) {
                     weight *= totalLuck;
                     // Tăng tỉ lệ ra Cá Voi cho cần Hoàng Kim
                     if (rodEntry.id === "cancau_hoang_kim" && data.currency == 'primo') weight *= 2;
