@@ -19,7 +19,7 @@ module.exports = {
         let participants = new Set();
         participants.add(message.author.id);
 
-        const bankVault = Math.floor(Math.random() * (2000000 - 500000 + 1)) + 500000; // 500k - 2M Mora
+        const bankVault = Math.floor(Math.random() * (1000000 - 500000 + 1)) + 500000; // 500k - 1M Mora
 
         // Công thức tính tỉ lệ: 1 người = 5%. Mỗi người thêm vào +5%. Max 70%.
         const calculateChance = (count) => Math.min(5 + (count - 1) * 5, 70);
