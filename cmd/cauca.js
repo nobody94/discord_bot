@@ -195,7 +195,7 @@ module.exports = {
                         if (f.sellPrice < 10) updateLeaderboard("trash", userId, username, guildId);
                         return `${f.icon} **${f.name}** x${count}`;
                     }).join("\n");
-                    resultEmbed.setDescription(`**Bạn đã kéo lên được:**\n${display}${missCount>0 ? `Có ${missCount} con cá đã thoát` : ''}`);
+                    resultEmbed.setDescription(`**Bạn đã kéo lên được:**\n${display}${missCount>0 ? `\n💨Có ${missCount} con cá đã thoát` : ''}`);
                 } else {
                     resultEmbed.setDescription("Thật tiếc, cá đã thoát mất tiêu rồi! 💨").setColor("#e74c3c");
                 }

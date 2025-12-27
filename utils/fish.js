@@ -81,21 +81,21 @@ const FISH_LIST = {
         icon: "🐢", 
         sellPrice: 30, 
         currency: "primo", 
-        chance: 0.008 
+        chance: 0.005 
     },
     "ca_voi": { 
         name: "Cá Voi Xanh", 
         icon: "🐳", 
         sellPrice: 50, 
         currency: "primo", 
-        chance: 0.005 // 0.5% xuất hiện
+        chance: 0.003 // 0.5% xuất hiện
     },
      "ca_heo": { 
         name: "Cá Heo Hồng", 
         icon: "<:dolphin:1454324539210203238>", 
         sellPrice: 80, 
         currency: "primo", 
-        chance: 0.002 
+        chance: 0.001 
     }, 
 };
 

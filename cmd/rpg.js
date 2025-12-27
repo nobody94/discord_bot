@@ -88,13 +88,13 @@ module.exports = {
     let totalXP = 0;
     let wins = 0;
     let losses = 0;
-    const difficultyMultiplier = 1 + (times - 1) * 0.15; // Tăng tỉ lệ thua khi đánh nhiều
+    const difficultyMultiplier = 1 + (times - 1) * 0.1; // Tăng tỉ lệ thua khi đánh nhiều
 
     // --- XỬ LÝ LOGIC CHIẾN ĐẤU ---
     if (subCommand === "hunt") {
       for (let i = 0; i < times; i++) {
         // Tỉ lệ thắng cơ bản của Hunt là 95%, giảm dần nếu đánh nhiều lần
-        const winChance = 0.95 / difficultyMultiplier;
+        const winChance = 0.99 / difficultyMultiplier;
 
         if (Math.random() < winChance) {
           const xp = Math.floor(Math.random() * 8) + 8;
