@@ -4,28 +4,28 @@ const FISH_LIST = {
         icon: "🥾", 
         sellPrice: 5, 
         currency: "mora", 
-        chance: 0.10 // 10% xuất hiện
+        chance: 0.10 
     },
     "vo_chuoi": { 
         name: "Vỏ Chuối", 
         icon: "🍌", 
         sellPrice: 3, 
         currency: "mora", 
-        chance: 0.18 // 8% xuất hiện
+        chance: 0.18 
     },
     "vo_chai_bia": { 
         name: "Vỏ Chai bia", 
         icon: "🍾", 
         sellPrice: 3, 
         currency: "mora", 
-        chance: 0.18 // 8% xuất hiện
+        chance: 0.18 
     },
     "tui_nilon": { 
         name: "Túi Nilon", 
         icon: "🛍️", 
         sellPrice: 2, 
         currency: "mora", 
-        chance: 0.15 // 12% xuất hiện
+        chance: 0.15 
     },
     "xuong_ca": { 
         name: "Bộ Xương Cá", 
@@ -37,16 +37,16 @@ const FISH_LIST = {
     "ca_long_tong": { 
         name: "Cá Lòng Tong", 
         icon: "🐟", 
-        sellPrice: 50, 
+        sellPrice: 20, 
         currency: "mora", 
-        chance: 0.50 // 50% xuất hiện
+        chance: 0.50 
     },
     "ca_chep": { 
         name: "Cá Chép Vàng", 
         icon: "🎏", 
         sellPrice: 300, 
         currency: "mora", 
-        chance: 0.30 // 30% xuất hiện
+        chance: 0.30
     },
     "sua": { 
         name: "Sứa", 
@@ -65,36 +65,36 @@ const FISH_LIST = {
     "bach_tuoc": { 
         name: "Bạch Tuộc Khổng Lồ", 
         icon: "🐙", 
-        sellPrice: 7000, 
+        sellPrice: 5000, 
         currency: "mora", 
         chance: 0.02 
     },   
     "ca_map": { 
         name: "Cá Mập Trắng", 
         icon: "🦈", 
-        sellPrice: 5000, 
+        sellPrice: 3000, 
         currency: "mora", 
-        chance: 0.05 // 8% xuất hiện
+        chance: 0.05 
     },    
     "rua_bien": { 
         name: "Rùa Biển", 
         icon: "🐢", 
-        sellPrice: 30, 
-        currency: "primo", 
+        sellPrice: 50000, 
+        currency: "mora", 
         chance: 0.005 
     },
     "ca_voi": { 
         name: "Cá Voi Xanh", 
         icon: "🐳", 
-        sellPrice: 50, 
-        currency: "primo", 
-        chance: 0.003 // 0.5% xuất hiện
+        sellPrice: 80000, 
+        currency: "mora", 
+        chance: 0.003 
     },
      "ca_heo": { 
         name: "Cá Heo Hồng", 
         icon: "<:dolphin:1454324539210203238>", 
-        sellPrice: 80, 
-        currency: "primo", 
+        sellPrice: 120000, 
+        currency: "mora", 
         chance: 0.001 
     }, 
 };
@@ -112,7 +112,7 @@ const FISH_SHOP_ITEMS = {
   "cancau_carbon": {
     name: "Cần Câu Sợi Carbon",
     icon: "🎋",
-    price: 100000,
+    price: 50000,
     luck: 1.5,
     maxDurability: 60,
     currency: "mora",
@@ -121,10 +121,10 @@ const FISH_SHOP_ITEMS = {
   "cancau_hoang_kim": {
     name: "Cần Câu Hoàng Kim",
     icon: "🔱",
-    price: 150,
+    price: 100000,
     luck: 3.0,
     maxDurability: 100,
-    currency: "primo", 
+    currency: "mora", 
     description: "Cần câu huyền thoại, tăng tỉ lệ gặp cá hiếm cực cao.",
   },
 
@@ -132,7 +132,7 @@ const FISH_SHOP_ITEMS = {
   "moica_thuong": {
     name: "Mồi Cá Thường",
     icon: "🪱",
-    price: 100,
+    price: 5,
     currency: "mora",
     luck: 1.0,
     description: "Mồi câu phổ thông, đủ để dụ mấy con cá nhỏ.",
@@ -140,7 +140,7 @@ const FISH_SHOP_ITEMS = {
   "moica_xin": {
     name: "Mồi Cá Cao Cấp",
     icon: "🐛",
-    price: 500,
+    price: 50,
     currency: "mora",
     luck: 2.0,
     description: "Mùi vị hấp dẫn hơn, tăng tỉ lệ cá cắn câu.",
