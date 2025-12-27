@@ -30,7 +30,7 @@ async function wordchainProcess(message, wordchain) {
 
   // 4. Xử lý kết quả sau khi đã có biến 'result'
   if (result.success) {
-    const tienThuong = 50;
+    const tienThuong = 200;
 
     // Cập nhật người dùng cuối ngay lập tức
     await wordchain.setLastUser(guildId, userId);
@@ -46,7 +46,7 @@ async function wordchainProcess(message, wordchain) {
     let replyMessage = result.message;
 
     if (result.reason === "OUT_OF_WORD") {
-      const bonusReward = 500;
+      const bonusReward = 1000;
       await Money.addMoney(userId, bonusReward);
 
       await message.reply({

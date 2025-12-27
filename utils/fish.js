@@ -91,8 +91,8 @@ const FISH_LIST = {
         chance: 0.005 // 0.5% xuất hiện
     },
      "ca_heo": { 
-        name: "Cá Heo", 
-        icon: "🐬", 
+        name: "Cá Heo Hồng", 
+        icon: "<:dolphin:1454324539210203238>", 
         sellPrice: 80, 
         currency: "primo", 
         chance: 0.002 
