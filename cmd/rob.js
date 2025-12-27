@@ -108,7 +108,7 @@ module.exports = {
                             resultEmbed.setColor("#2ecc71")
                                 .setDescription(`🎉 **THÀNH CÔNG RỰC RỠ!**\n\nNhóm đã khoét vách thành công hầm ngân hàng!\n💰 Tổng thu: **${bankVault.toLocaleString()}** ${getIcon('mora')}\n💰 Mỗi người chia nhau: **${individualShare.toLocaleString()}** ${getIcon('mora')}`);
                         } else {
-                            const fine = 2000; // Phạt 2k nếu bị bắt
+                            const fine = 5000; // Phạt tiền nếu bị bắt
                             for (const pId of participants) {
                                 await removeMoney(pId, fine, 'mora').catch(() => {});
                             }
