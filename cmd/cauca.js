@@ -115,7 +115,7 @@ module.exports = {
                 if (id === "ca_voi" || id === "ca_map" || id === "ca_heo") {
                     weight *= totalLuck;
                     // Tăng tỉ lệ ra Cá Voi cho cần Hoàng Kim
-                    if (rodEntry.id === "cancau_hoang_kim" && id === "ca_voi") weight *= 5;
+                    if (rodEntry.id === "cancau_hoang_kim" && data.currency == 'primo') weight *= 2;
                     if (totalLuck < 2.0) weight *= 0.4;
                 } else if (data.sellPrice < 10) {
                     weight /= Math.pow(totalLuck, 2); // Giảm rác khi cần xịn
