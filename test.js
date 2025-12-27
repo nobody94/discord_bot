@@ -1,165 +1,130 @@
-const { EmbedBuilder } = require("discord.js");
-const { getKey, renderKey, setKey, updateLeaderboard } = require("../utils/db");
-const { FISH_LIST, FISH_SHOP_ITEMS } = require("../utils/fish");
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionFlagsBits } = require("discord.js");
+const { getBalance, addMoney, removeMoney, getIcon } = require('../utils/currency.js');
 const { errorIcon, verifyIcon } = require('../utils/icon.js');
-const { getIcon } = require('../utils/currency.js');
+const { DEVELOPER_IDS } = require('../utils/constant.js');
 
 module.exports = {
-  name: "cauca",
-  aliases: ["fish", "cc"],
-  description: "Câu cá nhiều lần (Max 5). Ví dụ: .cc 5",
+    name: "rob",
+    aliases: ["cuoptien", "ct"],
+    description: "Khởi động một phi vụ cướp ngân hàng",
+    async execute(message, args) {
+        const isDev = DEVELOPER_IDS.includes(message.author.id);
+        const isAdmin = message.member.permissions.has(PermissionFlagsBits.ManageChannels);
 
-  async execute(message, args) {
-    const userId = message.author.id;
-    const username = message.author.username;
-    const guildId = message.guild.id;
-
-    let times = parseInt(args[0]) || 1;
-    if (times < 1) times = 1;
-    if (times > 5) times = 5;
-
-    const cooldownKey = renderKey("cooldown_cauca", userId);
-    const lastUsed = await getKey(cooldownKey);
-    const now = Date.now();
-    
-    const currentCooldown = lastUsed?.limit || 10000; 
-
-    if (lastUsed && now - lastUsed.time < currentCooldown) {
-      const timeLeft = Math.ceil((currentCooldown - (now - lastUsed.time)) / 1000);
-      return message.reply(`${errorIcon} | Chờ **${timeLeft} giây** nữa để tiếp tục!`).then((msg) => {
-        setTimeout(() => msg.delete().catch(() => null), 3000);
-      });
-    }
-
-    const fishInvKey = renderKey("fish_inv", userId);
-    let inventory = (await getKey(fishInvKey)) || [];
-
-    let rodIdx = -1, rodLuck = 0;
-    let baitIndices = [];
-
-    inventory.forEach((item, i) => {
-      const itemId = item.id || item;
-      const data = FISH_SHOP_ITEMS[itemId];
-      if (!data) return;
-
-      if (itemId.includes("cancau") && data.luck > rodLuck) {
-        rodLuck = data.luck;
-        rodIdx = i;
-      }
-      if (itemId.includes("moica")) {
-        baitIndices.push(i);
-      }
-    });
-
-    if (rodIdx === -1) return message.reply(`${errorIcon} | Bạn không có cần câu!`);
-    if (baitIndices.length < times) return message.reply(`${errorIcon} | Bạn không đủ mồi để câu **${times}** lần!`);
-
-    const rodEntry = inventory[rodIdx];
-    const rodId = rodEntry.id || rodEntry;
-    const rodData = FISH_SHOP_ITEMS[rodId];
-    
-    if (rodEntry.durability < times) {
-        return message.reply(`${errorIcon} | Cần câu không đủ độ bền để câu **${times}** lần!`);
-    }
-
-    const tankKey = renderKey("fishtank", userId);
-    const tank = (await getKey(tankKey)) || [];
-    let caughtFishList = [];
-    let missCount = 0; // Biến đếm số lần hụt
-
-    rodEntry.durability -= times;
-    for (let i = 0; i < times; i++) {
-        const idx = inventory.findLastIndex(item => (item.id || item).includes("moica"));
-        inventory.splice(idx, 1);
-    }
-
-    for (let i = 0; i < times; i++) {
-        const missRate = Math.max(0.01, 0.15 - (rodLuck * 0.025));
-        if (Math.random() < missRate) {
-            missCount++; // Tăng số lần hụt
-            await updateLeaderboard("miss", userId, username, guildId);
-            continue;
+        if (!isDev && !isAdmin) {
+            return message.reply(`${errorIcon} | Chỉ Dev hoặc Quản lý kênh mới có thể phát động phi vụ này!`);
         }
 
-        const adjustedChances = Object.entries(FISH_LIST).map(([id, data]) => {
-            let weight = data.chance;
-            
-            // TĂNG TỶ LỆ CÁ VOI KHI DÙNG CẦN CÂU HOÀNG KIM
-            if (id === "ca_voi") {
-                const goldenMultiplier = rodId === "cancau_hoangkim" ? 3.5 : 1; // Nhân 3.5 tỷ lệ nếu là cần hoàng kim
-                weight *= (rodLuck * goldenMultiplier);
-            } else if (id === "ca_map") {
-                weight *= rodLuck;
-            } else if (data.sellPrice < 10) {
-                weight /= Math.pow(rodLuck, 2);
+        let participants = new Set();
+        participants.add(message.author.id);
+        const bankVault = Math.floor(Math.random() * (2000000 - 500000 + 1)) + 500000;
+
+        const calculateChance = (count) => Math.min(5 + (count - 1) * 15, 90);
+
+        // Hàm tạo danh sách tag người dùng
+        const getMentions = () => Array.from(participants).map(id => `<@${id}>`).join(", ");
+
+        const embed = new EmbedBuilder()
+            .setTitle("🏦 PHI VỤ CƯỚP NGÂN HÀNG BẮC QUỐC")
+            .setColor("#ff0000")
+            .setDescription(`**${message.author.username}** đã phát động phi vụ!\n\n` +
+                `💰 **Giá trị hầm:** ~${bankVault.toLocaleString()} ${getIcon('mora')}\n` +
+                `🎯 **Tỉ lệ thành công:** ${calculateChance(participants.size)}%\n\n` +
+                `👥 **Đồng bọn tham gia:**\n${getMentions()}\n\n` +
+                `*Nhấn nút để tham gia. Càng đông tỉ lệ thắng càng cao!*`)
+            .setFooter({ text: "Phi vụ tự hủy sau 2 phút nếu không bắt đầu." });
+
+        const row = new ActionRowBuilder().addComponents(
+            new ButtonBuilder().setCustomId('join_rob').setLabel('Tham Gia').setStyle(ButtonStyle.Primary).setEmoji('👥'),
+            new ButtonBuilder().setCustomId('start_rob').setLabel('Bắt Đầu').setStyle(ButtonStyle.Success).setEmoji('🔫'),
+            new ButtonBuilder().setCustomId('cancel_rob').setLabel('Hủy').setStyle(ButtonStyle.Danger).setEmoji('✖️')
+        );
+
+        const msg = await message.reply({ embeds: [embed], components: [row] });
+        const collector = msg.createMessageComponentCollector({ time: 120000 });
+
+        collector.on('collect', async (interaction) => {
+            if (interaction.customId === 'join_rob') {
+                if (participants.has(interaction.user.id)) return interaction.reply({ content: "Bạn đã tham gia rồi!", ephemeral: true });
+                participants.add(interaction.user.id);
+                
+                const currentChance = calculateChance(participants.size);
+                embed.setDescription(`**${message.author.username}** đã phát động phi vụ!\n\n` +
+                    `💰 **Giá trị hầm:** ~${bankVault.toLocaleString()} ${getIcon('mora')}\n` +
+                    `🎯 **Tỉ lệ thành công:** ${currentChance}%\n\n` +
+                    `👥 **Đồng bọn tham gia:**\n${getMentions()}`);
+                await interaction.update({ embeds: [embed] });
             }
-            return { id, weight };
+
+            if (interaction.customId === 'start_rob') {
+                if (interaction.user.id !== message.author.id && !isDev) return interaction.reply({ content: "Chỉ chủ mưu mới có thể bắt đầu!", ephemeral: true });
+                await interaction.deferUpdate(); // Khắc phục lỗi "Interaction failed"
+                collector.stop('started');
+            }
+
+            if (interaction.customId === 'cancel_rob') {
+                if (interaction.user.id !== message.author.id && !isDev) return interaction.reply({ content: "Bạn không thể hủy!", ephemeral: true });
+                await interaction.deferUpdate(); // Khắc phục lỗi "Interaction failed"
+                collector.stop('cancelled');
+            }
         });
 
-        const totalWeight = adjustedChances.reduce((sum, f) => sum + f.weight, 0);
-        const roll = Math.random();
-        let cumulative = 0;
-        for (const f of adjustedChances) {
-            cumulative += f.weight / totalWeight;
-            if (roll < cumulative) {
-                caughtFishList.push(f.id);
-                tank.push(f.id);
-                break;
+        collector.on('end', async (collected, reason) => {
+            if (reason === 'cancelled') return msg.edit({ content: "❌ Phi vụ đã bị hủy.", embeds: [], components: [] });
+            if (reason === 'time' && participants.size < 1) return msg.edit({ content: "⏰ Hết thời gian chuẩn bị.", embeds: [], components: [] });
+
+            if (reason === 'started') {
+                let timeLeft = 10;
+                const disabledRow = new ActionRowBuilder().addComponents(
+                    row.components.map(btn => ButtonBuilder.from(btn).setDisabled(true))
+                );
+
+                const fightEmbed = new EmbedBuilder()
+                    .setTitle("🚨 ĐANG ĐỘT NHẬP NGÂN HÀNG...")
+                    .setColor("#f39c12")
+                    .setDescription(`Các tay súng đang nổ súng khống chế bảo vệ!\n\n` +
+                        `⏳ Kết quả sau: **${timeLeft} giây**\n` +
+                        `👥 **Đội hình:** ${getMentions()}`);
+
+                await msg.edit({ embeds: [fightEmbed], components: [disabledRow] });
+
+                const countdown = setInterval(async () => {
+                    timeLeft--;
+                    if (timeLeft > 0) {
+                        fightEmbed.setDescription(`Các tay súng đang nổ súng khống chế bảo vệ!\n\n` +
+                            `⏳ Kết quả sau: **${timeLeft} giây**\n` +
+                            `👥 **Đội hình:** ${getMentions()}`);
+                        await msg.edit({ embeds: [fightEmbed] }).catch(() => clearInterval(countdown));
+                    } else {
+                        clearInterval(countdown);
+                        
+                        const finalChance = calculateChance(participants.size);
+                        const isSuccess = Math.random() * 100 < finalChance;
+                        const resultEmbed = new EmbedBuilder().setTitle("🚨 KẾT QUẢ PHI VỤ");
+
+                        if (isSuccess) {
+                            const individualShare = Math.floor(bankVault / participants.size);
+                            for (const pId of participants) {
+                                await addMoney(pId, individualShare, 'mora');
+                            }
+                            resultEmbed.setColor("#2ecc71")
+                                .setDescription(`🎉 **THÀNH CÔNG RỰC RỠ!**\n\nNhóm cướp đã tẩu thoát cùng **${bankVault.toLocaleString()}** ${getIcon('mora')}.\n\n` +
+                                    `💰 Mỗi người nhận: **${individualShare.toLocaleString()}** ${getIcon('mora')}\n` +
+                                    `👥 **Danh sách tay súng:** ${getMentions()}`);
+                        } else {
+                            const fine = 5000;
+                            for (const pId of participants) {
+                                await removeMoney(pId, fine, 'mora').catch(() => {});
+                            }
+                            resultEmbed.setColor("#e74c3c")
+                                .setDescription(`🚔 **PHI VỤ THẤT BẠI!**\n\nCảnh sát đã bao vây và bắt gọn cả nhóm.\n\n` +
+                                    `💸 Mỗi người tốn **${fine.toLocaleString()}** ${getIcon('mora')} để tại ngoại.\n` +
+                                    `👥 **Danh sách bị bắt:** ${getMentions()}`);
+                        }
+                        await msg.edit({ embeds: [resultEmbed], components: [] });
+                    }
+                }, 1000);
             }
-        }
+        });
     }
-
-    let rodBroken = false;
-    if (rodEntry.durability <= 0) {
-        inventory.splice(inventory.indexOf(rodEntry), 1);
-        rodBroken = true;
-    }
-
-    const newCooldownLimit = times > 1 ? 60000 : 10000;
-    await setKey(fishInvKey, inventory);
-    await setKey(tankKey, tank);
-    await setKey(cooldownKey, { time: now, limit: newCooldownLimit });
-
-    const waitEmbed = new EmbedBuilder()
-        .setColor("#3498db")
-        .setTitle(`🎣 ĐANG THẢ CẦN (${times} LẦN)...`)
-        .setDescription(`Cần: **${rodData.name}**\nĐộ bền còn lại: **${rodEntry.durability}**\n\n*Vui lòng chờ kéo cần...*`);
-
-    const msg = await message.reply({ embeds: [waitEmbed] });
-
-    setTimeout(async () => {
-        const resultEmbed = new EmbedBuilder()
-            .setTitle(times > 1 ? `🎣 KẾT QUẢ CÂU ${times} LẦN` : `🎣 KẾT QUẢ CÂU CÁ`)
-            .setColor("#2ecc71");
-
-        let description = "";
-
-        if (caughtFishList.length === 0) {
-            resultEmbed.setColor("#e74c3c");
-            description = "Thật không may, tất cả các lần thả cần đều hụt mất cá! 💨";
-        } else {
-            const summary = {};
-            caughtFishList.forEach(id => summary[id] = (summary[id] || 0) + 1);
-            
-            const display = Object.entries(summary).map(([id, count]) => {
-                const f = FISH_LIST[id];
-                return `${f.icon} **${f.name}** x${count}`;
-            }).join("\n");
-
-            description = `Bạn đã kéo lên được:\n${display}`;
-        }
-
-        // THÔNG BÁO SỐ LẦN HỤT NẾU CÓ
-        if (missCount > 0 && times > 1) {
-            description += `\n\n💨 Có **${missCount}** lần cá đã thoát mất!`;
-        }
-
-        resultEmbed.setDescription(description);
-
-        if (rodBroken) resultEmbed.addFields({ name: "⚠️ RẮC!", value: "Cần câu của bạn đã gãy sau chuyến đi này!" });
-        if (times > 1) resultEmbed.setFooter({ text: "Bạn đã dùng câu hàng loạt, cooldown: 1 phút" });
-
-        await msg.edit({ embeds: [resultEmbed] });
-    }, 3000);
-  }
 };

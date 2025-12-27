@@ -23,13 +23,14 @@ module.exports = {
 
         // Công thức tính tỉ lệ: 1 người = 5%. Mỗi người thêm vào +5%. Max 70%.
         const calculateChance = (count) => Math.min(5 + (count - 1) * 5, 70);
+        const getMentions = () => Array.from(participants).map(id => `<@${id}>`).join("\n");
 
         const embed = new EmbedBuilder()
             .setTitle("🏦 PHI VỤ CƯỚP NGÂN HÀNG BẮC QUỐC")
             .setColor("#ff0000")
             .setDescription(`**${message.author.username}** đã phát động phi vụ!\n\n` +
                 `💰 **Giá trị hầm:** ~${bankVault.toLocaleString()} ${getIcon('mora')}\n` +
-                `👥 **Đồng bọn:** ${participants.size} người\n` +
+                `👥 **Đồng bọn:** ${participants.size} người\n${getMentions()}\n` +
                 `🎯 **Tỉ lệ thành công:** ${calculateChance(participants.size)}%\n\n` +
                 `*Nhấn nút để tham gia. Càng đông tỉ lệ thắng càng cao!*`)
             .setFooter({ text: "Phi vụ tự hủy sau 2 phút nếu không bắt đầu." });
@@ -51,7 +52,7 @@ module.exports = {
                 const currentChance = calculateChance(participants.size);
                 embed.setDescription(`**${message.author.username}** đã phát động phi vụ!\n\n` +
                     `💰 **Giá trị hầm:** ~${bankVault.toLocaleString()} ${getIcon('mora')}\n` +
-                    `👥 **Đồng bọn:** ${participants.size} người\n` +
+                    `👥 **Đồng bọn:** ${participants.size} người\n${getMentions()}\n` +
                     `🎯 **Tỉ lệ thành công:** ${currentChance}%`);
                 await interaction.update({ embeds: [embed] });
             }
