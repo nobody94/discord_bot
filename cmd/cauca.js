@@ -74,9 +74,17 @@ module.exports = {
         let inventory = (await getKey(fishInvKey)) || [];
 
         const rodEntry = inventory.find(item => typeof item === 'object' && item.id.includes("cancau"));
-        if (!rodEntry || rodEntry.durability <= 0) {
-            return message.reply(`${errorIcon} | Cần câu của bạn không có hoặc đã hỏng!`);
+        // console.log('rodEntry',rodEntry)
+        if (!rodEntry) {
+            return message.reply(`${errorIcon} | Cần câu của bạn không có!`);
         }
+        if(rodEntry.durability <= 0){
+            return message.reply(`${errorIcon} | Cần câu của bạn đã bị hỏng vui lòng sửa hoặc thay mới!`);
+        }
+        if (rodEntry.durability < times) {
+            return message.reply(`${errorIcon} | Cần câu của bạn không đủ độ bền để câu!`);
+        }
+
 
         const baitIndex = inventory.findIndex(item => typeof item === 'string' && item.includes("moi"));
         if (baitIndex === -1) {
@@ -187,50 +195,20 @@ module.exports = {
                         if (f.sellPrice < 10) updateLeaderboard("trash", userId, username, guildId);
                         return `${f.icon} **${f.name}** x${count}`;
                     }).join("\n");
-                    resultEmbed.setDescription(`**Bạn đã kéo lên được:**\n${display}`);
+                    resultEmbed.setDescription(`**Bạn đã kéo lên được:**\n${display}${missCount>0 ? `Có ${missCount} con cá đã thoát` : ''}`);
                 } else {
                     resultEmbed.setDescription("Thật tiếc, cá đã thoát mất tiêu rồi! 💨").setColor("#e74c3c");
                 }
 
                 if (missCount > 0 && times > 1) {
-                    resultEmbed.setFooter({ text: `Có ${missCount} lượt hụt. Độ bền còn: ${rodEntry.durability}` });
+                    resultEmbed.setFooter({ text: `Độ bền còn: ${rodEntry.durability}` });
                 } else {
                     resultEmbed.setFooter({ text: `Độ bền cần: ${rodEntry.durability}/${rodData.maxDurability}` });
                 }
 
                 await msg.edit({ embeds: [resultEmbed] }).catch(() => { });
             }
-        }, 1000); // Chạy mỗi 1000ms (1 giây)
-
-        // setTimeout(async () => {
-        //     const resultEmbed = new EmbedBuilder()
-        //         .setTitle(`🎣 ${username.toUpperCase()} VỪA THẢ CẦN`)
-        //         .setColor("#2ecc71")
-        //         .addFields(
-        //             { name: "Cần câu", value: `${rodData.icon} ${rodData.name}`, inline: true },
-        //             { name: "Lượt câu ngày", value: `📊 ${userLimit.count}/${limitTime}`, inline: true }
-        //         );
-
-        //     if (caughtFishList.length > 0) {
-        //         const summary = {};
-        //         caughtFishList.forEach(id => summary[id] = (summary[id] || 0) + 1);
-        //         const display = Object.entries(summary).map(([id, count]) => {
-        //             const f = FISH_LIST[id];
-        //             if (f.sellPrice < 10) updateLeaderboard("trash", userId, username, guildId);
-        //             return `${f.icon} **${f.name}** x${count}`;
-        //         }).join("\n");
-        //         resultEmbed.setDescription(`**Bạn đã kéo lên được:**\n${display}`);
-        //     } else {
-        //         resultEmbed.setDescription("Thật tiếc, cá đã thoát mất tiêu rồi! 💨").setColor("#e74c3c");
-        //     }
-
-        //     if (missCount > 0 && times > 1) {
-        //         resultEmbed.setFooter({ text: `Có ${missCount} lượt hụt. Độ bền còn: ${rodEntry.durability}` });
-        //     } else {
-        //         resultEmbed.setFooter({ text: `Độ bền cần: ${rodEntry.durability}/${rodData.maxDurability}` });
-        //     }
-
-        //     await msg.edit({ embeds: [resultEmbed] });
-        // }, 3000)
+        }, 1000); 
+       
     }
 };
