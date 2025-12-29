@@ -25,7 +25,8 @@ async function becaHandler(args, message, fishTank, tankKey, userId) {
             fishTank.forEach(id => {
                 const f = FISH_LIST[id];
                 // Chỉ bán cá thường, GIỮ LẠI cá hiếm (Cá Voi, Cá Mập) hoặc cá có giá > 500
-                if (f && (f.currency != 'primo' || f.sellPrice > 10000)) {
+                //f.currency != 'primo'
+                if (f && f.sellPrice < 10000) {
                     totalMora += f.sellPrice;
                     soldCount++;
                 } else {
