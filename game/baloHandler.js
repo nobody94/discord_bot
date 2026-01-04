@@ -1,7 +1,8 @@
 const { getKey, renderKey, setKey } = require("../utils/db");
 const { getIcon, addMoney } = require('../utils/currency.js');
 const { SHOP_ITEMS, BLIND_BOX_LOOT } = require("../utils/shop");
-const { errorIcon, verifyIcon, bagIcon } = require('../utils/icon.js')
+const { errorIcon, verifyIcon } = require('../utils/icon.js')
+const { getCustomDate, MAX_LOVE_POINTS_PER_DAY } = require('../utils/constant.js');
 
 async function baloHandler(args, message, inventory, invKey, userId) {
     // --- LOGIC TẶNG ĐỒ (GIVE) ---
@@ -44,16 +45,61 @@ async function baloHandler(args, message, inventory, invKey, userId) {
         await setKey(invKey, inventory);
         await setKey(targetInvKey, targetInventory);
 
-        const item = SHOP_ITEMS[itemId] || {
-            name: itemId,
-            icon: "<:box:1451465056612253779>",
-        };
+        // --- BẮT ĐẦU LOGIC CẬP NHẬT CHỈ SỐ THÂN MẬT ---
+        const guildId = message.guild.id;
+        const coupleKey = renderKey('couple', guildId);
+        let couplesList = (await getKey(coupleKey)) || [];
 
-        message.reply(
-            `${verifyIcon} | Bạn đã tặng **${amountToGive}x ${item.icon} ${item.name}** cho **${target.username}** thành công!`
+        // Tìm xem hai người có phải cặp đôi trong server này không
+        const coupleIndex = couplesList.findIndex(c =>
+            (c.husband === userId && c.wife === target.id) ||
+            (c.husband === target.id && c.wife === userId)
         );
+
+        let loveMsg = "";
+        if (coupleIndex !== -1) {
+            const today = getCustomDate();
+
+            if (couplesList[coupleIndex].lastGiftDate !== today) {
+                couplesList[coupleIndex].lastGiftDate = today;
+                couplesList[coupleIndex].dailyLovePoints = 0;
+            }
+
+            const item = SHOP_ITEMS[itemId] || {};
+            let pointPerItem = 0;
+
+            // Kiểm tra nếu là đồ rác (isTrash) thì trừ 5 điểm mỗi món
+            if (item.isTrash) {
+                pointPerItem = -5;
+            } else {
+                // Nếu không phải rác: lấy lovePoint định sẵn hoặc 1% giá trị (mặc định tối thiểu 1)
+                pointPerItem = item.lovePoint !== undefined
+                    ? item.lovePoint
+                    : Math.max(Math.floor((item.price || 0) / 100), 1);
+            }
+
+            const totalLovePoints = pointPerItem * amountToGive;
+            const currentDaily = couplesList[coupleIndex].dailyLovePoints || 0;    
+
+            if (totalLovePoints > 0) {
+                const remainingQuota = MAX_LOVE_POINTS_PER_DAY - currentDaily;
+                if (remainingQuota <= 0) {
+                    loveMsg = `\n⚠️ Hai bạn đã đạt giới hạn thân mật hôm nay (5k). Hãy tặng tiếp sau 4h sáng mai!`;
+                } else {
+                    loveMsg = `\n💖 Chỉ số thân mật tăng: **+${totalLovePoints.toLocaleString()}** điểm!`;
+                    couplesList[coupleIndex].lovePoints = (couplesList[coupleIndex].lovePoints || 0) + totalLovePoints;
+                    await setKey(coupleKey, couplesList);
+                }
+            } else if (totalLovePoints < 0) {
+                loveMsg = `\n💔 Tặng đồ rác làm giảm: **${totalLovePoints}** điểm thân mật!`;
+            }
+        }
+        // --- KẾT THÚC LOGIC CẬP NHẬT CHỈ SỐ THÂN MẬT ---
+
+        const itemInfo = SHOP_ITEMS[itemId] || { name: itemId, icon: "📦" };
+        message.reply(`${verifyIcon} | Bạn đã tặng **${amountToGive}x ${itemInfo.icon} ${itemInfo.name}** cho **${target.username}** thành công!${loveMsg}`);
         return true;
-    }    
+    }
     // --- LOGIC BÁN ĐỒ (SELL) ---
     if (args[0] === "sell") {
         const itemId = args[1]?.toLowerCase();

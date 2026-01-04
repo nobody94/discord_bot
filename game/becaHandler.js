@@ -2,6 +2,7 @@ const { setKey, getKey, renderKey } = require("../utils/db");
 const { addMoney, getIcon } = require('../utils/currency.js');
 const { FISH_LIST } = require("../utils/fish");
 const { errorIcon, verifyIcon } = require('../utils/icon.js');
+const { getCustomDate, MAX_LOVE_POINTS_PER_DAY } = require('../utils/constant.js');
 
 async function becaHandler(args, message, fishTank, tankKey, userId) {
     const action = args[0]?.toLowerCase();
@@ -35,9 +36,9 @@ async function becaHandler(args, message, fishTank, tankKey, userId) {
             });
 
             if (soldCount === 0) return message.reply(`${errorIcon} | Không có cá thường nào để bán. Các loại cá hiếm đã được giữ lại an toàn!`);
-            
+
             fishTank = newTank;
-        } 
+        }
         // TRƯỜNG HỢP: BÁN LOẠI CÁ CỤ THỂ
         else {
             const fish = FISH_LIST[fishId];
@@ -103,7 +104,55 @@ async function becaHandler(args, message, fishTank, tankKey, userId) {
         }
         await setKey(targetTankKey, targetTank);
 
-        return message.reply(`${verifyIcon} | Bạn đã tặng **${amount}** con **${fish.name}** ${fish.icon} cho **${target.username}**!`);
+        // --- LOGIC CẬP NHẬT CHỈ SỐ THÂN MẬT ---
+        const guildId = message.guild.id;
+        const coupleKey = renderKey('couple', guildId);
+        let couplesList = (await getKey(coupleKey)) || [];
+
+        const coupleIndex = couplesList.findIndex(c =>
+            (c.husband === userId && c.wife === target.id) ||
+            (c.husband === target.id && c.wife === userId)
+        );
+
+        let loveMsg = "";
+        if (coupleIndex !== -1) {
+            const today = getCustomDate();
+
+            if (couplesList[coupleIndex].lastGiftDate !== today) {
+                couplesList[coupleIndex].lastGiftDate = today;
+                couplesList[coupleIndex].dailyLovePoints = 0;
+            }
+
+            let pointPerFish = 0;
+
+            // Kiểm tra nếu là đồ rác (giá bán < 10 Mora)
+            if (fish.sellPrice <= 10) {
+                pointPerFish = -5;
+            } else {
+                // Ưu tiên lovePoint trong file fish.js, nếu không có tính 1% giá bán
+                pointPerFish = fish.lovePoint !== undefined
+                    ? fish.lovePoint
+                    : Math.max(Math.floor((fish.sellPrice || 0) / 100), 1);
+            }
+
+            const totalLovePoints = pointPerFish * amount;
+            const currentDaily = couplesList[coupleIndex].dailyLovePoints || 0;    
+
+            if (totalLovePoints > 0) {
+                const remainingQuota = MAX_LOVE_POINTS_PER_DAY - currentDaily;
+                 if (remainingQuota <= 0) {
+                    loveMsg = `\n⚠️ Hai bạn đã đạt giới hạn thân mật hôm nay (5k). Hãy tặng tiếp sau 4h sáng mai!`;
+                }else{
+                    loveMsg = `\n💖 Chỉ số thân mật tăng: **+${totalLovePoints.toLocaleString()}** điểm!`;
+                    couplesList[coupleIndex].lovePoints = (couplesList[coupleIndex].lovePoints || 0) + totalLovePoints;
+                    await setKey(coupleKey, couplesList);
+                }                
+            } else if (totalLovePoints < 0) {               
+                loveMsg = `\n💔 Tặng rác làm giảm: **${totalLovePoints}** điểm thân mật!`;
+            }
+        }
+
+        return message.reply(`${verifyIcon} | Bạn đã tặng **${amount}x ${fish.icon} ${fish.name}** cho **${target.username}** thành công!${loveMsg}`);
     }
 
     return false;

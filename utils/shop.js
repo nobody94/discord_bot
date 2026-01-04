@@ -19,7 +19,8 @@ const SHOP_ITEMS = {
         currency: primo,
         description: 'Mở ra ngẫu nhiên vật phẩm hiếm',
         icon: '<:lootbox:1452243400332935179>',
-        canOpen: true
+        canOpen: true,
+        lovePoint:10
     },
     'bim_bim': {
         name: 'Bim bim',
@@ -27,7 +28,8 @@ const SHOP_ITEMS = {
         sellPrice:20000,
         currency: mora,
         description: desc.onlyView,
-        icon: '<:chips:1451742059953389779>'
+        icon: '<:chips:1451742059953389779>',
+        lovePoint:5
     },
     'tra_sua': {
         name: 'Trà sữa',
@@ -36,6 +38,7 @@ const SHOP_ITEMS = {
         currency: mora,
         description: desc.onlyView,
         icon: '<:milktea:1451058355857522883>',
+        lovePoint:8
     },
     'kem': {
         name: 'Kem',
@@ -44,6 +47,7 @@ const SHOP_ITEMS = {
         currency: mora,
         description: desc.onlyView,
         icon: '<:icecream:1451606564698853519>',
+        lovePoint:10
     },
     'banh_kem': {
         name: 'Bánh kem',
@@ -51,7 +55,8 @@ const SHOP_ITEMS = {
         sellPrice:80000,
         currency: mora,
         description: desc.onlyView,
-        icon: '<:birthdaycake:1452248466016436235>'
+        icon: '<:birthdaycake:1452248466016436235>',
+        lovePoint:15
     },
     'xien_ban': {
         name: 'Xiên bẩn',
@@ -59,7 +64,8 @@ const SHOP_ITEMS = {
         sellPrice:20000,
         currency: mora,
         description: desc.onlyView,
-        icon: '<:barbecue:1451606702632865813>'
+        icon: '<:barbecue:1451606702632865813>',
+        lovePoint:7
     },
     'coca': {
         name: 'Cô ca',
@@ -67,7 +73,8 @@ const SHOP_ITEMS = {
         sellPrice:10000,
         currency: mora,
         description: desc.onlyView,
-        icon: '<:coca:1452491105940537647>'
+        icon: '<:coca:1452491105940537647>',
+        lovePoint:3
     },
     'com_nam': {
         name: 'Cơm nắm',
@@ -75,7 +82,8 @@ const SHOP_ITEMS = {
         sellPrice:15000,
         currency: mora,
         description: desc.onlyView,
-        icon: '<:comnam:1452491150765199484>'
+        icon: '<:comnam:1452491150765199484>',
+        lovePoint:4
     },
     'nuoc_ep': {
         name: 'Nước ép',
@@ -83,7 +91,8 @@ const SHOP_ITEMS = {
         sellPrice:25000,
         currency: mora,
         description: desc.onlyView,
-        icon: '<:juice:1452491233782923284>'
+        icon: '<:juice:1452491233782923284>',
+        lovePoint:7
     },
     'pizza': {
         name: 'Pizza',
@@ -92,6 +101,7 @@ const SHOP_ITEMS = {
         currency: mora,
         description: desc.onlyView,
         icon: '<:pizza:1451606591983058994>',
+        lovePoint:20
     },
     'burger': {
         name: 'Burger',
@@ -99,7 +109,8 @@ const SHOP_ITEMS = {
         sellPrice:100000,
         currency: mora,
         description: desc.onlyView,
-        icon: '<:fastfood:1451606621137670144>'
+        icon: '<:fastfood:1451606621137670144>',
+        lovePoint:20
     },
     'my_ly': {
         name: 'Mỳ ly',
@@ -107,7 +118,8 @@ const SHOP_ITEMS = {
         sellPrice:20000,
         currency: mora,
         description: desc.onlyView,
-        icon: '<:instantnoodles:1451606651588317357>'
+        icon: '<:instantnoodles:1451606651588317357>',
+        lovePoint:7
     },
     'my_tom': {
         name: 'Mỳ tôm',
@@ -115,7 +127,8 @@ const SHOP_ITEMS = {
         sellPrice:30000,
         currency: mora,
         description: desc.onlyView,
-        icon: '<:ramen:1451606668826775573>'
+        icon: '<:ramen:1451606668826775573>',
+        lovePoint:8
     },
     'gau_bong': {
         name: 'Gấu bông',
@@ -124,6 +137,7 @@ const SHOP_ITEMS = {
         currency: mora,
         description: desc.onlyView,
         icon: '<:bear:1451058314237448284>',
+        lovePoint:20
     },    
     'donut': {
         name: 'Donut',
@@ -131,7 +145,8 @@ const SHOP_ITEMS = {
         sellPrice:30000,
         currency: mora,
         description: desc.onlyView,
-        icon: '<:donut:1452491274434379978>'
+        icon: '<:donut:1452491274434379978>',
+        lovePoint:8
     },
     'banh_bao': {
         name: 'Bánh bao',
@@ -139,7 +154,8 @@ const SHOP_ITEMS = {
         sellPrice:10000,
         currency: mora,
         description: desc.onlyView,
-        icon: '<:banhbao:1452491299528773662>'
+        icon: '<:banhbao:1452491299528773662>',
+        lovePoint:3
     },
     'xuc_xich': {
         name: 'Xúc xích',
@@ -147,7 +163,8 @@ const SHOP_ITEMS = {
         sellPrice:10000,
         currency: mora,
         description: desc.onlyView,
-        icon: '<:xucxich:1452491332261253182>'
+        icon: '<:xucxich:1452491332261253182>',
+        lovePoint:3
     },
     'socola_box': {
         name: 'Hộp socola',
@@ -155,7 +172,8 @@ const SHOP_ITEMS = {
         sellPrice:200000,
         currency: mora,
         description: desc.onlyView,
-        icon: '<:chocolatebox:1452491394663841803>'
+        icon: '<:chocolatebox:1452491394663841803>',
+        lovePoint:40
     },
     'tui_rac': {
         name: 'Túi rác 3 ngày chưa vứt',
@@ -224,8 +242,18 @@ const SHOP_ITEMS = {
         currency: primo,
         description: desc.legendary,
         icon: '<:diamond:1451466638103806012>',
+        hideFromShop: true,
+        lovePoint:200
+    },   
+    'nhan_cuoi': {
+        name: 'Nhẫn cưới',
+        price: 100000,
+        sellPrice:100000,
+        currency: mora,
+        description: desc.onlyView,
+        icon: '<:diamond_ring:1451058258944065638>',
         hideFromShop: true
-    }    
+    }   
 };
 
 const BLIND_BOX_LOOT = {

@@ -1,5 +1,5 @@
 const { getBalance, removeMoney, getIcon } = require('../utils/currency');
-const { renderKey, pushKey, setKey, getKey } = require('../utils/db'); // Thêm setKey, getKey để xử lý mảng
+const { renderKey, setKey, getKey } = require('../utils/db');
 const { SHOP_ITEMS } = require('../utils/shop');
 const { errorIcon, verifyIcon } = require('../utils/icon.js');
 

@@ -39,7 +39,7 @@ module.exports = {
         emoji: "❤️",
         color: "#FFB6C1", // Màu hồng tình cảm
         commands:
-          "• Hạnh phúc: kiss, hug, cuddle, cheek, airkiss, lick, nibled\n• Vui vẻ: laugh, highfive, pat, stare, pinch\n• Mạnh bạo: slap, poke, punch, kick, fight, bonk, rip",
+          "• Hạnh phúc: kiss, hug, cuddle, cheek, airkiss, lick, nibled\n• Vui vẻ: laugh, highfive, pat, stare, pinch\n• Mạnh bạo: slap, poke, punch, kick, fight, bonk, rip,spank",
       },
       admin: {
         label: "Cấu hình (Admin)",

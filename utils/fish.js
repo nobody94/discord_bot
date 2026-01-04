@@ -81,21 +81,24 @@ const FISH_LIST = {
         icon: "🐢", 
         sellPrice: 50000, 
         currency: "mora", 
-        chance: 0.005 
+        chance: 0.005,
+        lovePoint:10
     },
     "ca_voi": { 
         name: "Cá Voi Xanh", 
         icon: "🐳", 
         sellPrice: 80000, 
         currency: "mora", 
-        chance: 0.003 
+        chance: 0.003,
+        lovePoint:20
     },
      "ca_heo": { 
         name: "Cá Heo Hồng", 
         icon: "<:dolphin:1454324539210203238>", 
         sellPrice: 120000, 
         currency: "mora", 
-        chance: 0.001 
+        chance: 0.001,
+        lovePoint:50 
     }, 
 };
 
