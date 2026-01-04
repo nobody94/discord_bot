@@ -79,20 +79,26 @@ async function baloHandler(args, message, inventory, invKey, userId) {
             }
 
             const totalLovePoints = pointPerItem * amountToGive;
-            const currentDaily = couplesList[coupleIndex].dailyLovePoints || 0;    
+            const currentDaily = couplesList[coupleIndex].dailyLovePoints || 0;
 
             if (totalLovePoints > 0) {
                 const remainingQuota = MAX_LOVE_POINTS_PER_DAY - currentDaily;
                 if (remainingQuota <= 0) {
-                    loveMsg = `\n⚠️ Hai bạn đã đạt giới hạn thân mật hôm nay (5k). Hãy tặng tiếp sau 4h sáng mai!`;
+                    loveMsg = `\n⚠️ Hai bạn đã đạt giới hạn thân mật hôm nay. Hãy tặng tiếp sau 4h sáng mai!`;
                 } else {
-                    loveMsg = `\n💖 Chỉ số thân mật tăng: **+${totalLovePoints.toLocaleString()}** điểm!`;
-                    couplesList[coupleIndex].lovePoints = (couplesList[coupleIndex].lovePoints || 0) + totalLovePoints;
-                    await setKey(coupleKey, couplesList);
+                    const pointsToAdd = Math.min(totalLovePoints, remainingQuota);
+                    loveMsg = `\n💖 Chỉ số thân mật tăng: **+${pointsToAdd.toLocaleString()}** điểm!`;
+                    couplesList[coupleIndex].lovePoints = (couplesList[coupleIndex].lovePoints || 0) + pointsToAdd;
+                    couplesList[coupleIndex].dailyLovePoints = currentDaily + pointsToAdd;
+                    if (totalLovePoints > remainingQuota) {
+                        loveMsg += `\n*(Một số điểm bị bỏ qua do vượt giới hạn ngày)*`;
+                    }                   
                 }
             } else if (totalLovePoints < 0) {
                 loveMsg = `\n💔 Tặng đồ rác làm giảm: **${totalLovePoints}** điểm thân mật!`;
+                couplesList[coupleIndex].lovePoints = (couplesList[coupleIndex].lovePoints || 0) + totalLovePoints;
             }
+            await setKey(coupleKey, couplesList);
         }
         // --- KẾT THÚC LOGIC CẬP NHẬT CHỈ SỐ THÂN MẬT ---
 

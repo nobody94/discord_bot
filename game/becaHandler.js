@@ -141,15 +141,22 @@ async function becaHandler(args, message, fishTank, tankKey, userId) {
             if (totalLovePoints > 0) {
                 const remainingQuota = MAX_LOVE_POINTS_PER_DAY - currentDaily;
                  if (remainingQuota <= 0) {
-                    loveMsg = `\n⚠️ Hai bạn đã đạt giới hạn thân mật hôm nay (5k). Hãy tặng tiếp sau 4h sáng mai!`;
-                }else{
-                    loveMsg = `\n💖 Chỉ số thân mật tăng: **+${totalLovePoints.toLocaleString()}** điểm!`;
-                    couplesList[coupleIndex].lovePoints = (couplesList[coupleIndex].lovePoints || 0) + totalLovePoints;
-                    await setKey(coupleKey, couplesList);
+                    loveMsg = `\n⚠️ Hai bạn đã đạt giới hạn thân mật hôm nay. Hãy tặng tiếp sau 4h sáng mai!`;
+                }else{                    
+                    const pointsToAdd = Math.min(totalLovePoints, remainingQuota);
+                    loveMsg = `\n💖 Chỉ số thân mật tăng: **+${pointsToAdd.toLocaleString()}** điểm!`;
+                    couplesList[coupleIndex].lovePoints = (couplesList[coupleIndex].lovePoints || 0) + pointsToAdd;
+                    couplesList[coupleIndex].dailyLovePoints = currentDaily + pointsToAdd;
+                    
+                     if (totalLovePoints > remainingQuota) {
+                        loveMsg += `\n*(Một số điểm bị bỏ qua do vượt giới hạn ngày)*`;
+                    }                     
                 }                
             } else if (totalLovePoints < 0) {               
+                couplesList[coupleIndex].lovePoints = (couplesList[coupleIndex].lovePoints || 0) + totalLovePoints;
                 loveMsg = `\n💔 Tặng rác làm giảm: **${totalLovePoints}** điểm thân mật!`;
             }
+            await setKey(coupleKey, couplesList);  
         }
 
         return message.reply(`${verifyIcon} | Bạn đã tặng **${amount}x ${fish.icon} ${fish.name}** cho **${target.username}** thành công!${loveMsg}`);
