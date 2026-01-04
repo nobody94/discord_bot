@@ -25,14 +25,29 @@ module.exports = {
     const senderId = message.author.id;
 
     try {
-      // Lấy danh sách thành viên từ cache
-      const targetMembers = message.guild.members.cache.filter(member => !member.user.bot);
+      // Lấy danh sách thành viên từ cache      
+      let targetMembers;     
+
+      if (isAdmin) {
+        // Admin: Quét và fetch toàn bộ thành viên (kể cả offline)
+        const allMembers = await message.guild.members.fetch();
+        targetMembers = allMembers.filter(member => !member.user.bot);
+      } else {
+        // Người dùng thường: Chỉ lì xì cho những người có trong cache (thường là đang online/hoạt động)
+        // Điều này giúp tránh việc người dùng thường tiêu tốn quá nhiều tiền cho người offline
+        targetMembers = message.guild.members.cache.filter(member => 
+          !member.user.bot && 
+          member.id !== senderId && // Không tự lì xì cho mình
+          (member.presence?.status !== 'offline' || member.voice.channel) // Ưu tiên người online hoặc trong voice
+        );
+      }
+
       const totalMembers = targetMembers.size;
       const totalCost = amount * totalMembers;
 
       if (totalMembers === 0) return message.reply("❌ | Không tìm thấy thành viên nào để lì xì!");
 
-      if (!isAdmin) {
+      if (!isAdmin) {        
         const senderBalance = await Money.getBalance(senderId, currencyType);
         if (senderBalance < totalCost) {
           return message.reply(
