@@ -29,7 +29,7 @@ module.exports = {
             pageItems.forEach(([id, item]) => {
                 embed.addFields({
                     name: `${item.icon} ${item.name} (ID: \`${id}\`)`,
-                    value: `Giá: **${item.price.toLocaleString()}** ${getIcon(item.currency)}\n*${item.description}*`,
+                    value: `Giá: **${item.price.toLocaleString()}** ${getIcon(item.currency)}\n*${item.description}*${item.lovePoint ? `\nĐiểm thân mật: ${item.lovePoint}` : ''}`,
                     inline: false // Để mỗi món chiếm 1 hàng cho dễ nhìn
                 });
             });

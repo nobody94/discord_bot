@@ -36,7 +36,7 @@ module.exports = {
       },
       interaction: {
         label: "Tương tác",
-        emoji: "🩷",
+        emoji: "📘",
         color: "#FFB6C1", 
         commands:
           "• Hạnh phúc: kiss, hug, cuddle, cheek, airkiss, lick, nibled\n• Vui vẻ: laugh, highfive, pat, stare, pinch\n• Mạnh bạo: slap, poke, punch, kick, fight, bonk, rip,spank",

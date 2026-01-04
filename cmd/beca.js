@@ -49,7 +49,7 @@ module.exports = {
         .map(([id, count]) => {
           const fish = FISH_LIST[id];
           if (fish) {
-            return `${fish.icon} **${fish.name}** x${count} (ID: \`${id}\`) - Giá: \`${fish.sellPrice}\`${getIcon(fish.currency)}`;
+            return `${fish.icon} **${fish.name}** x${count} (ID: \`${id}\`) - Giá: \`${fish.sellPrice}\`${getIcon(fish.currency)}${fish.lovePoint ? `\nĐiểm thân mật: ${fish.lovePoint}` : ''}`;
           }
           return `❓ Sinh vật lạ x${count} (ID: ${id})`;
         })
