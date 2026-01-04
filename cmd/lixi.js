@@ -53,7 +53,7 @@ module.exports = {
 
       // Xử lý hiển thị danh sách (tránh quá 2000 ký tự)
       let listDisplay = receivedUsers.join(", ");
-      if (listDisplay.length > 1500) {
+      if (receivedUsers.length > 30) {
         listDisplay = receivedUsers.slice(0, 30).join(", ") + ` và **${totalMembers - 30}** người khác...`;
       }
 
