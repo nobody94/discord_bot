@@ -5,7 +5,7 @@ const {
   ButtonStyle,
   PermissionFlagsBits,
 } = require("discord.js");
-const { addMoney, removeMoney, getIcon } = require("../utils/currency.js");
+const { addMoney, removeMoney, getIcon,getBalance } = require("../utils/currency.js");
 const { errorIcon, verifyIcon } = require("../utils/icon.js");
 const { DEVELOPER_IDS } = require("../utils/constant.js");
 
@@ -25,11 +25,11 @@ module.exports = {
       );
     }
 
+    const FINE_AMOUNT = 5000;
     let participants = new Set();
     participants.add(message.author.id);
 
-    const bankVault =
-      Math.floor(Math.random() * (500000 - 200000 + 1)) + 200000;
+    const bankVault = Math.floor(Math.random() * (500000 - 200000 + 1)) + 200000;
     const calculateChance = (count) => Math.min(5 + (count - 1) * 5, 70);
     const getMentions = () =>
       Array.from(participants)
@@ -72,6 +72,7 @@ module.exports = {
 
     const msg = await message.reply({ embeds: [embed], components: [row] });
     const collector = msg.createMessageComponentCollector({ time: 120000 });
+   
 
     collector.on("collect", async (interaction) => {
       const isStarter = interaction.user.id === message.author.id;
@@ -82,6 +83,13 @@ module.exports = {
         if (participants.has(interaction.user.id)) {
           return interaction.reply({
             content: "Bạn đã tham gia phi vụ này rồi!",
+            ephemeral: true,
+          });
+        }
+        const userBalance = await getBalance(interaction.user.id, "mora");
+        if (userBalance < FINE_AMOUNT) {
+          return interaction.reply({
+            content: `❌ Bạn không có đủ **${FINE_AMOUNT.toLocaleString()}** ${getIcon("mora")} để tham gia. Bạn cần đủ tiền để phòng hờ bị cảnh sát bắt!`,
             ephemeral: true,
           });
         }
@@ -188,15 +196,14 @@ module.exports = {
                     "mora"
                   )}`
                 );
-            } else {
-              const fine = 5000;
+            } else {              
               for (const pId of participants) {
-                await removeMoney(pId, fine, "mora").catch(() => {});
+                await removeMoney(pId, FINE_AMOUNT, "mora").catch(() => {});
               }
               resultEmbed
                 .setColor("#e74c3c")
                 .setDescription(
-                  `🚔 **PHI VỤ THẤT BẠI!**\n\nCảnh sát đã tóm gọn cả nhóm. Mỗi người tốn **${fine.toLocaleString()}** ${getIcon(
+                  `🚔 **PHI VỤ THẤT BẠI!**\n\nCảnh sát đã tóm gọn cả nhóm. Mỗi người tốn **${FINE_AMOUNT.toLocaleString()}** ${getIcon(
                     "mora"
                   )} để tại ngoại.`
                 );
