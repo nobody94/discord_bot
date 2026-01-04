@@ -36,10 +36,17 @@ module.exports = {
       },
       interaction: {
         label: "Tương tác",
-        emoji: "❤️",
-        color: "#FFB6C1", // Màu hồng tình cảm
+        emoji: "🩷",
+        color: "#FFB6C1", 
         commands:
           "• Hạnh phúc: kiss, hug, cuddle, cheek, airkiss, lick, nibled\n• Vui vẻ: laugh, highfive, pat, stare, pinch\n• Mạnh bạo: slap, poke, punch, kick, fight, bonk, rip,spank",
+      },
+      interaction: {
+        label: "Cặp đôi",
+        emoji: "❤️",
+        color: "#FF69B4", 
+        commands:
+          "• marry, kethon: Dùng để cầu hôn\n• divorce, lyhon: Dùng để ly hôn\n• couple, cp: Xem tình trạng hôn nhân\n• marrylist, mrl: Danh sách các cặp đôi",
       },
       admin: {
         label: "Cấu hình (Admin)",
