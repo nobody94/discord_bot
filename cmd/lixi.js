@@ -1,7 +1,7 @@
 const { PermissionsBitField } = require('discord.js');
 const Money = require("../utils/currency");
 const { errorIcon, verifyIcon } = require('../utils/icon.js');
-const {DEVELOPER_IDS} = require('../utils/constant.js');
+const { DEVELOPER_IDS } = require('../utils/constant.js');
 
 module.exports = {
   name: "lixi",
@@ -25,11 +25,12 @@ module.exports = {
     const senderId = message.author.id;
 
     try {
-      // SỬA LỖI TẠI ĐÂY: Sử dụng cache thay vì fetch() toàn bộ để tránh Timeout
-      // Nếu bot của bạn có bật GuildMembers Intent, cache sẽ chứa đủ mem.
+      // Lấy danh sách thành viên từ cache
       const targetMembers = message.guild.members.cache.filter(member => !member.user.bot);
       const totalMembers = targetMembers.size;
       const totalCost = amount * totalMembers;
+
+      if (totalMembers === 0) return message.reply("❌ | Không tìm thấy thành viên nào để lì xì!");
 
       if (!isAdmin) {
         const senderBalance = await Money.getBalance(senderId, currencyType);
@@ -41,21 +42,31 @@ module.exports = {
         await Money.removeMoney(senderId, totalCost, currencyType);
       }
 
-      // Thông báo đang xử lý nếu số lượng mem lớn
       const processingMsg = await message.channel.send(`⏳ Đang phát lì xì cho **${totalMembers}** thành viên...`);
 
-      // Sử dụng vòng lặp for thay vì Promise.all nếu số lượng mem cực lớn để tránh làm nghẽn Database
+      let receivedUsers = [];
+      // Sử dụng vòng lặp để add tiền và thu thập danh sách user
       for (const [id, member] of targetMembers) {
         await Money.addMoney(member.id, amount, currencyType);
+        receivedUsers.push(`<@${member.id}>`);
+      }
+
+      // Xử lý hiển thị danh sách (tránh quá 2000 ký tự)
+      let listDisplay = receivedUsers.join(", ");
+      if (listDisplay.length > 1500) {
+        listDisplay = receivedUsers.slice(0, 30).join(", ") + ` và **${totalMembers - 30}** người khác...`;
       }
 
       return processingMsg.edit(
-        `🎊 **LÌ XÌ TỔNG LỰC!** 🎊\n${verifyIcon} | **${message.author.username}** đã lì xì **${amount.toLocaleString()}** ${Money.getIcon(currencyType)} cho tất cả **${totalMembers}** thành viên!${isAdmin ? '' : `\nTổng chi: **${totalCost.toLocaleString()}** ${Money.getIcon(currencyType)}`}`
+        `🎊 **LÌ XÌ TỔNG LỰC!** 🎊\n` +
+        `${verifyIcon} | **${message.author.username}** đã lì xì **${amount.toLocaleString()}** ${Money.getIcon(currencyType)} cho:\n` +
+        `> ${listDisplay}\n\n` +
+        `✅ Tổng cộng: **${totalMembers}** thành viên đã nhận lộc!${isAdmin ? '' : `\n💸 Tổng chi: **${totalCost.toLocaleString()}** ${Money.getIcon(currencyType)}`}`
       );
 
     } catch (error) {
-      console.error("Lỗi khi thực hiện lệnh lixi:", error);
-      return message.reply(`${errorIcon} | Đã xảy ra lỗi khi thực hiện phát lì xì.`);
+      console.error("Lỗi lệnh Lixi:", error);
+      return message.reply("❌ | Có lỗi xảy ra khi đang phát lì xì!");
     }
-  },
+  }
 };
