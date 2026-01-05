@@ -1,4 +1,4 @@
-const { renderKey, getKey, setKey } = require("./utils/db");
+const { renderKey, getKey, setKey } = require("../utils/db");
 
 async function removeHandler(member){
     console.log(`📡 Phát hiện ${member.user.tag} đã rời khỏi server.`);
@@ -18,7 +18,7 @@ async function removeHandler(member){
         await setKey(coupleKey, couplesList);
     }
 
-    
+
 }
 
 module.exports ={
