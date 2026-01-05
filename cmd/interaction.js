@@ -239,8 +239,7 @@ module.exports = {
     if (coupleIndex !== -1) {
       const today = getCustomDate();
       const couple = couplesList[coupleIndex];
-      const partnerId =
-        couple.husband === userId ? couple.wife : couple.husband;
+      const partnerId = couple.husband === userId ? couple.wife : couple.husband;
 
       // Reset điểm ngày nếu qua 4h sáng
       if (couple.lastGiftDate !== today) {
@@ -254,22 +253,23 @@ module.exports = {
       if (target.id === partnerId) {
         if (points < 0) {
           // Hành động tiêu cực: Luôn trừ điểm
-          couplesList[coupleIndex].lovePoints =
-            (couplesList[coupleIndex].lovePoints || 0) + points;
+          couple.lovePoints =
+            (couple.lovePoints || 0) + points;
           loveNote = `\n💔 Thân mật: **${points}** (Đừng bạo lực thế chứ!)`;
         } else {
           // Hành động tích cực: Kiểm tra giới hạn ngày
           const remaining = MAX_LOVE_POINTS_PER_DAY - currentDaily;
           if (remaining > 0) {
             const added = Math.min(points, remaining);
-            couplesList[coupleIndex].lovePoints =
-              (couplesList[coupleIndex].lovePoints || 0) + added;
-            couplesList[coupleIndex].dailyLovePoints = currentDaily + added;
+            couple.lovePoints =
+              (couple.lovePoints || 0) + added;
+            couple.dailyLovePoints = currentDaily + added;
             loveNote = `\n💖 Thân mật: **+${added}** điểm!`;
           }
         }
-      }else if(points>2 && target.id !== partnerId && target.id !== userId){
-        couplesList[coupleIndex].lovePoints = (couplesList[coupleIndex].lovePoints || 0) - points;
+      }
+      else if(points>2 && target.id !== partnerId){
+        couple.lovePoints = (couple.lovePoints || 0) - points;
         loveNote = `\n🔥 **Bắt quả tang!** Bạn dám ${config.tag} người khác sao? \n💔 Bạn đời của bạn đã buồn và hai bạn bị trừ **${penalty}** điểm thân mật!`;
       }
 
