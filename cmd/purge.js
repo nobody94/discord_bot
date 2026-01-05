@@ -1,6 +1,6 @@
 const { errorIcon, verifyIcon } = require("../utils/icon.js");
 const { DEVELOPER_IDS } = require("../utils/constant.js");
-const { getKey, setKey, deleteKey,db } = require("../utils/db");
+const { getKey, setKey, deleteKey, db,dbKey } = require("../utils/db");
 
 module.exports = {
   name: "purge",
@@ -9,16 +9,28 @@ module.exports = {
   async execute(message, args) {
     const isDeveloper = DEVELOPER_IDS.includes(message.author.id);
     if (!isDeveloper) {
-      return message.reply(`${errorIcon} | Bạn không có quyền sử dụng lệnh này.`);
+      return message.reply(
+        `${errorIcon} | Bạn không có quyền sử dụng lệnh này.`
+      );
     }
 
-    const msg = await message.reply("⏳ Đang phân tích cơ sở dữ liệu, quá trình này có thể mất một chút thời gian...");
+    const msg = await message.reply(
+      "⏳ Đang phân tích cơ sở dữ liệu, quá trình này có thể mất một chút thời gian..."
+    );
 
     try {
       const guild = message.guild;
       const listKeyTypes = [
-        "inventory", "fishtank", "blackjack", "cooldown_cauca",
-        "pity_counter", "fish_inv", "daily", "rpg_user", "mora", "primo",
+        "inventory",
+        "fishtank",
+        "blackjack",
+        "cooldown_cauca",
+        "pity_counter",
+        "fish_inv",
+        "daily",
+        "rpg_user",
+        "mora",
+        "primo",
       ];
 
       // 1. Fetch toàn bộ thành viên hiện tại
@@ -26,24 +38,29 @@ module.exports = {
       const memberIds = new Set(currentMembers.keys());
 
       // 2. Lấy toàn bộ dữ liệu từ QuickMongo
+      if (!db) {
+        throw new Error("Biến DB chưa được khởi tạo trong db.js");
+      }
       const allData = await db.all();
       let totalDeleted = 0;
 
       // Regex kiểm tra xem một chuỗi có phải là ID Discord (Snowflake) hay không
-      const isSnowflake = /^\d+$/; 
+      const isSnowflake = /^\d+$/;
 
       // 3. Lọc và xóa các key cá nhân
       for (const item of allData) {
         const fullKey = item.ID;
 
         // Kiểm tra xem key có bắt đầu bằng prefix + "_" hay không
-        const prefix = listKeyTypes.find((type) => fullKey.startsWith(`${type}_`));
+        const prefix = listKeyTypes.find((type) =>
+          fullKey.startsWith(`${dbKey}_${type}_`)
+        );
 
         if (prefix) {
           const parts = fullKey.split("_");
           const userId = parts.pop(); // Lấy phần tử cuối cùng
 
-          // ĐIỀU KIỆN XÓA: 
+          // ĐIỀU KIỆN XÓA:
           // 1. Phải có userId
           // 2. userId phải là định dạng số (tránh xóa nhầm key config_global)
           // 3. userId không có trong danh sách thành viên hiện tại

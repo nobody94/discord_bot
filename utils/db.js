@@ -82,5 +82,5 @@ async function migrateData(type, guildId) {
 }
 
 module.exports={
-    db,renderKey,setKey,getKey,pushKey,addKey,deleteKey,updateLeaderboard,migrateData
+    db,dbKey,renderKey,setKey,getKey,pushKey,addKey,deleteKey,updateLeaderboard,migrateData
 }
