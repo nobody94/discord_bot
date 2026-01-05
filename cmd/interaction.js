@@ -268,7 +268,7 @@ module.exports = {
       }
       else if(points>2 && target.id !== userId){
         couple.lovePoints = (couple.lovePoints || 0) - points;
-        loveNote = `\n🔥 **Bắt quả tang!** Bạn dám ${config.tag} người khác sao? \n💔 Bạn đời của bạn đã buồn và hai bạn bị trừ **${points}** điểm thân mật!`;
+        loveNote = `\n🔥 **Bắt quả tang!** Bạn dám ${config.msg} người khác sao? \n💔 Bạn đời của bạn đã buồn và hai bạn bị trừ **${points}** điểm thân mật!`;
       }
 
       await setKey(coupleKey, couplesList);
