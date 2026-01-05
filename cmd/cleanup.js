@@ -54,7 +54,7 @@ module.exports = {
           "daily",
           "rpg_user",
           "mora",
-          "primo",
+          "primo"
         ];
 
         for (const type of listKey) {
