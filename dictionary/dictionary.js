@@ -17,7 +17,8 @@ const jsonArray = JSON.parse(rawData);
 const sourceArray = Array.isArray(jsonArray) ? jsonArray : Object.keys(jsonArray);
 const dicFilter = new Set(sourceArray
             .map((w) => w.trim().toLowerCase())
-            .filter((w)=> Boolean(w) && !w.includes('-')))
+            .filter((w)=> Boolean(w) && !w.includes('-') && w.length > 1));
+
 const enDictionary = Array.from(dicFilter).map((d)=> d);
 
 const viDictionary = Array.from(listViWord).filter(
