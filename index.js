@@ -14,6 +14,7 @@ const { db } = require("./utils/db");
 const { wordleProcess } = require("./game/wordleHandler");
 const { wordchainHandler } = require("./game/wordchainHandler");
 const { errorIcon } = require("./utils/icon");
+const {removeHandler} = require('./game/removeHandler');
 
 const express = require("express");
 const app = express();
@@ -56,18 +57,9 @@ for (const file of commandFiles) {
   }
 }
 
-// client.on("debug", console.log);
-// client.on("warn", console.warn);
-// client.on("error", console.error);
-// client.on("shardError", console.error);
-
 client.once(Events.ClientReady, (c) => {
   console.log(`Bot ${c.user.tag} đã sẵn sàng và đang hoạt động!`);
 });
-
-// client.on("ready", () => {
-//   console.log(`Bot ${client.user.tag} đã sẵn sàng!`);
-// });
 
 client.on("messageCreate", async (message) => {
   // Bỏ qua tin nhắn của bot
@@ -229,6 +221,11 @@ client.on("interactionCreate", async (interaction) => {
       }
     }
   }
+});
+
+// xử lý những người out khỏi server
+client.on('guildMemberRemove', async (member) => {
+  await removeHandler(member);
 });
 
 
