@@ -268,7 +268,7 @@ module.exports = {
           }
         }
       }
-      else if(points>2 && target.id !== partnerId){
+      else if(points>2 && target.id !== userId){
         couple.lovePoints = (couple.lovePoints || 0) - points;
         loveNote = `\n🔥 **Bắt quả tang!** Bạn dám ${config.tag} người khác sao? \n💔 Bạn đời của bạn đã buồn và hai bạn bị trừ **${penalty}** điểm thân mật!`;
       }
