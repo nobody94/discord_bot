@@ -28,6 +28,10 @@ async function pushKey(key,data){
     return await db.push(key, data)
 }
 
+async function deleteKey(key) {
+    return await db.delete(key);
+}
+
 // Hàm cập nhật bảng xếp hạng
 async function updateLeaderboard(type, userId, username,guildId) {
   const key = `leaderboard_${type}_${guildId}`; // leaderboard_miss hoặc leaderboard_trash
@@ -78,5 +82,5 @@ async function migrateData(type, guildId) {
 }
 
 module.exports={
-    db,renderKey,setKey,getKey,pushKey,addKey,updateLeaderboard,migrateData
+    db,renderKey,setKey,getKey,pushKey,addKey,deleteKey,updateLeaderboard,migrateData
 }

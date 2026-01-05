@@ -1,26 +1,47 @@
-const { renderKey, getKey, setKey } = require("../utils/db");
+const { getKey, setKey } = require("../utils/db");
 
-async function removeHandler(member){
-    console.log(`📡 Phát hiện ${member.user.tag} đã rời khỏi server.`);
-    const userId = member.id;
-    const guildId = member.guild.id;   
+async function removeHandler(member) {
+  const guildId = member.guild.id;
+  const leaveKey = `left_member_${guildId}`;
+  let list = (await getKey(leaveKey)) || [];
 
-    // Xử lý dữ liệu cặp đôi (Couples)
-    const coupleKey = renderKey('couple', guildId);
-    let couplesList = (await getKey(coupleKey)) || [];
+  list = list.filter((u) => u.userId !== member.id);
+  list.push({
+    userId: member.id,
+    tag: member.user.tag,
+    leftAt: Date.now(),
+  });
 
-    // Tìm xem người rời đi có nằm trong cặp đôi nào không
-    const coupleIndex = couplesList.findIndex(c => c.husband === userId || c.wife === userId);
+  await setKey(leaveKey, list);
+}
 
-    if (coupleIndex !== -1) {
-        console.log(`💔 Tự động hủy hôn ước của ${userId} do đã rời server.`);
-        couplesList.splice(coupleIndex, 1); // Xóa cặp đôi này khỏi danh sách
-        await setKey(coupleKey, couplesList);
+async function addHandler(member) {
+  const guildId = member.guild.id;
+  const userId = member.id;
+  const key = `left_member_${guildId}`;
+
+  // 1. Lấy danh sách chờ xóa của server này
+  let leftList = (await getKey(key)) || [];
+
+  if (leftList.length > 0) {
+    // 2. Tìm xem người vừa join có trong danh sách chờ xóa không
+    const isWaiting = leftList.some((u) => u.userId === userId);
+
+    if (isWaiting) {
+      // 3. Lọc người đó ra khỏi danh sách
+      const newList = leftList.filter((u) => u.userId !== userId);
+
+      // 4. Cập nhật lại database
+      if (newList.length > 0) {
+        await setKey(key, newList);
+      } else {
+        await deleteKey(key); // Xóa luôn key nếu không còn ai chờ
+      }
     }
-
-
+  }
 }
 
-module.exports ={
-    removeHandler
-}
+module.exports = {
+  removeHandler,
+  addHandler,
+};

@@ -23,8 +23,6 @@ function getRandomSymbol() {
   return symbols[Math.floor(Math.random() * symbols.length)];
 }
 
-// ... (các phần khai báo symbols và getRandomSymbol giữ nguyên)
-
 module.exports = {
   name: "dice",
   description: "Đặt cược vào xúc xắc (1-3 là Thấp, 4-6 là Cao)",

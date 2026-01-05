@@ -14,7 +14,7 @@ const { db } = require("./utils/db");
 const { wordleProcess } = require("./game/wordleHandler");
 const { wordchainHandler } = require("./game/wordchainHandler");
 const { errorIcon } = require("./utils/icon");
-const {removeHandler} = require('./game/removeHandler');
+const {removeHandler,addHandler} = require('./game/removeHandler');
 
 const express = require("express");
 const app = express();
@@ -227,6 +227,12 @@ client.on("interactionCreate", async (interaction) => {
 client.on('guildMemberRemove', async (member) => {
   await removeHandler(member);
 });
+
+// xử lý những người vào lại khỏi server
+client.on('guildMemberAdd', async (member) => {
+  await addHandler(member);
+});
+
 
 
 async function startBot() {
