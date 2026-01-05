@@ -238,7 +238,7 @@ module.exports = {
 
     if (coupleIndex !== -1) {
       const today = getCustomDate();
-      const couple = couplesList[userCoupleIndex];
+      const couple = couplesList[coupleIndex];
       const partnerId =
         couple.husband === userId ? couple.wife : couple.husband;
 
