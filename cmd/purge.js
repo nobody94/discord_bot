@@ -37,11 +37,8 @@ module.exports = {
       const currentMembers = await guild.members.fetch();
       const memberIds = new Set(currentMembers.keys());
 
-      // 2. Lấy toàn bộ dữ liệu từ QuickMongo
-      if (!db) {
-        throw new Error("Biến DB chưa được khởi tạo trong db.js");
-      }
-      const allData = await db.all();
+      // 2. Lấy toàn bộ dữ liệu từ QuickMongo      
+      const allData = await db.fetchEverything();
       let totalDeleted = 0;
 
       // Regex kiểm tra xem một chuỗi có phải là ID Discord (Snowflake) hay không
