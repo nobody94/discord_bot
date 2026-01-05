@@ -231,9 +231,7 @@ module.exports = {
     let couplesList = (await getKey(coupleKey)) || [];
 
     const coupleIndex = couplesList.findIndex(
-      (c) =>
-        (c.husband === message.author.id && c.wife === target.id) ||
-        (c.husband === target.id && c.wife === message.author.id)
+      (c) => c.husband === userId || c.wife === userId
     );
 
     if (coupleIndex !== -1) {
