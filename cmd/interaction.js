@@ -136,7 +136,7 @@ const interactions = {
     tag: "nibled",
     color: "#FF1493",
     msg: "đã cắn yêu",
-    lovePoint: 2,
+    lovePoint: 5,
     images: [
       "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3OHUzbjNzY3A4Mzhud3d4NWlpYWh2YjN3MjJqaW9jcTAzbmJtMW83cCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/DdJ9RsY88uBarMvVsb/giphy.gif",
       "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExcWRneDg1cTA0d2tza3pkZ3R2MGhwMDJ3cDVzYmw0ZHBhZmFjOTMwYiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/YW3obh7zZ4Rj2/giphy.gif",
@@ -268,7 +268,7 @@ module.exports = {
             loveNote = `\n💖 Thân mật: **+${added}** điểm!`;
           }
         }
-      }else if(points>0 && target.id !== partnerId && target.id !== userId){
+      }else if(points>2 && target.id !== partnerId && target.id !== userId){
         couplesList[coupleIndex].lovePoints = (couplesList[coupleIndex].lovePoints || 0) - points;
         loveNote = `\n🔥 **Bắt quả tang!** Bạn dám ${config.tag} người khác sao? \n💔 Bạn đời của bạn đã buồn và hai bạn bị trừ **${penalty}** điểm thân mật!`;
       }
