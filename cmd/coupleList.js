@@ -25,7 +25,7 @@ module.exports = {
       let description = "";
       currentItems.forEach((couple, index) => {
         const date = new Date(couple.date).toLocaleDateString('vi-VN'); //
-        description += `**${start + index + 1}.** <@${couple.husband}> ❤️ <@${couple.wife}>\n└ *Ngày cưới: ${date}*\n Độ thân mật: ${couple.lovePoints}\n`;
+        description += `**${start + index + 1}.** <@${couple.husband}> ❤️ <@${couple.wife}>\n└ *Ngày cưới: ${date}*\n Độ thân mật: ${couple.lovePoints}\n\n`;
       });
 
       return new EmbedBuilder()
