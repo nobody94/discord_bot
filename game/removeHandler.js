@@ -1,4 +1,4 @@
-const { getKey, setKey } = require("../utils/db");
+const { getKey, setKey,deleteKey } = require("../utils/db");
 
 async function removeHandler(member) {
   const guildId = member.guild.id;
