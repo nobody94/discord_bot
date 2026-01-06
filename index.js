@@ -229,17 +229,21 @@ async function startBot() {
     console.log("✅ Đã kết nối MongoDB thành công!");
     console.log("--- ĐANG CHUẨN BỊ LOGIN ---");
 
-    if (!Token) return console.error(`${errorIcon} BOT_TOKEN missing!`);
-
+    if (!Token) {
+        console.error("❌ LỖI: BOT_TOKEN không tồn tại trong Environment Variables!");
+        return;
+    }
+    console.log("🔑 Đang tiến hành đăng nhập vào Discord...");
     // Kiểm tra nếu client đã login rồi thì không login lại
-    client
-      .login(Token)
-      .then(() => {
-        console.log("🔑 Login request sent to Discord");
-      })
-      .catch((err) => {
-        console.error("❌ Discord login failed:", err);
-      });
+    await client.login(Token);
+    // client
+    //   .login(Token)
+    //   .then(() => {
+    //     console.log("🔑 Login request sent to Discord");
+    //   })
+    //   .catch((err) => {
+    //     console.error("❌ Discord login failed:", err);
+    //   });
     // if (!client.readyAt) {
     //   await client.login(Token);
     //   console.log("Bot đã đăng nhập thành công!");
