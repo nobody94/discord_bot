@@ -235,15 +235,15 @@ async function startBot() {
     }
     console.log("🔑 Đang tiến hành đăng nhập vào Discord...");
     // Kiểm tra nếu client đã login rồi thì không login lại
-    await client.login(Token);
-    // client
-    //   .login(Token)
-    //   .then(() => {
-    //     console.log("🔑 Login request sent to Discord");
-    //   })
-    //   .catch((err) => {
-    //     console.error("❌ Discord login failed:", err);
-    //   });
+    // await client.login(Token);
+    client
+      .login(Token)
+      .then(() => {
+        console.log("🔑 Login request sent to Discord");
+      })
+      .catch((err) => {
+        console.error("❌ Discord login failed:", err);
+      });
     // if (!client.readyAt) {
     //   await client.login(Token);
     //   console.log("Bot đã đăng nhập thành công!");
