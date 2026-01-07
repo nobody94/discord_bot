@@ -236,6 +236,7 @@ async function startBot() {
     console.log("🔑 Đang tiến hành đăng nhập vào Discord...");
     // Kiểm tra nếu client đã login rồi thì không login lại
     // await client.login(Token);
+    client.on("debug", (m) => console.log(m));
     client
       .login(Token)
       .then(() => {
