@@ -253,7 +253,16 @@ const SHOP_ITEMS = {
         description: desc.onlyView,
         icon: '<:diamond_ring:1451058258944065638>',
         hideFromShop: true
-    }   
+    },
+    'nhan_doi': {
+        name: 'Nhẫn đôi',
+        price: 100,
+        sellPrice:100,
+        currency: primo,
+        description: desc.onlyView,
+        icon: '<:ring:1460091870666424372>',
+        lovePoint:200
+    } 
 };
 
 const BLIND_BOX_LOOT = {
