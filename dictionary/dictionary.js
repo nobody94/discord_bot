@@ -25,7 +25,33 @@ const viDictionary = Array.from(listViWord).filter(
   (phrase) => phrase.split(" ").length === 2 && !phrase.includes('-')
 );
 
+const saveWord = (lang, word) => {
+    const targetWord = word.trim().toLowerCase();
+    
+    if (lang === 'vi') {
+        // Ghi thêm một dòng mới vào file Viet74K.txt
+        fs.appendFileSync(pathViToFile, `\n${targetWord}`);
+        
+        // Cập nhật bộ nhớ tạm để dùng ngay không cần restart
+        if (targetWord.split(" ").length === 2) {
+            viDictionary.push(targetWord);
+        }
+    } else {
+        // Đọc file JSON hiện tại, thêm từ và ghi đè lại
+        const rawData = fs.readFileSync(pathEnToFile, "utf8");
+        const jsonArray = JSON.parse(rawData);
+        
+        if (Array.isArray(jsonArray)) {
+            jsonArray.push(targetWord);
+            fs.writeFileSync(pathEnToFile, JSON.stringify(jsonArray, null, 2));
+            // Cập nhật bộ nhớ tạm
+            enDictionary.push(targetWord);
+        }
+    }
+};
+
 module.exports = {
     viDictionary,
-    enDictionary
+    enDictionary,
+    saveWord
 };
