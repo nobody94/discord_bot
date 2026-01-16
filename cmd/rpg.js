@@ -94,7 +94,7 @@ module.exports = {
     if (subCommand === "hunt") {
       for (let i = 0; i < times; i++) {
         // Tỉ lệ thắng cơ bản của Hunt là 95%, giảm dần nếu đánh nhiều lần
-        const winChance = 0.99 / difficultyMultiplier;
+        const winChance = 0.95;
 
         if (Math.random() < winChance) {
           const xp = Math.floor(Math.random() * 8) + 8;
@@ -128,14 +128,14 @@ module.exports = {
     }
 
     if (subCommand === "battle") {
-      if (user.data.level < 20)
-        return message.reply(`${errorIcon} | Cần cấp **20** để Battle!`);
+      if (user.data.level < 10)
+        return message.reply(`${errorIcon} | Cần cấp **10** để Battle!`);
 
       for (let i = 0; i < times; i++) {
-        const winChance = 0.6 / difficultyMultiplier; // Giảm tỉ lệ thắng
+        const winChance = 0.7 / difficultyMultiplier; // Giảm tỉ lệ thắng
         if (Math.random() < winChance) {
           const xp =
-            user.data.level < 30
+            user.data.level < 20
               ? Math.floor(Math.random() * 15) + 15
               : Math.floor(Math.random() * 30) + 30;
           totalXP += xp;
@@ -152,11 +152,11 @@ module.exports = {
     }
 
     if (subCommand === "dungeon") {
-      if (user.data.level < 40)
-        return message.reply(`${errorIcon} | Cần cấp **40** để Dungeon!`);
+      if (user.data.level < 30)
+        return message.reply(`${errorIcon} | Cần cấp **30** để Dungeon!`);
 
       for (let i = 0; i < times; i++) {
-        const winChance = 0.4 / difficultyMultiplier; // Dungeon cực khó khi đánh nhanh
+        const winChance = 0.5 / difficultyMultiplier; // Dungeon cực khó khi đánh nhanh
         if (Math.random() < winChance) {
           const xp = Math.floor(Math.random() * 50) + 50;
           totalXP += xp;

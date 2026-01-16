@@ -70,7 +70,7 @@ const QUESTS = {
       target: 60,
       rewardMora: 17000,
       rewardGems: 12,
-      desc: "Săn 80 lần (hunt)",
+      desc: "Săn 60 lần (hunt)",
       type: "hunt",
     },
   ],

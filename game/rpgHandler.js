@@ -42,7 +42,7 @@ async function rpgHandler(args, message, key, user,userId) {
     if (!user.data.quest || user.data.quest.date !== todayStr) {
       let pool = [...QUESTS.hunt];
       if (user.data.level >= 10) pool = pool.concat(QUESTS.battle);
-      if (user.data.level >= 20) pool = pool.concat(QUESTS.dungeon);
+      if (user.data.level >= 30) pool = pool.concat(QUESTS.dungeon);
       const randomQ = pool[Math.floor(Math.random() * pool.length)];
       await setKey(`${key}.data.quest`, {
         ...randomQ,
