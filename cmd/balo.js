@@ -1,9 +1,9 @@
 const { EmbedBuilder } = require("discord.js");
 const { getKey, renderKey, setKey } = require("../utils/db");
-const { getIcon } = require('../utils/currency.js');
+const { getIcon } = require("../utils/currency.js");
 const { SHOP_ITEMS } = require("../utils/shop");
-const { errorIcon, verifyIcon, bagIcon } = require('../utils/icon.js')
-const { baloHandler } = require('../game/baloHandler.js');
+const { errorIcon, verifyIcon, bagIcon } = require("../utils/icon.js");
+const { baloHandler } = require("../game/baloHandler.js");
 
 module.exports = {
   name: "balo",
@@ -11,22 +11,37 @@ module.exports = {
   description: "Xem các vật phẩm bạn đang sở hữu.",
 
   async execute(message, args) {
-    const userId = message.author.id;
+    //const userId = message.author.id;
     // Lấy danh sách item từ DB (mảng các ID đã mua)
     // Lưu ý: Trong lệnh .buy bạn nên lưu mảng ID;
+    const targetUser = message.mentions.users.first() || message.author;
+    const userId = targetUser.id;
+    const username = targetUser.username;
     const invKey = renderKey("inventory", userId);
     const inventory = (await getKey(invKey)) || [];
 
     //Xử lý bán, cho, mở đồ
-    const isHandled = await baloHandler(args, message, inventory,invKey,userId);
+    if (args[0] && ["sell", "give", "open"].includes(args[0].toLowerCase())) {
+      const authorId = message.author.id;
+      const authorBaloKey = renderKey("fishtank", authorId);
+      let authorBalo = (await getKey(authorBaloKey)) || [];
 
-    // Nếu đã thực hiện các lệnh phụ (open, sell, give) thì dừng lại luôn
-    if (isHandled) return;
+      const isHandled = await baloHandler(
+        args,
+        message,
+        authorBalo,
+        authorBaloKey,
+        authorId
+      );
+
+      // Nếu đã thực hiện các lệnh phụ (open, sell, give) thì dừng lại luôn
+      if (isHandled) return;
+    }
 
     //LOGIC HIỂN THỊ TÚI ĐỒ
     const embed = new EmbedBuilder()
       .setTitle(
-        `${bagIcon} TÚI ĐỒ CỦA ${message.author.username.toUpperCase()}`
+        `${bagIcon} TÚI ĐỒ CỦA ${username.toUpperCase()}`
       )
       .setColor(0x3498db)
       .setFooter({
