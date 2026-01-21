@@ -23,7 +23,7 @@ module.exports = {
     //Xử lý bán, cho, mở đồ
     if (args[0] && ["sell", "give", "open"].includes(args[0].toLowerCase())) {
       const authorId = message.author.id;
-      const authorBaloKey = renderKey("fishtank", authorId);
+      const authorBaloKey = renderKey("inventory", authorId);
       let authorBalo = (await getKey(authorBaloKey)) || [];
 
       const isHandled = await baloHandler(
