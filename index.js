@@ -15,18 +15,6 @@ const { wordleProcess } = require("./game/wordleHandler");
 const { wordchainHandler } = require("./game/wordchainHandler");
 const { errorIcon } = require("./utils/icon");
 
-const express = require("express");
-const app = express();
-app.get("/", (req, res) => {
-  console.log("--- Có tín hiệu Ping từ UptimeRobot! ---");
-  res.send("Server is running!");
-});
-const port = process.env.PORT || 3000;
-
-app.listen(port, "0.0.0.0", () => {
-  console.log(`Server is running on port ${port}`);
-});
-
 const Token = process.env.BOT_TOKEN;
 // const Token = process.env.BOT_TEST_TOKEN;
 

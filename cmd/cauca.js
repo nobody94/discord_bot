@@ -19,7 +19,7 @@ module.exports = {
         // 1. XỬ LÝ SỐ LẦN CÂU (Tối đa 5)
         let times = parseInt(args[0]) || 1;
         if (times < 1) times = 1;
-        if (times > 10) times = 10;
+        if (times > 20) times = 20;
 
         // 2. KIỂM TRA GIỚI HẠN TẬP TRUNG (fish_limit)
         const limitKey = "fish_limit";
