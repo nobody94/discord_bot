@@ -21,8 +21,30 @@ module.exports = {
 
     // 1. XỬ LÝ SỐ LẦN ĐÁNH (args[1]) - Mặc định 1, tối đa 5
     let times = parseInt(args[1]) || 1;
-    if (times < 1) times = 1;
-    if (times > 5) times = 5;
+    if (times < 1) { times = 1; }
+
+    if((user.data.quest.current == user.data.quest.target || user.data.quest.claimed) && times > 1){
+      times = 1
+    }
+
+    if(user.data.quest.current < user.data.quest.target){
+      if(times > (user.data.quest.target / 2)){
+        times = user.data.quest.target / 2
+      }
+      // if(user.data.quest.target < 20 && times > 5){
+      //   times = 5;
+      // }
+
+      // if(user.data.quest.target>20 && user.data.quest.target < 40 && times > 10){
+      //   times = 10;
+      // }
+
+      // if(user.data.quest.target>40 && user.data.quest.target < 80 && times > 20){
+      //   times = 20;
+      // }
+    }
+    
+    // if (times > 5) { times = 5; }
 
     if (!subCommand) {
       if (user && user.data && user.data.element) {
@@ -45,7 +67,7 @@ module.exports = {
       return message.reply({ embeds: [embed] });
     }
 
-    const isHandled = await rpgHandler(args, message, key, user,userId);
+    const isHandled = await rpgHandler(args, message, key, user, userId);
     if (isHandled) return;
 
     if (!user?.data) return message.reply(`${errorIcon} | Hãy chọn hệ trước!`);
