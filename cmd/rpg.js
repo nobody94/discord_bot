@@ -18,34 +18,7 @@ module.exports = {
     const key = await renderKey("rpg_user", userId);
     const subCommand = args[0]?.toLowerCase();
     let user = await getKey(key);
-
-    // 1. XỬ LÝ SỐ LẦN ĐÁNH (args[1]) - Mặc định 1, tối đa 5
-    let times = parseInt(args[1]) || 1;
-    if (times < 1) { times = 1; }
-
-    if((user.data.quest.current == user.data.quest.target || user.data.quest.claimed) && times > 1){
-      times = 1
-    }
-
-    if(user.data.quest.current < user.data.quest.target){
-      if(times > (user.data.quest.target / 2)){
-        times = user.data.quest.target / 2
-      }
-      // if(user.data.quest.target < 20 && times > 5){
-      //   times = 5;
-      // }
-
-      // if(user.data.quest.target>20 && user.data.quest.target < 40 && times > 10){
-      //   times = 10;
-      // }
-
-      // if(user.data.quest.target>40 && user.data.quest.target < 80 && times > 20){
-      //   times = 20;
-      // }
-    }
-    
-    // if (times > 5) { times = 5; }
-
+      
     if (!subCommand) {
       if (user && user.data && user.data.element) {
         return this.showProfile(message, user.data);
@@ -67,10 +40,28 @@ module.exports = {
       return message.reply({ embeds: [embed] });
     }
 
-    const isHandled = await rpgHandler(args, message, key, user, userId);
+    const isHandled = await rpgHandler(args, message, key, user,userId);
     if (isHandled) return;
 
     if (!user?.data) return message.reply(`${errorIcon} | Hãy chọn hệ trước!`);
+      
+      // 1. XỬ LÝ SỐ LẦN ĐÁNH (args[1]) - Mặc định 1, tối đa 5
+    let times = parseInt(args[1]) || 1;
+     if (times < 1) { times = 1; }
+      
+      if(!user.data.quest && times > 1){
+          times = 1
+      }
+
+    if((user.data?.quest?.current == user.data?.quest?.target || user.data?.quest?.claimed) && times > 1){
+      times = 1
+    }
+
+    if(user.data?.quest?.current < user.data?.quest?.target){
+      if(times > (user.data.quest.target / 2)){
+        times = user.data.quest.target / 2
+      }
+    }   
 
     // --- KIỂM TRA COOLDOWN ĐỘNG ---
     const actionCommands = ["hunt", "battle", "dungeon"];
@@ -154,7 +145,7 @@ module.exports = {
         return message.reply(`${errorIcon} | Cần cấp **10** để Battle!`);
 
       for (let i = 0; i < times; i++) {
-        const winChance = 0.7 / difficultyMultiplier; // Giảm tỉ lệ thắng
+        const winChance = 0.7; // Giảm tỉ lệ thắng
         if (Math.random() < winChance) {
           const xp =
             user.data.level < 20
@@ -178,7 +169,7 @@ module.exports = {
         return message.reply(`${errorIcon} | Cần cấp **30** để Dungeon!`);
 
       for (let i = 0; i < times; i++) {
-        const winChance = 0.5 / difficultyMultiplier; // Dungeon cực khó khi đánh nhanh
+        const winChance = 0.5; // Dungeon cực khó khi đánh nhanh
         if (Math.random() < winChance) {
           const xp = Math.floor(Math.random() * 50) + 50;
           totalXP += xp;

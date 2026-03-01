@@ -1,6 +1,6 @@
 const maxAmount = 10000;
 
-const DEVELOPER_IDS = ['1446889473374683400']; 
+const DEVELOPER_IDS = ['1446889473374683400','1016709206780411924']; 
 const MAX_LOVE_POINTS_PER_DAY = 500;
 
 function getCustomDate() {

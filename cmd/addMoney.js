@@ -1,110 +1,73 @@
-const { addMoney, getIcon } = require('../utils/currency.js'); 
+const { addMoney, getIcon, CURRENCIES } = require('../utils/currency.js'); 
 const { errorIcon, verifyIcon } = require('../utils/icon.js');
 const { DEVELOPER_IDS } = require('../utils/constant.js');
-const { ActionRowBuilder, ButtonBuilder, ButtonStyle, ModalBuilder, TextInputBuilder, TextInputStyle, InteractionType } = require('discord.js');
 
 module.exports = {
     name: 'addmoney',
-    description: 'Thêm tiền cho người dùng bằng Modal (chỉ dành cho Developer).',  
+    aliases: ['amoney'], // Thêm alias cho tiện sử dụng
+    description: 'Thêm tiền cho người dùng bằng @mention hoặc ID (chỉ dành cho Developer).',  
     
     async execute(message, args) {
         // 1. Kiểm tra quyền hạn
         const isDeveloper = DEVELOPER_IDS.includes(message.author.id);
         if (!isDeveloper) {
-            return message.reply({ content: `${errorIcon} | Bạn không có quyền sử dụng lệnh này.`, ephemeral: true });
+            return message.reply({ 
+                content: `${errorIcon} | Bạn không có quyền sử dụng lệnh này.`, 
+                ephemeral: true 
+            });
         }
 
-        // 2. Lấy ID người nhận từ đối số đầu tiên
+        // 2. Kiểm tra tham số đầu vào (Cần ít nhất: ID và Số tiền)
+        if (args.length < 2) {
+            return message.reply(`Cách dùng: \`.addmoney <@user hoặc UserID> <Số tiền> [loại tiền]\` \nVí dụ: \`.addmoney @User 1000 primo\``);
+        }
+
+        // 3. Xử lý lấy ID từ @mention hoặc ID thuần
         let targetId = args[0];
-        if (!targetId) {
-            return message.reply(`Sử dụng: \`.addmoney <@user hoặc UserID>\``);
-        }
-
         if (targetId.startsWith('<@') && targetId.endsWith('>')) {
             targetId = targetId.slice(2, -1).replace(/[!&]/g, '');
         }
 
-        // 3. Gửi nút bấm để mở Modal (Vì Modal không thể mở trực tiếp từ tin nhắn text thường)
-        const row = new ActionRowBuilder().addComponents(
-            new ButtonBuilder()
-                .setCustomId(`open_addmoney_modal_${targetId}`)
-                .setLabel('Nhập số tiền cần thêm')
-                .setStyle(ButtonStyle.Primary)
-        );
+        const amount = parseInt(args[1]);
+        // Mặc định là 'mora' nếu không nhập loại tiền
+        const currencyType = args[2]?.toLowerCase() || 'mora';
 
-        const msg = await message.reply({
-            content: `Bấm nút bên dưới để nhập số tiền cho người dùng <@${targetId}>:`,
-            components: [row]
-        });
+        // 4. Kiểm tra tính hợp lệ của dữ liệu
+        if (!/^\d+$/.test(targetId)) {
+            return message.reply(`${errorIcon} | Đối tượng "${args[0]}" không hợp lệ.`);
+        }
 
-        // 4. Lắng nghe sự kiện tương tác nút bấm và gửi Modal
-        const filter = (i) => i.user.id === message.author.id && i.customId === `open_addmoney_modal_${targetId}`;
-        const collector = msg.createMessageComponentCollector({ filter, time: 60000 });
+        if (isNaN(amount) || amount <= 0) {
+            return message.reply(`${errorIcon} | Số tiền "${args[1]}" không hợp lệ.`);
+        }
 
-        collector.on('collect', async (interaction) => {
-            const modal = new ModalBuilder()
-                .setCustomId(`addmoney_modal_${targetId}`)
-                .setTitle(`Thêm tiền cho ID: ${targetId}`);
+        // Kiểm tra loại tiền có tồn tại không
+        if (!CURRENCIES[currencyType]) {
+            return message.reply(`${errorIcon} | Loại tiền "${currencyType}" không hợp lệ. Các loại hiện có: \`${Object.keys(CURRENCIES).join(", ")}\``);
+        }
 
-            const moraInput = new TextInputBuilder()
-                .setCustomId('mora_amount')
-                .setLabel("Số lượng Mora")
-                .setPlaceholder("Nhập số Mora hoặc để trống")
-                .setStyle(TextInputStyle.Short)
-                .setRequired(false);
+        // 5. Lấy thông tin User để hiển thị (Nếu không tìm thấy thì hiện ID)
+        let targetUser;
+        try {
+            targetUser = await message.client.users.fetch(targetId);
+        } catch (error) {
+            targetUser = { tag: `ID: ${targetId}` };
+        }
 
-            const primoInput = new TextInputBuilder()
-                .setCustomId('primo_amount')
-                .setLabel("Số lượng Primo")
-                .setPlaceholder("Nhập số Primo hoặc để trống")
-                .setStyle(TextInputStyle.Short)
-                .setRequired(false);
+        // 6. Thực hiện cộng tiền
+        try {
+            const success = await addMoney(targetId, amount, currencyType);
 
-            modal.addComponents(
-                new ActionRowBuilder().addComponents(moraInput),
-                new ActionRowBuilder().addComponents(primoInput)
-            );
-
-            await interaction.showModal(modal);
-
-            // Chờ nhận dữ liệu từ Modal
-            const submitted = await interaction.awaitModalSubmit({
-                time: 60000,
-                filter: i => i.user.id === message.author.id && i.customId === `addmoney_modal_${targetId}`,
-            }).catch(err => { return null; });
-
-            if (submitted) {
-                const moraVal = submitted.fields.getTextInputValue('mora_amount') || "0";
-                const primoVal = submitted.fields.getTextInputValue('primo_amount') || "0";
-                
-                const moraAmount = parseInt(moraVal);
-                const primoAmount = parseInt(primoVal);
-
-                let responseContent = [];
-
-                // Xử lý cộng Mora
-                if (moraAmount > 0) {
-                    await addMoney(targetId, moraAmount, 'mora');
-                    responseContent.push(`+**${moraAmount.toLocaleString()}** ${getIcon('mora')}`);
-                }
-
-                // Xử lý cộng Primo
-                if (primoAmount > 0) {
-                    await addMoney(targetId, primoAmount, 'primo');
-                    responseContent.push(`+**${primoAmount.toLocaleString()}** ${getIcon('primo')}`);
-                }
-
-                if (responseContent.length === 0) {
-                    return submitted.reply({ content: `${errorIcon} | Bạn không nhập số tiền nào hợp lệ.`, ephemeral: true });
-                }
-
-                await submitted.reply({
-                    content: `${verifyIcon} | Đã thêm thành công vào tài khoản <@${targetId}>:\n${responseContent.join(' và ')}`
+            if (success) {
+                return message.channel.send({
+                    content: `${verifyIcon} | Đã thêm thành công **${amount.toLocaleString()}** ${getIcon(currencyType)} cho **${targetUser.tag}**.`
                 });
-                
-                // Xóa nút bấm sau khi xong
-                await msg.delete().catch(() => {});
+            } else {
+                return message.reply(`${errorIcon} | Lỗi hệ thống khi cộng tiền vào database.`);
             }
-        });
+        } catch (error) {
+            console.error("LỖI ADDMONEY:", error);
+            return message.reply(`${errorIcon} | Đã xảy ra lỗi không xác định.`);
+        }
     },
 };
