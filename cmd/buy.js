@@ -6,7 +6,6 @@ const { errorIcon, verifyIcon } = require('../utils/icon.js');
 module.exports = {
     name: 'buy',
     description: 'Mua vật phẩm từ cửa hàng với số lượng.',
-    aliases: ['mua'],
 
     async execute(message, args) {
         const userId = message.author.id;

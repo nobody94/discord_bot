@@ -15,8 +15,8 @@ const { wordleProcess } = require("./game/wordleHandler");
 const { wordchainHandler } = require("./game/wordchainHandler");
 const { errorIcon } = require("./utils/icon");
 
-const Token = process.env.BOT_TOKEN;
-// const Token = process.env.BOT_TEST_TOKEN;
+// const Token = process.env.BOT_TOKEN;
+const Token = process.env.BOT_TEST_TOKEN;
 
 const PREFIX = ".";
 const client = new Client({
@@ -147,6 +147,14 @@ client.on("interactionCreate", async (interaction) => {
         }
       }
     }
+
+    // Kiểm tra nếu là các nút của thêm đồ tạp hóa trò chơi
+    if (interaction.customId.startsWith("taphoa_")) {
+      const command = client.commands.get("taphoa");
+      if (command && command.handleInteraction) {
+        return await command.handleInteraction(interaction);
+      }
+    }
   }
 
   // 2. XỬ LÝ GỬI FORM (Modal Submit Interaction)
@@ -203,7 +211,19 @@ client.on("interactionCreate", async (interaction) => {
         try {
           return await command.handleInteraction(interaction);
         } catch (error) {
-          console.error("LỖI XỬ LÝ MODAL SUBMIT ĐỔi tiền:", error);
+          console.error("LỖI XỬ LÝ MODAL SUBMIT bầu cua:", error);
+        }
+      }
+    }
+
+     // Kiểm tra modal của thêm đồ tạp hóa trò chơi
+    if (interaction.customId.startsWith("modal_taphoa_")) {
+     const command = client.commands.get("taphoa");
+      if (command && command.handleInteraction) {
+        try {
+          return await command.handleInteraction(interaction);
+        } catch (error) {
+          console.error("LỖI XỬ LÝ MODAL Thêm đồ tạp hóa:", error);
         }
       }
     }

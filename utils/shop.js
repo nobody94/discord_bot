@@ -21,15 +21,33 @@ const SHOP_ITEMS = {
         icon: '<:lootbox:1452243400332935179>',
         canOpen: true,
         lovePoint:10
+    },    
+    'lau_dai': {
+        name: 'Lâu đài tình ái',
+        price: 2999,
+        sellPrice:2999,
+        currency: primo,
+        description: desc.onlyView,
+        icon: '<:mansion:1479705680943251628>',
+        lovePoint:500
     },
-    'bim_bim': {
-        name: 'Bim bim',
-        price: 20000,
-        sellPrice:20000,
+    'hoa_hong': {
+        name: 'Hoa hồng tình yêu',
+        price: 99999,
+        sellPrice:99999,
         currency: mora,
         description: desc.onlyView,
-        icon: '<:chips:1451742059953389779>',
-        lovePoint:5
+        icon: '<:rose:1479705727722459349>',
+        lovePoint:20
+    },
+    'bo_hoa': {
+        name: 'Bó hoa',
+        price: 50000,
+        sellPrice:50000,
+        currency: mora,
+        description: desc.onlyView,
+        icon: '<:flowers:1479707548192870532>',
+        lovePoint:10
     },
     'tra_sua': {
         name: 'Trà sữa',
@@ -76,6 +94,16 @@ const SHOP_ITEMS = {
         icon: '<:coca:1452491105940537647>',
         lovePoint:3
     },
+    'bim_bim': {
+        name: 'Bim bim',
+        price: 20000,
+        sellPrice:20000,
+        currency: mora,
+        description: desc.onlyView,
+        icon: '<:chips:1451742059953389779>',
+        lovePoint:5,
+         hideFromShop: true,
+    },
     'com_nam': {
         name: 'Cơm nắm',
         price: 15000,
@@ -83,7 +111,8 @@ const SHOP_ITEMS = {
         currency: mora,
         description: desc.onlyView,
         icon: '<:comnam:1452491150765199484>',
-        lovePoint:4
+        lovePoint:4,
+         hideFromShop: true,
     },
     'nuoc_ep': {
         name: 'Nước ép',
@@ -92,7 +121,28 @@ const SHOP_ITEMS = {
         currency: mora,
         description: desc.onlyView,
         icon: '<:juice:1452491233782923284>',
-        lovePoint:7
+        lovePoint:7,
+         hideFromShop: true,
+    },
+    'my_ly': {
+        name: 'Mỳ ly',
+        price: 20000,
+        sellPrice:20000,
+        currency: mora,
+        description: desc.onlyView,
+        icon: '<:instantnoodles:1451606651588317357>',
+        lovePoint:7,
+         hideFromShop: true,
+    },
+     'banh_bao': {
+        name: 'Bánh bao',
+        price: 10000,
+        sellPrice:10000,
+        currency: mora,
+        description: desc.onlyView,
+        icon: '<:banhbao:1452491299528773662>',
+        lovePoint:3,
+         hideFromShop: true,
     },
     'pizza': {
         name: 'Pizza',
@@ -111,16 +161,7 @@ const SHOP_ITEMS = {
         description: desc.onlyView,
         icon: '<:fastfood:1451606621137670144>',
         lovePoint:20
-    },
-    'my_ly': {
-        name: 'Mỳ ly',
-        price: 20000,
-        sellPrice:20000,
-        currency: mora,
-        description: desc.onlyView,
-        icon: '<:instantnoodles:1451606651588317357>',
-        lovePoint:7
-    },
+    },    
     'my_tom': {
         name: 'Mỳ tôm',
         price: 30000,
@@ -147,16 +188,7 @@ const SHOP_ITEMS = {
         description: desc.onlyView,
         icon: '<:donut:1452491274434379978>',
         lovePoint:8
-    },
-    'banh_bao': {
-        name: 'Bánh bao',
-        price: 10000,
-        sellPrice:10000,
-        currency: mora,
-        description: desc.onlyView,
-        icon: '<:banhbao:1452491299528773662>',
-        lovePoint:3
-    },
+    },   
     'xuc_xich': {
         name: 'Xúc xích',
         price: 10000,
