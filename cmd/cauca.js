@@ -105,7 +105,7 @@ module.exports = {
             const missChance = Math.max(0.05, 0.25 - (totalLuck * 0.05));
             if (Math.random() < missChance) {
                 missCount++;
-                await updateLeaderboard("miss", userId, username, guildId);
+                // await updateLeaderboard("miss", userId, username, guildId);
                 continue;
             }
 
@@ -192,7 +192,7 @@ module.exports = {
                     caughtFishList.forEach(id => summary[id] = (summary[id] || 0) + 1);
                     const display = Object.entries(summary).map(([id, count]) => {
                         const f = FISH_LIST[id];
-                        if (f.sellPrice < 10) updateLeaderboard("trash", userId, username, guildId);
+                        // if (f.sellPrice < 10) updateLeaderboard("trash", userId, username, guildId);
                         return `${f.icon} **${f.name}** x${count}`;
                     }).join("\n");
                     resultEmbed.setDescription(`**Bạn đã kéo lên được:**\n${display}${missCount>0 ? `\n💨Có ${missCount} con cá đã thoát` : ''}`);
