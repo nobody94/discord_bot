@@ -1,5 +1,6 @@
-const { renderKey, getKey, setKey } = require('../utils/db'); //
-const { verifyIcon, errorIcon } = require('../utils/icon.js'); //
+const { renderKey, getKey, setKey } = require('../utils/db'); 
+const { verifyIcon, errorIcon } = require('../utils/icon.js'); 
+const {managerIds} = require('../utils/constant.js');
 
 module.exports = {
     name: 'point',
@@ -21,8 +22,7 @@ module.exports = {
             return message.reply(`${msg}`);
         }
 
-        // --- CHỨC NĂNG QUẢN LÝ (Chỉ dành cho Developer) ---
-        const managerIds = ['1182987381662556253',"1446889473374683400"]; // Thay bằng ID thực tế của bạn
+        // --- CHỨC NĂNG QUẢN LÝ ---
         if (!managerIds.includes(message.author.id)) {
             return message.reply(`${errorIcon} Bạn không có quyền sử dụng lệnh quản lý điểm.`);
         }

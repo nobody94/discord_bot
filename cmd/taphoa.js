@@ -1,6 +1,7 @@
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType,
     ModalBuilder, TextInputBuilder, TextInputStyle, InteractionType } = require('discord.js');
-const { getKey, setKey, renderKey, addKey } = require('../utils/db');
+const { getKey, setKey, renderKey } = require('../utils/db');
+const {managerIds,giftManagerIds} = require('../utils/constant.js');
 
 const cooldowns = new Map();
 
@@ -27,8 +28,6 @@ module.exports = {
         cooldowns.set(userId, now);
         setTimeout(() => cooldowns.delete(userId), cooldownAmount);
 
-        const managerIds = ['1182987381662556253', "1446889473374683400"];
-        const giftManagerIds = ['1016709206780411924', "1446889473374683400"];
         const shopKey = renderKey('taphoa');
         const allData = (await getKey(shopKey)) || {};
         let title = '🛒 CỬA HÀNG TRAO ĐỔI';

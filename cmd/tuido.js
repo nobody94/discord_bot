@@ -1,6 +1,7 @@
 const { EmbedBuilder } = require("discord.js");
 const { getKey, renderKey } = require("../utils/db");
-const { bagIcon } = require("../utils/icon.js"); // Sử dụng icon túi đồ từ file icon
+const { bagIcon } = require("../utils/icon.js"); 
+const {managerIds,giftManagerIds} = require('../utils/constant.js');
 
 module.exports = {
   name: "tuido",
@@ -23,7 +24,41 @@ module.exports = {
 
     // Truy xuất dữ liệu từ key game_inventory
     const invKey = renderKey("game_inventory", userId);
-    const inventory = (await getKey(invKey)) || [];
+    let inventory = (await getKey(invKey)) || [];
+
+    // --- LOGIC XỬ LÝ REMOVE ---
+    // Cú pháp: .tuido @user remove <id> HOẶC .tuido gift @user remove <id>
+    const removeIndex = isGiftView ? 2 : 1; // Vị trí chữ 'remove' trong args
+    const idIndex = isGiftView ? 3 : 2;     // Vị trí 'id' trong args
+
+    if (args[removeIndex] && args[removeIndex].toLowerCase() === 'remove') {
+      // Kiểm tra quyền
+      const allowedIds = isGiftView ? giftManagerIds : managerIds;
+      if (!allowedIds.includes(message.author.id)) {
+        return message.reply("❌ Bạn không có quyền xóa vật phẩm này.");
+      }
+
+      const itemId = args[idIndex];
+      if (!itemId) return message.reply("❌ Vui lòng nhập ID vật phẩm cần xóa.");
+
+      // Kiểm tra vật phẩm có trong túi của user không
+      const itemPos = inventory.indexOf(itemId);
+      if (itemPos === -1) {
+        return message.reply(`❌ Người dùng không có vật phẩm với ID \`${itemId}\` trong túi.`);
+      }
+
+      // Kiểm tra loại vật phẩm để tránh xóa nhầm (VD: đang ở chế độ gift nhưng nhập ID đồ exchange)
+      const itemInfo = allData[itemId];
+      if (itemInfo && itemInfo.type !== filterType) {
+        return message.reply(`❌ Vật phẩm \`${itemId}\` không thuộc loại **${filterType}**. Hãy kiểm tra lại lệnh.`);
+      }
+
+      // Tiến hành xóa 1 món
+      inventory.splice(itemPos, 1);
+      await setKey(invKey, inventory);
+
+      return message.reply(`✅ Đã xóa vật phẩm **${itemInfo ? itemInfo.name : itemId}** khỏi túi đồ của **${username}**.`);
+    }
 
     const embed = new EmbedBuilder()
       .setTitle(`${bagIcon} ${isGiftView ? 'KHO VẬT PHẨM TẶNG' : 'TÚI ĐỒ TRÒ CHƠI'}: ${username.toUpperCase()}`)

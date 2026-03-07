@@ -152,7 +152,11 @@ client.on("interactionCreate", async (interaction) => {
     if (interaction.customId.startsWith("taphoa_")) {
       const command = client.commands.get("taphoa");
       if (command && command.handleInteraction) {
-        return await command.handleInteraction(interaction);
+        try {
+          return await command.handleInteraction(interaction);
+        } catch (error) {
+          console.error("LỖI XỬ LÝ Nút SUBMIT taphoa:", error);
+        }
       }
     }
   }

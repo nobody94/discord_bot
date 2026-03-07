@@ -21,18 +21,18 @@ module.exports = {
           "• slots, slot, sl: Máy đánh bạc\n• taixiu, tx: Chơi tài xỉu\n• baucua, bc: Chơi bầu cua \n• caoveso, scratch,sc: cào vé số\n• hint, wc, ws: Dùng để search từ trong kênh nối từ Tiếng Việt/Tiếng Anh(Mỗi ngày được 5 lượt)\n• restart: restart game kênh nối từ\n• fishshop, fs: cửa hàng bán đồ câu cá\n• tuica, inv: xem đồ nghề câu cá\n• cauca, fish, cc: câu cá\n• beca, tank: xem bể cá\n• suacan, repair: sửa cần câu",
       },
       currency: {
-        label: "Tiền tệ & Cửa hàng",
+        label: "Tiền tệ",
         emoji: "💵",
         color: "#FFD700", // Màu vàng Mora
         commands:
-          "• balance, money: Kiểm tra số dư\n• daily, claim: Nhận thưởng hàng ngày\n• exchange, doitien: Đổi tiền\n• shop, buy: Xem và mua đồ",
+          "• balance, money: Kiểm tra số dư\n• daily, claim: Nhận thưởng hàng ngày\n• exchange, doitien: Đổi tiền",
       },
       inventory: {
-        label: "Túi đồ (Inventory)",
+        label: "Túi đồ & Cửa hàng",
         emoji: "🎒",
         color: "#3498db", // Màu xanh dương thông tin
         commands:
-          "• balo: Xem túi đồ\n• balo give: Tặng vật phẩm\n• balo sell: Bán vật phẩm\n• balo open: Mở vật phẩm",
+          "• balo: Xem túi đồ\n• balo give: Tặng vật phẩm\n• balo sell: Bán vật phẩm\n• balo open: Mở vật phẩm\n• shop, buy: Xem và mua đồ",
       },
       interaction: {
         label: "Tương tác & Cặp đôi",
@@ -41,19 +41,19 @@ module.exports = {
         commands:
           "• Hạnh phúc: kiss, hug, cuddle, cheek, airkiss, lick, nibled\n• Vui vẻ: laugh, highfive, pat, stare, pinch\n• Mạnh bạo: slap, poke, punch, kick, fight, bonk, rip,spank\n • marry, kethon: Dùng để cầu hôn\n• divorce, lyhon: Dùng để ly hôn\n• couple, cp: Xem tình trạng hôn nhân\n• marrylist, mrl: Danh sách các cặp đôi",
       },      
-      admin: {
-        label: "Cấu hình (Admin)",
-        emoji: "⚙️",
+      taphoa: {
+        label: "Game kinh dị",
+        emoji: "🎮",
         color: "#95a5a6", // Màu xám hệ thống
         commands:
-          "• setwordchain vi/en: Cài đặt nối chữ\n• setwordle: Cài đặt Vua Tiếng Việt",
+          "• taphoa: Xem đồ trong cửa hàng trao đổi\n• taphoa mua: mua đồ trong cửa hàng trao đổi\n• tuido: Xem đồ trong túi\n• taphoa/tuido gift: Xem đồ trong cửa hàng/túi đồ vật phẩm tặng\n• point check:check điểm hiện tại\n\nChỉ dành cho người quản lý\n• point add/remove: Thêm hoặc trừ điểm\n• taphoa give: tặng vật phẩm trong mục vật phẩm tặng\n• taphoa themdo: thêm đồ cho cửa hàng trao đổi\n• taphoa gift themdo: thêm đồ cửa hàng vật phẩm tặng \n• tuido @user remove id: để xóa vật phẩm trao đổi khỏi túi của 1 người \n• tuido gift @user remove id: để xóa vật phẩm tặng khỏi túi của 1 người",
       },
-      anniversary: {
-        label: "Anniversary (Admin)",
-        emoji: "🎂",
+      admin: {
+        label: "Anniversary và Cấu hình (Admin)",
+        emoji: "⚙️",
         color: "#d4558a",
         commands:
-          "• setbirthday, setsinhnhat: lưu sinh nhật của user\n• checkbirthday, xemsinhnhat, birthdaylist: xem danh sách sinh nhật trong tháng hoặc của user\n• hpbd, sinhnhat: gửi lời chúc sinh nhật\n• lixi, phatloc: lì xì cho toàn bộ thành viên trong server",
+          "• setwordchain vi/en: Cài đặt nối chữ\n• setwordle: Cài đặt Vua Tiếng Việt\n• setbirthday, setsinhnhat: lưu sinh nhật của user\n• checkbirthday, xemsinhnhat, birthdaylist: xem danh sách sinh nhật trong tháng hoặc của user\n• hpbd, sinhnhat: gửi lời chúc sinh nhật\n• lixi, phatloc: lì xì cho toàn bộ thành viên trong server",
       },
     };
 
