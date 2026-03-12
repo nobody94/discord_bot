@@ -219,12 +219,13 @@ async function gameProcess(guildId, newWord) {
       message: `${errorIcon} Từ cần bắt đầu bằng ${currentLastWord}`,
     };
   }
-  // Lấy tất cả cụm 2 từ chưa dùng và bắt đầu bằng secondWord
+  // Lấy tất cả cụm 2 từ chưa dùng và bắt đầu bằng secondWord 
   const nextOptions = dictionary.filter((p) => {
     if (viState.wordHistory.includes(p)) return false;
-    return p.split(" ")[0] === secondWord;
+    const wLower = p.toLowerCase();
+    return wLower.startsWith(secondWord + " ") && !viState.wordHistory.includes(wLower) && wLower != newWord.toLowerCase()
   });
-
+  
   //hết từ nối
   if (nextOptions.length === 0) {
     return {
