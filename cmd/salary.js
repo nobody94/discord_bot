@@ -35,7 +35,7 @@ module.exports = {
                 // Cộng tiền Primo
                 await addMoney(staff.id, staff.primo, 'primo');
 
-                resultMessage += `${verifyIcon} **QTV**: <@${staff.id}> đã nhận **${staff.primo}** ${getIcon('primo')}\n`;
+                resultMessage += `**QTV**: <@${staff.id}> đã nhận **${staff.primo}** ${getIcon('primo')}\n`;
             } catch (error) {
                 console.error(`Lỗi phát lương cho ${staff.id}:`, error);
                 resultMessage += `❌ **QTV**: Lỗi hệ thống khi phát cho <@${staff.id}>.\n`;

@@ -60,7 +60,7 @@ module.exports = {
                 await addMoney(targetId, rewards[i].mora, 'mora');
                 await addMoney(targetId, rewards[i].primo, 'primo');
 
-                resultMessage += `${verifyIcon} **${rewards[i].rank}**: <@${targetId}> nhận **${rewards[i].mora.toLocaleString()}** ${getIcon('mora')} và **${rewards[i].primo.toLocaleString()}** ${getIcon('primo')}\n`;
+                resultMessage += `**${rewards[i].rank}**: <@${targetId}> nhận **${rewards[i].mora.toLocaleString()}** ${getIcon('mora')} và **${rewards[i].primo.toLocaleString()}** ${getIcon('primo')}\n`;
             } catch (error) {
                 console.error(`Lỗi thưởng:`, error);
                 resultMessage += `❌ **${rewards[i].rank}**: Lỗi khi trao thưởng cho <@${targetId}>.\n`;

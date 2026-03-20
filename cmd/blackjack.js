@@ -12,19 +12,30 @@ const { renderKey, getKey, setKey } = require("../utils/db");
 
 // Hàm hỗ trợ tính điểm bài
 function calculatePoints(hand) {
-  let points = hand.reduce((acc, card) => acc + (card > 10 ? 10 : card), 0);
-  // Xử lý lá Ace (11) nếu bị quắc (bust) thì tính là 1
-  let aceCount = hand.filter((card) => card === 11).length;
-  while (points > 21 && aceCount > 0) {
-    points -= 10;
-    aceCount--;
+  let total = 0;
+  let aces = 0;
+
+  for (let card of hand) {
+    if (card === 11) {
+      aces += 1;
+      total += 11;
+    } else {
+      total += card;
+    }
   }
-  return points;
+
+  // Nếu bị quá 21, biến Ace thành 1 (trừ đi 10)
+  while (total > 21 && aces > 0) {
+    total -= 10;
+    aces -= 1;
+  }
+
+  return total;
 }
 
 // Hàm rút lá bài ngẫu nhiên
 function drawCard() {
-  const cards = [2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10, 11];
+  const cards = [2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10,10, 11];
   return cards[Math.floor(Math.random() * cards.length)];
 }
 
@@ -40,7 +51,9 @@ module.exports = {
     const isPlaying = await getKey(dbKey);
 
     if (isPlaying && isPlaying.active) {
-        return message.reply(`${errorIcon} Bạn đang có một ván Blackjack chưa kết thúc! Hãy hoàn thành nó trước.`);
+      return message.reply(
+        `${errorIcon} Bạn đang có một ván Blackjack chưa kết thúc! Hãy hoàn thành nó trước.`,
+      );
     }
 
     const betAmount = parseInt(args[0]);
@@ -53,7 +66,7 @@ module.exports = {
       betAmount > maxAmount
     ) {
       return message.reply(
-        `${errorIcon} Vui lòng cược từ 100 đến ${maxAmount} ${getIcon()}.`
+        `${errorIcon} Vui lòng cược từ 100 đến ${maxAmount} ${getIcon()}.`,
       );
     }
 
@@ -67,7 +80,7 @@ module.exports = {
     await setKey(dbKey, { active: true });
 
     let playerHand = [drawCard(), drawCard()];
-    let botHand = [drawCard(), drawCard()];    
+    let botHand = [drawCard(), drawCard()];
 
     // 3. Tạo hàng nút bấm
     const row = new ActionRowBuilder().addComponents(
@@ -78,7 +91,7 @@ module.exports = {
       new ButtonBuilder()
         .setCustomId("stand")
         .setLabel("Dừng")
-        .setStyle(ButtonStyle.Danger)
+        .setStyle(ButtonStyle.Danger),
     );
 
     const embedContent = () => `
