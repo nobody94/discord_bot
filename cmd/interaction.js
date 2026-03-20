@@ -132,7 +132,7 @@ const interactions = {
       "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3Nm1uYWEwdjJxOHdwcDBqOGJxZTQyZWpleGc1dnJpMXF3d3VxNDljcyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/b2eTtzh6tMs7KVoFzV/giphy.gif",
     ],
   },
-  nibled: {
+  can_yeu: {
     tag: "nibled",
     color: "#FF1493",
     msg: "đã cắn yêu",
@@ -186,6 +186,20 @@ const interactions = {
       "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3p4Zmw5MDBrc2RmMXZydHF4bzdvMXo3YW0ycjBsZnN2ZXNiNjFhYyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/pRotk2UQTsozm/giphy.gif",
       "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3eDAzaGZ4M3I2Ym44bGp0OGRicnFkcndrcGRoNmRteXVlNTRxZWw2eCZlcD12MV9naWZzX3JlbGF0ZWQmY3Q9Zw/jdrgQXu2qdL1e/giphy.gif",
       "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3eDAzaGZ4M3I2Ym44bGp0OGRicnFkcndrcGRoNmRteXVlNTRxZWw2eCZlcD12MV9naWZzX3JlbGF0ZWQmY3Q9Zw/cxWG5eigQt1K0/giphy.gif",
+    ],
+  },
+  hien_te: {
+    tag: "sacrifice",
+    color: "#1c082c",
+    msg: "đã hiến tế",
+    lovePoint: -5,
+    images: [
+      "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3ZzloN3diaHg0b2dlYmc2OTA3Nmp0dnp5N3o0YmtuMDAxam41ZjVlbCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/RyAZDGzXdyhc1szx2R/giphy.gif",
+      "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3bmJld3NkemplY2EzcnZweGJ1NmQweXJpNXBmeWh4ZjQwZXFtcHkwNiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/zPbYWiX4akME1dSqRf/giphy.gif",
+      "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExaGgzYW9zYWkzb21sdnNvaDc1Z3lrb3hkOTl1YzZ5ZjIxZ2ZzNXFpayZlcD12MV9naWZzX3NlYXJjaCZjdD1n/La3G8N3tn4nzW/giphy.gif",
+      "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3NnB3ZW5wc3A0dGY4ZmJ3cWl5azQ0ZTcwamUxMXBpeW50Z3p1OXNraiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/1vRgUJWrZ5Sfy93IjM/giphy.gif",
+      "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3b2prZzZjbm91ZWY0bjkyMDV4a2JydnVlODRxMjNkNWt6Yjg3a285ZCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/WKFprEiHzNDttpPCIf/giphy.gif",
+      "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExd2Y2NzYwd2R3eWd1MGM2cTV6dGlwcmVuc2d5NGU2ZXowYjRvYWN4bSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/lsuzxXh9Eiwqz1jlHv/giphy.gif",      
     ],
   },
 };
