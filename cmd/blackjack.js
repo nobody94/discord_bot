@@ -39,6 +39,18 @@ function drawCard() {
   return cards[Math.floor(Math.random() * cards.length)];
 }
 
+function drawInitialHand() {
+  let card1 = drawCard();
+  let card2 = drawCard();
+
+  // Logic giảm tỉ lệ bài > 19
+  if (calculatePoints([card1, card2]) > 19 && Math.random() < 0.6) {
+    const lowCards = [2, 3, 4, 5, 6, 7, 8];
+    card2 = lowCards[Math.floor(Math.random() * lowCards.length)];
+  }
+  return [card1, card2];
+}
+
 module.exports = {
   name: "blackjack",
   aliases: ["bj"],
@@ -79,8 +91,8 @@ module.exports = {
     await Money.removeMoney(userId, betAmount);
     await setKey(dbKey, { active: true });
 
-    let playerHand = [drawCard(), drawCard()];
-    let botHand = [drawCard(), drawCard()];
+    let playerHand = drawInitialHand();
+    let botHand = drawInitialHand();
 
     // 3. Tạo hàng nút bấm
     const row = new ActionRowBuilder().addComponents(

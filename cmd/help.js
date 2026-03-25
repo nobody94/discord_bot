@@ -53,7 +53,7 @@ module.exports = {
         emoji: "⚙️",
         color: "#d4558a",
         commands:
-          "• setwordchain vi/en: Cài đặt nối chữ\n• setwordle: Cài đặt Vua Tiếng Việt\n• setbirthday, setsinhnhat: lưu sinh nhật của user\n• checkbirthday, xemsinhnhat, birthdaylist: xem danh sách sinh nhật trong tháng hoặc của user\n• hpbd, sinhnhat: gửi lời chúc sinh nhật\n• lixi, phatloc: lì xì cho toàn bộ thành viên trong server",
+          "• setwordchain vi/en: Cài đặt nối chữ\n• setwordle: Cài đặt Vua Tiếng Việt\n• setbirthday, setsinhnhat: lưu sinh nhật của user\n• checkbirthday, xemsinhnhat, birthdaylist: xem danh sách sinh nhật trong tháng hoặc của user\n• hpbd, sinhnhat: gửi lời chúc sinh nhật\n• lixi, phatloc: lì xì cho toàn bộ thành viên trong server\n• salary: phát lương cho qtv hoặc theo role\n• reward: phát thưởng voice/ chat tuần",
       },
     };
 
