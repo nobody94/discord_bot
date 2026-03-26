@@ -18,7 +18,7 @@ module.exports = {
         emoji: "🎮",
         color: "#FF5733", // Màu cam đỏ (Action/Combat)
         commands:
-          "• slots, slot, sl: Máy đánh bạc\n• taixiu, tx: Chơi tài xỉu\n• baucua, bc: Chơi bầu cua \n• caoveso, scratch,sc: cào vé số\n• hint, wc, ws: Dùng để search từ trong kênh nối từ Tiếng Việt/Tiếng Anh(Mỗi ngày được 5 lượt)\n• restart: restart game kênh nối từ\n• fishshop, fs: cửa hàng bán đồ câu cá\n• tuica, inv: xem đồ nghề câu cá\n• cauca, fish, cc: câu cá\n• beca, tank: xem bể cá\n• suacan, repair: sửa cần câu",
+          "• slots, slot, sl: Máy đánh bạc\n• taixiu, tx: Chơi tài xỉu\n• baucua, bc: Chơi bầu cua \n• caoveso, scratch,sc: cào vé số\n• duathu, race: đua thú\n• hint, wc, ws: Dùng để search từ trong kênh nối từ Tiếng Việt/Tiếng Anh(Mỗi ngày được 5 lượt)\n• restart: restart game kênh nối từ\n• fishshop, fs: cửa hàng bán đồ câu cá\n• tuica, inv: xem đồ nghề câu cá\n• cauca, fish, cc: câu cá\n• beca, tank: xem bể cá\n• suacan, repair: sửa cần câu",
       },
       currency: {
         label: "Tiền tệ",

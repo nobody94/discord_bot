@@ -44,7 +44,7 @@ function drawInitialHand() {
   let card2 = drawCard();
 
   // Logic giảm tỉ lệ bài > 19
-  if (calculatePoints([card1, card2]) > 19 && Math.random() < 0.6) {
+  if (calculatePoints([card1, card2]) > 19 && Math.random() < 0.7) {
     const lowCards = [2, 3, 4, 5, 6, 7, 8];
     card2 = lowCards[Math.floor(Math.random() * lowCards.length)];
   }

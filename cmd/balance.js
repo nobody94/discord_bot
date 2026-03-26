@@ -4,7 +4,7 @@ const { EmbedBuilder } = require('discord.js');
 module.exports = {
     name: 'balance', 
     description: 'Kiểm tra số dư của bạn hoặc người khác.',
-    aliases: ['tien', 'money', 'cash', 'bal'],
+    aliases: ['tien', 'cash', 'bal'],
 
     async execute(message, args) {
         // 1. Xác định đối tượng mục tiêu

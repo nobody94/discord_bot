@@ -12,7 +12,7 @@ module.exports = {
     // Lấy thông tin nhẫn cưới từ SHOP_ITEMS
     const itemKey = 'nhan_cuoi';
     const ringItem = SHOP_ITEMS[itemKey]; 
-    const RING_PRICE = ringItem.price; 
+    const RING_PRICE = ringItem.price * 2; 
 
     if (!target || target.id === message.author.id || target.user.bot) {
       return message.reply("❌ Bạn cần tag một người dùng thật để cầu hôn!");
@@ -38,7 +38,7 @@ module.exports = {
     // Kiểm tra tiền của người cầu hôn
     const balance = await getBalance(message.author.id, "mora");
     if (balance < RING_PRICE) {
-      return message.reply(`❌ Bạn cần ít nhất **${RING_PRICE.toLocaleString()}** ${getIcon("mora")} để mua ${ringItem.icon} **${ringItem.name}**!`);
+      return message.reply(`❌ Bạn cần ít nhất **${RING_PRICE.toLocaleString()}** ${getIcon("mora")} để mua 2 chiếc ${ringItem.icon} **${ringItem.name}**!`);
     }
 
     const embed = new EmbedBuilder()
@@ -64,11 +64,17 @@ module.exports = {
 
       if (i.customId === "accept_marry") {
         // TRƯỜNG HỢP ĐỒNG Ý: Tặng nhẫn cho đối phương
-        // Logic: Lưu quan hệ kết hôn vào Database và chuyển item 'nhan_cuoi' cho target (nếu bot có hệ thống inventory)        
+             
         const invKey = renderKey('inventory', target.id);
         const currentInv = (await getKey(invKey)) || [];
         currentInv.push(itemKey);
         await setKey(invKey, currentInv);
+
+        //Thêm nhẫn cho bản thân
+        const myInvKey = renderKey('inventory', message.author.id);
+        const myCurrentInv = (await getKey(myInvKey)) || [];
+        myCurrentInv.push(itemKey);
+        await setKey(myInvKey, myCurrentInv);
 
         // 2. Cập nhật danh sách cặp đôi TRONG SERVER     
         couplesList.push({
