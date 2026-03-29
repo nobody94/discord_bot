@@ -89,6 +89,22 @@ async function becaHandler(args, message, fishTank, tankKey, userId) {
         const countInTank = fishTank.filter(id => id === fishId).length;
         if (countInTank < amount) return message.reply(`${errorIcon} | Bạn không đủ **${amount}** con **${fish.name}** để tặng.`);
 
+        const loanKey = renderKey("loan", message.guild.id);
+        let allLoans = (await getKey(loanKey)) || [];
+        const userLoans = allLoans.filter(l => l.nguoi_vay === userId);
+
+        // Kiểm tra xem có khoản nợ nào quá 3 ngày không
+        const hasOverdueDebt = userLoans.some(loan => {
+            const loanDate = new Date(loan.date);
+            const diffTime = Math.abs(new Date() - loanDate);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            return diffDays >= 3;
+        });
+
+        if (hasOverdueDebt) {
+            return message.reply(`${errorIcon} | **GIAO DỊCH BỊ CHẶN!** Bạn đang có khoản nợ quá hạn (trên 3 ngày). Vui lòng dùng lệnh \`.trano\` để thanh toán trước khi tặng cá.`);
+        }
+
         // Trừ cá của người tặng
         for (let i = 0; i < amount; i++) {
             const idx = fishTank.indexOf(fishId);
@@ -136,27 +152,27 @@ async function becaHandler(args, message, fishTank, tankKey, userId) {
             }
 
             const totalLovePoints = pointPerFish * amount;
-            const currentDaily = couplesList[coupleIndex].dailyLovePoints || 0;    
+            const currentDaily = couplesList[coupleIndex].dailyLovePoints || 0;
 
             if (totalLovePoints > 0) {
                 const remainingQuota = MAX_LOVE_POINTS_PER_DAY - currentDaily;
-                 if (remainingQuota <= 0) {
+                if (remainingQuota <= 0) {
                     loveMsg = `\n⚠️ Hai bạn đã đạt giới hạn thân mật hôm nay. Hãy tặng tiếp sau 4h sáng mai!`;
-                }else{                    
+                } else {
                     const pointsToAdd = Math.min(totalLovePoints, remainingQuota);
                     loveMsg = `\n💖 Chỉ số thân mật tăng: **+${pointsToAdd.toLocaleString()}** điểm!`;
                     couplesList[coupleIndex].lovePoints = (couplesList[coupleIndex].lovePoints || 0) + pointsToAdd;
                     couplesList[coupleIndex].dailyLovePoints = currentDaily + pointsToAdd;
-                    
-                     if (totalLovePoints > remainingQuota) {
+
+                    if (totalLovePoints > remainingQuota) {
                         loveMsg += `\n*(Một số điểm bị bỏ qua do vượt giới hạn ngày)*`;
-                    }                     
-                }                
-            } else if (totalLovePoints < 0) {               
+                    }
+                }
+            } else if (totalLovePoints < 0) {
                 couplesList[coupleIndex].lovePoints = (couplesList[coupleIndex].lovePoints || 0) + totalLovePoints;
                 loveMsg = `\n💔 Tặng rác làm giảm: **${totalLovePoints}** điểm thân mật!`;
             }
-            await setKey(coupleKey, couplesList);  
+            await setKey(coupleKey, couplesList);
         }
 
         return message.reply(`${verifyIcon} | Bạn đã tặng **${amount}x ${fish.icon} ${fish.name}** cho **${target.username}** thành công!${loveMsg}`);

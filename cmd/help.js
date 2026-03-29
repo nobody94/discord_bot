@@ -25,7 +25,7 @@ module.exports = {
         emoji: "💵",
         color: "#FFD700", // Màu vàng Mora
         commands:
-          "• balance, money: Kiểm tra số dư\n• daily, claim: Nhận thưởng hàng ngày\n• exchange, doitien: Đổi tiền",
+          "• balance, money: Kiểm tra số dư\n• daily, claim: Nhận thưởng hàng ngày\n• exchange, doitien: Đổi tiền\n• vay: vay tiền ai đó\n• trano:trả nợ\n• checkvay:check các khoản vay hiện tại",
       },
       inventory: {
         label: "Túi đồ & Cửa hàng",
@@ -53,7 +53,7 @@ module.exports = {
         emoji: "⚙️",
         color: "#d4558a",
         commands:
-          "• setwordchain vi/en: Cài đặt nối chữ\n• setwordle: Cài đặt Vua Tiếng Việt\n• setbirthday, setsinhnhat: lưu sinh nhật của user\n• checkbirthday, xemsinhnhat, birthdaylist: xem danh sách sinh nhật trong tháng hoặc của user\n• hpbd, sinhnhat: gửi lời chúc sinh nhật\n• lixi, phatloc: lì xì cho toàn bộ thành viên trong server\n• salary: phát lương cho qtv hoặc theo role\n• reward: phát thưởng voice/ chat tuần\n• money add/remove/rm: thêm, trừ tiền\n• lp/lovepoint add/remove/rm: thêm trừ điểm cặp đôi",
+          "• setwordchain vi/en: Cài đặt nối chữ\n• setwordle: Cài đặt Vua Tiếng Việt\n• setbirthday, setsinhnhat: lưu sinh nhật của user\n• checkbirthday, xemsinhnhat, birthdaylist: xem danh sách sinh nhật trong tháng hoặc của user\n• hpbd, sinhnhat: gửi lời chúc sinh nhật\n• lixi, phatloc: lì xì cho toàn bộ thành viên trong server\n• salary: phát lương cho qtv hoặc theo role\n• reward: phát thưởng voice/ chat tuần\n• money add/remove/rm: thêm, trừ tiền\n• lp/lovepoint add/remove/rm: thêm trừ điểm cặp đôi\n• checkvay all: kiểm tra tất cả các khoản vay trong sv\n• eptra: bắt trả nợ",
       },
     };
 

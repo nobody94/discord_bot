@@ -28,6 +28,22 @@ async function baloHandler(args, message, inventory, invKey, userId) {
             );
         }
 
+        const loanKey = renderKey("loan", message.guild.id);
+        let allLoans = (await getKey(loanKey)) || [];
+        const userLoans = allLoans.filter(l => l.nguoi_vay === userId);
+
+        // Kiểm tra xem có khoản nợ nào quá 3 ngày không
+        const hasOverdueDebt = userLoans.some(loan => {
+            const loanDate = new Date(loan.date);
+            const diffTime = Math.abs(new Date() - loanDate);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            return diffDays >= 3;
+        });
+
+        if (hasOverdueDebt) {
+            return message.reply(`${errorIcon} | **GIAO DỊCH BỊ CHẶN!** Bạn đang có khoản nợ quá hạn (trên 3 ngày). Vui lòng dùng lệnh \`.trano\` để thanh toán trước khi tặng đồ.`);
+        }
+
         // 2. Thực hiện chuyển đồ
         const targetInvKey = renderKey("inventory", target.id);
         let targetInventory = (await getKey(targetInvKey)) || [];
@@ -92,7 +108,7 @@ async function baloHandler(args, message, inventory, invKey, userId) {
                     couplesList[coupleIndex].dailyLovePoints = currentDaily + pointsToAdd;
                     if (totalLovePoints > remainingQuota) {
                         loveMsg += `\n*(Một số điểm bị bỏ qua do vượt giới hạn ngày)*`;
-                    }                   
+                    }
                 }
             } else if (totalLovePoints < 0) {
                 loveMsg = `\n💔 Tặng đồ rác làm giảm: **${totalLovePoints}** điểm thân mật!`;

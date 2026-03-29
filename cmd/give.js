@@ -3,8 +3,8 @@ const { errorIcon, verifyIcon } = require('../utils/icon.js');
 
 module.exports = {
   name: "give",
-  aliases: ["tang", "chuyen"],
-  description: "Tặng tiền cho người dùng khác (Chỉ chấp nhận mora hoặc primo)",
+  aliases: ["gui"],
+  description: "Chuyển tiền cho người dùng khác (Chỉ chấp nhận mora hoặc primo)",
 
   async execute(message, args) {
     // 1. Kiểm tra tag người nhận
@@ -38,10 +38,27 @@ module.exports = {
     const senderId = message.author.id;
     const receiverId = target.id;
 
+    //kiểm tra nợ
+    const loanKey = renderKey("loan", message.guild.id);
+    let allLoans = (await getKey(loanKey)) || [];
+    const userLoans = allLoans.filter(l => l.nguoi_vay === senderId);
+
+    // Kiểm tra xem có khoản nợ nào quá 3 ngày không
+    const hasOverdueDebt = userLoans.some(loan => {
+      const loanDate = new Date(loan.date);
+      const diffTime = Math.abs(new Date() - loanDate);
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+      return diffDays >= 3;
+    });
+
+    if (hasOverdueDebt) {
+      return message.reply(`${errorIcon} | **GIAO DỊCH BỊ CHẶN!** Bạn đang có khoản nợ quá hạn (trên 3 ngày). Vui lòng dùng lệnh \`.trano\` để thanh toán trước khi chuyển tiền cho người khác.`);
+    }
+
     try {
       // 4. Kiểm tra số dư của người gửi theo loại tiền đã chọn
       const senderBalance = await Money.getBalance(senderId, currencyType);
-      
+
       if (senderBalance < amount) {
         return message.reply(
           `${errorIcon} | Bạn không đủ **${currencyType}**! Số dư hiện tại: **${senderBalance.toLocaleString()}** ${Money.getIcon(currencyType)}`
@@ -55,7 +72,7 @@ module.exports = {
       return message.channel.send(
         `${verifyIcon} | **${message.author.username}** đã tặng **${amount.toLocaleString()}** ${Money.getIcon(currencyType)} cho **${target.username}**!`
       );
-      
+
     } catch (error) {
       console.error("Lỗi khi thực hiện lệnh give:", error);
       return message.reply(`${errorIcon} | Đã xảy ra lỗi khi thực hiện giao dịch.`);

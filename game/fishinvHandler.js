@@ -20,12 +20,28 @@ async function fishInvHandler(args, message, inventory, invKey, userId) {
     if (!itemData) return message.reply(`${errorIcon} | Vật phẩm không tồn tại.`);
 
     // Lọc danh sách vật phẩm người dùng đang có theo ID (Xử lý cả String và Object)
-    const userItems = inventory.filter(entry => 
+    const userItems = inventory.filter(entry =>
       (typeof entry === "object" ? entry.id : entry) === itemId
     );
 
     if (userItems.length < amountToGive) {
       return message.reply(`${errorIcon} | Bạn không đủ số lượng **${itemData.name}** để tặng.`);
+    }
+
+    const loanKey = renderKey("loan", message.guild.id);
+    let allLoans = (await getKey(loanKey)) || [];
+    const userLoans = allLoans.filter(l => l.nguoi_vay === userId);
+
+    // Kiểm tra xem có khoản nợ nào quá 3 ngày không
+    const hasOverdueDebt = userLoans.some(loan => {
+      const loanDate = new Date(loan.date);
+      const diffTime = Math.abs(new Date() - loanDate);
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      return diffDays >= 3;
+    });
+
+    if (hasOverdueDebt) {
+      return message.reply(`${errorIcon} | **GIAO DỊCH BỊ CHẶN!** Bạn đang có khoản nợ quá hạn (trên 3 ngày). Vui lòng dùng lệnh \`.trano\` để thanh toán trước khi tặng đồ câu.`);
     }
 
     const targetInvKey = renderKey("fish_inv", target.id);
@@ -34,7 +50,7 @@ async function fishInvHandler(args, message, inventory, invKey, userId) {
     // Thực hiện chuyển vật phẩm
     for (let i = 0; i < amountToGive; i++) {
       // Tìm vị trí vật phẩm (Hỗ trợ tìm Object cho cần câu)
-      const index = inventory.findIndex(entry => 
+      const index = inventory.findIndex(entry =>
         (typeof entry === "object" ? entry.id : entry) === itemId
       );
 
@@ -62,7 +78,7 @@ async function fishInvHandler(args, message, inventory, invKey, userId) {
     if (!itemData) return message.reply(`${errorIcon} | Vật phẩm không tồn tại.`);
 
     const isRod = itemId.includes("cancau");
-    const userItems = inventory.filter(entry => 
+    const userItems = inventory.filter(entry =>
       (typeof entry === "object" ? entry.id : entry) === itemId
     );
 
@@ -72,10 +88,10 @@ async function fishInvHandler(args, message, inventory, invKey, userId) {
 
     let totalMoraEarned = 0;
     for (let i = 0; i < amountToSell; i++) {
-      const index = inventory.findIndex(entry => 
+      const index = inventory.findIndex(entry =>
         (typeof entry === "object" ? entry.id : entry) === itemId
       );
-      
+
       const itemEntry = inventory[index];
       let sellPrice = itemData.price;
 

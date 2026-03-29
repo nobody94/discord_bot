@@ -35,7 +35,7 @@ async function getBalance(userId, type = DEFAULT_TYPE) {
 
 // Cộng tiền theo loại tiền
 async function addMoney(userId, amount, type = DEFAULT_TYPE) {
-    try {
+   try {
         const key = renderKey(CURRENCIES[type]?.key || DEFAULT_TYPE,userId);
         await addKey(key, amount);
         return true;

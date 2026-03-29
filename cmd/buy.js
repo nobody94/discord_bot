@@ -37,14 +37,30 @@ module.exports = {
             return message.reply(`💸 | Bạn cần **${totalPrice.toLocaleString()}** ${getIcon(item.currency)} để mua **${amount}x** ${item.icon} **${item.name}**.`);
         }
 
+        const loanKey = renderKey("loan", message.guild.id);
+        let allLoans = (await getKey(loanKey)) || [];
+        const userLoans = allLoans.filter(l => l.nguoi_vay === userId);
+
+        // Kiểm tra xem có khoản nợ nào quá 3 ngày không
+        const hasOverdueDebt = userLoans.some(loan => {
+            const loanDate = new Date(loan.date);
+            const diffTime = Math.abs(new Date() - loanDate);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            return diffDays >= 3;
+        });
+
+        if (hasOverdueDebt) {
+            return message.reply(`${errorIcon} | **GIAO DỊCH BỊ CHẶN!** Bạn đang có khoản nợ quá hạn (trên 3 ngày). Vui lòng dùng lệnh \`.trano\` để thanh toán trước khi mua đồ.`);
+        }
+
         try {
             // 5. Thực hiện trừ tiền
             const success = await removeMoney(userId, totalPrice, item.currency);
-            
+
             if (success) {
                 // 6. Thêm vật phẩm vào túi đồ (inventory)
                 const invKey = renderKey('inventory', userId);
-                
+
                 // Tối ưu: Lấy mảng cũ, push hàng loạt rồi set 1 lần duy nhất để tránh spam DB
                 const currentInv = (await getKey(invKey)) || [];
                 for (let i = 0; i < amount; i++) {
