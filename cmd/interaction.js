@@ -202,6 +202,21 @@ const interactions = {
       "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExd2Y2NzYwd2R3eWd1MGM2cTV6dGlwcmVuc2d5NGU2ZXowYjRvYWN4bSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/lsuzxXh9Eiwqz1jlHv/giphy.gif",      
     ],
   },
+   shoot: {
+    tag: "shoot",
+    color: "#1b1202",
+    msg: "đã bắn",
+    lovePoint: -5,
+    images: [
+      "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExMG5qeHgzdDMxdGt0ZjN6ZmU2aDZ6YW04Nm9sYzloeTl6bGx2aDJ5MyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/10ZuedtImbopos/giphy.gif",
+      "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExMG5qeHgzdDMxdGt0ZjN6ZmU2aDZ6YW04Nm9sYzloeTl6bGx2aDJ5MyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/28p7K4xfPHK8w/giphy.gif",
+      "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExMG5qeHgzdDMxdGt0ZjN6ZmU2aDZ6YW04Nm9sYzloeTl6bGx2aDJ5MyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/LJ7fPC06m5xDC2pSGX/giphy.gif",
+      "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExMG5qeHgzdDMxdGt0ZjN6ZmU2aDZ6YW04Nm9sYzloeTl6bGx2aDJ5MyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/IgCUUBKeBozqLcZEOj/giphy.gif",
+      "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExMG5qeHgzdDMxdGt0ZjN6ZmU2aDZ6YW04Nm9sYzloeTl6bGx2aDJ5MyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/xTiN0m0FurL9m3KdRS/giphy.gif",
+      "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExenRsM2s1djJpMDM1aG1kaTEzMGc3bTY3YmZkZnI2dzk4bGVnb2hyaSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/d2QCorOWTId6jnODgv/giphy.gif",
+      "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExenRsM2s1djJpMDM1aG1kaTEzMGc3bTY3YmZkZnI2dzk4bGVnb2hyaSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/a5OCMAro7MGQg/giphy.gif"
+    ],
+  },
 };
 
 module.exports = {

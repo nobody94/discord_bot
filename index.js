@@ -48,6 +48,7 @@ client.once(Events.ClientReady, (c) => {
   console.log(`Bot ${c.user.tag} đã sẵn sàng và đang hoạt động!`);
 });
 
+
 client.on("messageCreate", async (message) => {
   // Bỏ qua tin nhắn của bot
   if (!message) return;

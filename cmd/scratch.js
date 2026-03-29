@@ -50,15 +50,15 @@ module.exports = {
     let reward = 0;
     let resultMessage = "";
 
-    if (winRate < 0.05) {
-      // 5% trúng giải Độc Đắc (x10 lần cược)
+    if (winRate < 0.02) {
+      // 5% trúng giải Độc Đắc (x5 lần cược)
       reward = betAmount * 5;
       resultMessage = `🎰 **GIẢI ĐỘC ĐẮC!** Bạn đã trúng x5: **${reward}** ${getIcon()}!`;
-    } else if (winRate < 0.15) {
-      // 10% trúng giải Nhì (x5 lần cược)
+    } else if (winRate < 0.08) {
+      // 10% trúng giải Nhì (x3 lần cược)
       reward = betAmount * 3;
       resultMessage = `🎉 **Giải Nhì!** Bạn đã trúng x3: **${reward}** ${getIcon()}!`;
-    } else if (winRate < 0.35) {
+    } else if (winRate < 0.30) {
       // 20% trúng giải Ba (x2 lần cược)
       reward = betAmount * 2;
       resultMessage = `✨ **Giải Ba!** Bạn nhận được x2: **${reward}** ${getIcon()}.`;

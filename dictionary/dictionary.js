@@ -1,9 +1,11 @@
 const fs = require("fs");
 const path = require('path');
 
-const pathViToFile = path.join(__dirname, '..','dictionary' ,'Viet74K.txt');
-const pathEnToFile = path.join(__dirname, '..','dictionary' ,'en-dictionary.json');
+const pathViToFile = path.join(__dirname, '..','dictionary' ,'vi-dictionary.txt');
+// Đổi đuôi file thành .txt
+const pathEnToFile = path.join(__dirname, '..','dictionary' ,'en-dictionary.txt');
 
+// Xử lý từ điển Tiếng Việt
 const listViWord = new Set(
   fs
     .readFileSync(pathViToFile, "utf8")
@@ -12,14 +14,17 @@ const listViWord = new Set(
     .filter(Boolean)
 );
 
-const rawData =fs.readFileSync(pathEnToFile, "utf8");
-const jsonArray = JSON.parse(rawData);  
-const sourceArray = Array.isArray(jsonArray) ? jsonArray : Object.keys(jsonArray);
-const dicFilter = new Set(sourceArray
-            .map((w) => w.trim().toLowerCase())
-            .filter((w)=> Boolean(w) && !w.includes('-') && w.length > 1));
+// Xử lý từ điển Tiếng Anh (Chuyển từ JSON sang TXT)
+const rawEnData = fs.readFileSync(pathEnToFile, "utf8");
+const enLines = rawEnData.split("\n"); // Tách theo dòng thay vì parse JSON
 
-const enDictionary = Array.from(dicFilter).map((d)=> d);
+const dicFilter = new Set(
+  enLines
+    .map((w) => w.trim().toLowerCase())
+    .filter((w) => Boolean(w) && !w.includes('-') && w.length > 1)
+);
+
+const enDictionary = Array.from(dicFilter);
 
 const viDictionary = Array.from(listViWord).filter(
   (phrase) => phrase.split(" ").length === 2 && !phrase.includes('-')
@@ -29,22 +34,16 @@ const saveWord = (lang, word) => {
     const targetWord = word.trim().toLowerCase();
     
     if (lang === 'vi') {
-        // Ghi thêm một dòng mới vào file Viet74K.txt
         fs.appendFileSync(pathViToFile, `\n${targetWord}`);
-        
-        // Cập nhật bộ nhớ tạm để dùng ngay không cần restart
         if (targetWord.split(" ").length === 2) {
             viDictionary.push(targetWord);
         }
     } else {
-        // Đọc file JSON hiện tại, thêm từ và ghi đè lại
-        const rawData = fs.readFileSync(pathEnToFile, "utf8");
-        const jsonArray = JSON.parse(rawData);
+        // Ghi vào file .txt tiếng Anh (Dùng append để tối ưu hơn ghi đè)
+        fs.appendFileSync(pathEnToFile, `\n${targetWord}`);
         
-        if (Array.isArray(jsonArray)) {
-            jsonArray.push(targetWord);
-            fs.writeFileSync(pathEnToFile, JSON.stringify(jsonArray, null, 2));
-            // Cập nhật bộ nhớ tạm
+        // Cập nhật bộ nhớ tạm
+        if (!enDictionary.includes(targetWord) && !targetWord.includes('-')) {
             enDictionary.push(targetWord);
         }
     }
