@@ -20,11 +20,29 @@ function getCustomDate() {
     return `${year}-${month}-${day}`;
 }
 
+function calculateInterest(date) {
+    const startDate = new Date(date);
+    const now = new Date();
+    const diffTime = Math.abs(now - startDate);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
+
+    let interestRate = 0;
+    if (diffDays >= 7) interestRate = 0.10;      // >= 7 ngày lãi 10%
+    else if (diffDays >= 3) interestRate = 0.05; // >= 3 ngày lãi 5%
+    else interestRate = 0.02;                    // < 3 ngày lãi 2%
+
+    return {
+        rate: interestRate,
+        days: diffDays
+    };
+}
+
 module.exports={
     maxAmount,
     DEVELOPER_IDS,
     getCustomDate,
     MAX_LOVE_POINTS_PER_DAY,
     managerIds,
-    giftManagerIds
+    giftManagerIds,
+    calculateInterest
 }

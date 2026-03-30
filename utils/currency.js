@@ -56,6 +56,32 @@ async function removeMoney(userId, amount, type = DEFAULT_TYPE) {
     return true;
 }
 
+async function checkPay(guildId,userId) {
+    //check nợ
+    const loanKey = renderKey("loan", guildId);
+    let allLoans = (await getKey(loanKey)) || [];
+    const userLoans = allLoans.filter(l => l.nguoi_vay === userId);
+
+    // Kiểm tra xem có khoản nợ nào quá 3 ngày không
+    const hasOverdueDebt = userLoans.some(loan => {
+      const loanDate = new Date(loan.date);
+      const diffTime = Math.abs(new Date() - loanDate);
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+      return diffDays >= 3;
+    });
+
+    //check biên bản
+    const bienbanKey = renderKey("bienban", guildId);
+    let allBienban = (await getKey(bienbanKey)) || [];
+    const userBienban = allBienban.filter(l => l.userId === userId);
+    const isBienban = userBienban.length > 0;
+    
+    return {
+        isDebt:hasOverdueDebt,
+        isReport:isBienban
+    }
+}
 
 
-module.exports = { getAllBalances,getBalance, addMoney, removeMoney, getIcon,CURRENCIES };
+
+module.exports = { getAllBalances,getBalance, addMoney, removeMoney, getIcon,CURRENCIES,checkPay };

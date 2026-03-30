@@ -1,5 +1,5 @@
 const { getKey, renderKey, setKey } = require("../utils/db");
-const { getIcon, addMoney } = require("../utils/currency.js");
+const { getIcon, addMoney,checkPay } = require("../utils/currency.js");
 const { FISH_SHOP_ITEMS } = require("../utils/fish.js");
 const { errorIcon, verifyIcon } = require("../utils/icon.js");
 
@@ -28,20 +28,19 @@ async function fishInvHandler(args, message, inventory, invKey, userId) {
       return message.reply(`${errorIcon} | Bạn không đủ số lượng **${itemData.name}** để tặng.`);
     }
 
-    const loanKey = renderKey("loan", message.guild.id);
-    let allLoans = (await getKey(loanKey)) || [];
-    const userLoans = allLoans.filter(l => l.nguoi_vay === userId);
+    //kiểm tra nợ và biên bản
+    const isPay = await checkPay(message.guild.id, userId);
 
-    // Kiểm tra xem có khoản nợ nào quá 3 ngày không
-    const hasOverdueDebt = userLoans.some(loan => {
-      const loanDate = new Date(loan.date);
-      const diffTime = Math.abs(new Date() - loanDate);
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      return diffDays >= 3;
-    });
+    if (isPay.isReport) {
+      return message.reply(
+        `${errorIcon} | **GIAO DỊCH BỊ CHẶN!** Bạn đang có biên bản vi phạm. Vui lòng dùng lệnh \`.bienban thanhtoan\` để thanh toán.`,
+      );
+    }
 
-    if (hasOverdueDebt) {
-      return message.reply(`${errorIcon} | **GIAO DỊCH BỊ CHẶN!** Bạn đang có khoản nợ quá hạn (trên 3 ngày). Vui lòng dùng lệnh \`.trano\` để thanh toán trước khi tặng đồ câu.`);
+    if (isPay.isDebt) {
+      return message.reply(
+        `${errorIcon} | **GIAO DỊCH BỊ CHẶN!** Bạn đang có khoản nợ quá hạn (trên 3 ngày). Vui lòng dùng lệnh \`.trano\` để thanh toán.`,
+      );
     }
 
     const targetInvKey = renderKey("fish_inv", target.id);
