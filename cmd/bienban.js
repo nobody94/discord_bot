@@ -14,6 +14,10 @@ module.exports = {
     const bbKey = renderKey("bienban", message.guild.id);
     const isDev = DEVELOPER_IDS.includes(message.author.id);
 
+    if(!action){
+        return message.reply(`⚠️ Cách dùng: \`.bienban lap @user <số tiền>\``);
+    }
+
     try {
       // --- 1. LẬP BIÊN BẢN ---
       if (action === "lap") {
