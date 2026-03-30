@@ -5,12 +5,16 @@ const { renderKey, getKey, setKey, deleteKey } = require('../utils/db.js');
 const { DEVELOPER_IDS } = require('../utils/constant.js');
 
 // --- CẤU HÌNH ---
+// Giá vé
 const TICKET_PRICE = 1000;
+// số lượng vé có thể mua
 const MAX_TICKETS_PER_USER = 10;
+// Thuế 10%
+const TAX_RATE = 0.1; 
 
 module.exports = {
-    name: 'soxo',
-    aliases: ['sx', 'lottery'],
+    name: 'xoso',
+    aliases: ['xs', 'lottery'],
     description: 'Hệ thống xổ số Jackpot chuyên sâu.',
 
     async execute(message, args) {
@@ -125,10 +129,11 @@ module.exports = {
                             .setTimestamp();
 
                         if (winners.length > 0) {
+                            const winnerMentions = winners.map(w => `<@${w.userId}>`).join(', ');
                             embed.setColor(0x00FF00)
                                  .setDescription(
                                      `🔢 Con số may mắn: **[ ${displayWin} ]**\n\n` +
-                                     `🎉 Chúc mừng **${winners.length}** người đã trúng giải!\n` +
+                                     `🎉 Chúc mừng những người sau đây đã trúng giải!\n${winnerMentions}` +
                                      `👉 Dùng \`.soxo thuong\` để phát thưởng ngay.`
                                  );
                         } else {
@@ -136,7 +141,7 @@ module.exports = {
                                  .setDescription(
                                      `🔢 Con số may mắn: **[ ${displayWin} ]**\n\n` +
                                      `❌ Rất tiếc, không có ai trúng đợt này.\n` +
-                                     `💰 Jackpot tiếp tục được cộng dồn!`
+                                     `💰 Jackpot tiếp tục được cộng dồn! Dùng \`.soxo thuong\` để bỏ vé cũ.`
                                  );
                             await deleteKey(lotteryKey); // Xóa vé cũ
                         }
@@ -156,31 +161,57 @@ module.exports = {
 
             // --- 5. THƯỞNG (CHỈ DEV - .soxo thuong) ---
             else if (action === 'thuong') {
-                if (!isDev) return message.reply(`${errorIcon} | Chỉ Dev mới có quyền phát thưởng.`);
+                if (!isDev) return message.reply(`${errorIcon} | Chỉ Dev mới phát thưởng được.`);
                 
                 const allTickets = (await getKey(lotteryKey)) || [];
                 const jackpot = (await getKey(jackpotKey)) || 0;
-                const winNum = await getKey(renderKey("last_win_num", guildId));
+                const winNum = await getKey(winNumKey);
 
-                if (!winNum) return message.reply("Hãy chạy lệnh `.soxo quay` trước.");
+                if (!winNum) return message.reply("⚠️ Hãy quay số trước bằng lệnh `.xoso quay`.");
 
                 const winners = allTickets.filter(t => t.number === winNum);
-                if (winners.length === 0) return message.reply("Không có ai trúng số này để thưởng.");
-
-                const prize = Math.floor(jackpot / winners.length);
-                for (const w of winners) {
-                    await addMoney(w.userId, prize, currencyType);
+                if (winners.length === 0) {
+                    await deleteKey(lotteryKey);
+                    await deleteKey(winNumKey);
+                    return message.reply(`📢 Không có ai trúng số **${winNum}**. Đã hủy vé đợt cũ.`);
                 }
+
+                // --- LOGIC THUẾ ---
+                const tax = Math.floor(jackpot * TAX_RATE);
+                const finalPrizePool = jackpot - tax;
+                const prizePerPerson = Math.floor(finalPrizePool / winners.length);
+                
+                // Cập nhật ngân khố server
+                let currentBank = (await getKey(bankKey)) || 0;
+                await setKey(bankKey, currentBank + tax);
+
+                const winnerMentions = winners.map(w => `<@${w.userId}>`).join(', ');
+
+                for (const w of winners) {
+                    await addMoney(w.userId, prizePerPerson, currencyType);
+                }
+
+                const embed = new EmbedBuilder()
+                    .setTitle("💰 PHÁT THƯỞNG XỔ SỐ 💰")
+                    .setColor(0x00FF00)
+                    .setDescription(
+                        `🔢 Số trúng: **[ ${winNum.split('').join(' | ')} ]**\n\n` +
+                        `👤 **Người trúng:** ${winnerMentions}\n` +
+                        `💵 **Tổng hũ:** ${jackpot.toLocaleString()}${getIcon(currencyType)}\n` +
+                        `🧧 **Thuế (10%):** ${tax.toLocaleString()}${getIcon(currencyType)}\n` +
+                        `💰 **Thực nhận:** **${prizePerPerson.toLocaleString()}**${getIcon(currencyType)} / người`
+                    )
+                    .setFooter({ text: "Tiền thuế đã được nộp vào Ngân khố Server." });
 
                 await setKey(jackpotKey, 0);
                 await deleteKey(lotteryKey);
-                await deleteKey(renderKey("last_win_num", guildId));
+                await deleteKey(winNumKey);
 
-                return message.reply(`${verifyIcon} | Đã phát thưởng thành công **${prize.toLocaleString()}** cho mỗi người thắng!`);
+                return message.channel.send({ content: `🎊 Chúc mừng: ${winnerMentions}`, embeds: [embed] });
             }
 
             else {
-                return message.reply("📝 **Lệnh:** `mua`, `check`, `all` (Admin), `quay` (Admin), `thuong` (Dev).");
+                return message.reply("📝 **LỆNH XỔ SỐ:**\n> `.xoso mua <số>`: Mua vé (Max 10).\n> `.xoso check`: Xem vé cá nhân.\n> `.xoso all`: Xem tất cả vé (Admin/Dev).\n> `.xoso quay`: Quay số (Admin/Dev).\n> `.xoso thuong`: Phát giải (Dev).");
             }
 
         } catch (error) {
