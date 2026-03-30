@@ -2,7 +2,7 @@ const { EmbedBuilder } = require('discord.js');
 const { getIcon } = require('../utils/currency.js');
 const { errorIcon } = require('../utils/icon.js');
 const { renderKey, getKey } = require('../utils/db.js');
-const { DEVELOPER_IDS } = require('../utils/constant.js');
+const { DEVELOPER_IDS,calculateInterest } = require('../utils/constant.js');
 
 module.exports = {
     name: 'khoanvay',
@@ -10,7 +10,7 @@ module.exports = {
     description: 'Kiểm tra danh sách các khoản vay của bản thân hoặc người khác.',
 
     async execute(message, args) {
-        try {
+       try {
             const loanKey = renderKey("loan", message.guild.id);
             const allLoans = (await getKey(loanKey)) || [];
 
@@ -27,25 +27,16 @@ module.exports = {
 
             // --- LOGIC LỌC DỮ LIỆU ---
             if (isViewAll) {
-                // 1. Xem tất cả (Chỉ Dev)
                 if (!isDev) return message.reply(`${errorIcon} | Bạn không có quyền xem toàn bộ khoản vay.`);
                 displayLoans = allLoans;
                 title = `📋 TOÀN BỘ KHOẢN VAY - ${message.guild.name.toUpperCase()}`;
             } 
             else if (targetUser) {
-                // 2. Xem của người được tag
-                displayLoans = allLoans.filter(l => 
-                    l.nguoi_vay === targetUser.id || 
-                    l.nguoi_cho_vay === targetUser.id
-                );
+                displayLoans = allLoans.filter(l => l.nguoi_vay === targetUser.id || l.nguoi_cho_vay === targetUser.id);
                 title = `📋 KHOẢN VAY CỦA ${targetUser.username.toUpperCase()}`;
             } 
             else {
-                // 3. Tự xem bản thân
-                displayLoans = allLoans.filter(l =>
-                    l.nguoi_vay === message.author.id ||
-                    l.nguoi_cho_vay === message.author.id
-                );
+                displayLoans = allLoans.filter(l => l.nguoi_vay === message.author.id || l.nguoi_cho_vay === message.author.id);
                 title = `📋 KHOẢN VAY CỦA ${message.author.username.toUpperCase()}`;
             }
 
@@ -62,24 +53,28 @@ module.exports = {
 
             let description = "";
             displayLoans.forEach((loan, index) => {
-                const dateObj = new Date(loan.date);
-                const now = new Date();
-                const diffTime = Math.abs(now - dateObj);
-                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                // Sử dụng hàm dùng chung để tính lãi suất hiện tại
+                const { rate, days } = calculateInterest(loan.date);
+                const interestAmount = Math.round(loan.money * rate);
+                const totalDebt = loan.money + interestAmount;
 
+                const dateObj = new Date(loan.date);
                 const dateDisplay = !isNaN(dateObj) ? dateObj.toLocaleDateString('vi-VN') : "Không rõ";
 
-                description += `**${index + 1}.** <@${loan.nguoi_vay}> vay <@${loan.nguoi_cho_vay}>\n`;
-                description += `> 💸 Tiền: **${loan.money.toLocaleString()}** ${getIcon('mora')}\n`;
-                description += `> 🗓️ Ngày: \`${dateDisplay}\` (${diffDays} ngày trước)\n`;
+                description += `**${index + 1}.** <@${loan.nguoi_vay}> nợ <@${loan.nguoi_cho_vay}>\n`;
+                description += `> 💰 Tổng nợ: **${totalDebt.toLocaleString()}** ${getIcon('mora')}\n`;
+                description += `> 💵 Gốc: \`${loan.money.toLocaleString()}\` | 📈 Lãi: \`${(rate * 100).toFixed(0)}%\` (+${interestAmount.toLocaleString()})\n`;
+                description += `> 🗓️ Ngày vay: \`${dateDisplay}\` (<t:${Math.floor(dateObj.getTime() / 1000)}:R>)\n`;
 
-                if (diffDays >= 3) {
-                    description += `> ⚠️ **Lưu ý:** *Nợ quá hạn (3+ ngày)*\n`;
+                if (days >= 3) {
+                    description += `> ⚠️ **Cảnh báo:** Khoản nợ đã quá hạn ${days} ngày.\n`;
                 }
                 description += `\n`;
             });
 
             embed.setDescription(description);
+            embed.setFooter({ text: "Dùng .trano <STT> [số tiền] để thanh toán." });
+            
             return message.channel.send({ embeds: [embed] });
 
         } catch (error) {

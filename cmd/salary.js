@@ -42,13 +42,25 @@ module.exports = {
                 return message.reply(`❌ Bạn chưa nhập số tiền hợp lệ.`);
             }
 
-            // Lấy thành viên trong Role
-            const members = role.members;
-            if (members.size === 0) {
-                return message.reply(`❌ Role này hiện không có thành viên nào.`);
-            }
+            // --- ĐOẠN SỬA ĐỔI: Sử dụng fetch để lấy đầy đủ thành viên ---
+            const statusMsg = await message.channel.send("🔄 Đang tải danh sách thành viên từ Role...");
+            
+            try {
+                // Fetch lại toàn bộ member của server để đảm bảo cache đầy đủ
+                const allMembers = await message.guild.members.fetch();
+                // Lọc ra những người có Role đó
+                const roleMembers = allMembers.filter(m => m.roles.cache.has(role.id));
 
-            listToPay = members.map(m => ({ id: m.id, amount: amount, type: currencyType }));
+                if (roleMembers.size === 0) {
+                    return statusMsg.edit(`❌ Role này hiện không có thành viên nào.`);
+                }
+
+                listToPay = roleMembers.map(m => ({ id: m.id, amount: amount, type: currencyType }));
+                await statusMsg.delete(); // Xóa tin nhắn chờ sau khi tải xong
+            } catch (err) {
+                console.error(err);
+                return statusMsg.edit(`❌ Lỗi khi tải danh sách thành viên.`);
+            }
         }
 
         // 3. THỰC HIỆN PHÁT LƯƠNG

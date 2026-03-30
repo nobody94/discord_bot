@@ -11,6 +11,7 @@ const { renderKey, pushKey, getKey } = require('../utils/db.js');
 // --- CẤU HÌNH GIỚI HẠN ---
 const MAX_LOAN_COUNT = 3;          // Tối đa 3 lần nợ
 const MAX_LOAN_AMOUNT = 1000000;  // Tối đa 1 triệu Mora tổng cộng
+const MIN_LOAN_AMOUNT = 10000;
 
 module.exports = {
     name: 'vay',
@@ -44,6 +45,9 @@ module.exports = {
             }
 
             // Kiểm tra tổng số tiền nợ
+            if(amount < MIN_LOAN_AMOUNT){
+                return message.reply(`${errorIcon} | Số tiền vay không được nhỏ hơn **${MIN_LOAN_AMOUNT.toLocaleString()}** ${getIcon(currencyType)}`);
+            }
             if (currentTotalDebt + amount > MAX_LOAN_AMOUNT) {
                 return message.reply(`${errorIcon} | Tổng nợ của bạn không được vượt quá **${MAX_LOAN_AMOUNT.toLocaleString()}** ${getIcon(currencyType)}.\n> Nợ hiện tại: **${currentTotalDebt.toLocaleString()}**`);
             }
