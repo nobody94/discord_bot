@@ -4,7 +4,6 @@ const { errorIcon, verifyIcon } = require('../utils/icon.js');
 const { renderKey, getKey, setKey, deleteKey } = require('../utils/db.js');
 const { DEVELOPER_IDS } = require('../utils/constant.js');
 
-// --- CẤU HÌNH ---
 // Giá vé
 const TICKET_PRICE = 1000;
 // số lượng vé có thể mua
