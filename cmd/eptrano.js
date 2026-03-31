@@ -61,8 +61,8 @@ module.exports = {
                 content: `🚨 **LỆNH CƯỠNG CHẾ TÀI CHÍNH**`,
                 embeds: [{
                     color: 0xFF0000,
-                    description: `Developer ${message.author} đã ép <@${targetUser.id}> trả nợ.\n\n` +
-                                 `> 👤 Chủ nợ nhận: **${totalToPay.toLocaleString()}** ${getIcon(currencyType)}\n` +
+                    description: `${message.author} đã cưỡng chế <@${targetUser.id}> trả nợ.\n\n` +
+                                 `> 👤 Chủ nợ <@${targetLoan.nguoi_cho_vay}> nhận: **${totalToPay.toLocaleString()}** ${getIcon(currencyType)}\n` +
                                  `> 📉 Lãi suất áp dụng (${diffDays} ngày): **${(interestRate * 100)}%**\n` +
                                  `> ✅ Trạng thái: **Đã xóa khoản nợ khỏi hệ thống.**`
                 }]

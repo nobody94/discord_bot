@@ -1,9 +1,12 @@
+//max tiền được đánh cược
 const maxAmount = 10000;
 
 const DEVELOPER_IDS = ['1446889473374683400','1016709206780411924']; 
-const MAX_LOVE_POINTS_PER_DAY = 500;
+const MAX_LOVE_POINTS_PER_DAY = 500; 
 const managerIds = ['1182987381662556253', "1446889473374683400"];
 const giftManagerIds = ['1016709206780411924', "1446889473374683400"];
+//số tiền đổi từ primo ra mora
+const exchangeRate = 10000;
 
 function getCustomDate() {
    const vnTime = new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Ho_Chi_Minh"}));
@@ -44,5 +47,6 @@ module.exports={
     MAX_LOVE_POINTS_PER_DAY,
     managerIds,
     giftManagerIds,
-    calculateInterest
+    calculateInterest,
+    exchangeRate
 }

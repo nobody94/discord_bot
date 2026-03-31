@@ -2,7 +2,7 @@ const { renderKey, pushKey, getKey, setKey } = require("../utils/db.js");
 const { errorIcon, verifyIcon } = require("../utils/icon.js");
 const { getIcon, getBalance, removeMoney } = require("../utils/currency.js");
 const { DEVELOPER_IDS } = require("../utils/constant.js");
-const { calculateInterest } = require("../utils/constant.js");
+const { calculateInterest,exchangeRate } = require("../utils/constant.js");
 
 module.exports = {
   name: "bienban",
@@ -174,7 +174,7 @@ module.exports = {
         });
       }
 
-      // --- 5. XÓA BIÊN BẢN (NÂNG CẤP) ---
+      // --- 5. XÓA BIÊN BẢN ---
       else if (action === "xoa") {
         if (!isDev) {
           return message.reply(`${errorIcon} | Chỉ Dev mới có thể dùng.`);
@@ -219,6 +219,83 @@ module.exports = {
             `${verifyIcon} | Đã xóa biên bản số **${option}** của ${target} (Trị giá: ${itemToDelete.money.toLocaleString()}).`,
           );
         }
+      }
+      // --- 6. ÉP TRẢ BIÊN BẢN  ---
+      else if (action === "eptra") {
+        if (!isDev) {
+          return message.reply(`${errorIcon} | Chỉ Dev mới có quyền thực thi lệnh cưỡng chế này.`);
+        }
+
+        const targetUser = message.mentions.users.first();
+        const stt = parseInt(args[2]);
+
+        if (!targetUser || isNaN(stt)) {
+          return message.reply(`⚠️ Cách dùng: \`.bienban eptra @user <STT>\``);
+        }
+
+        const allBB = (await getKey(bbKey)) || [];
+        const userBBs = allBB.filter((bb) => bb.userId === targetUser.id);
+        const targetBB = userBBs[stt - 1];
+
+        if (!targetBB) {
+          return message.reply(`${errorIcon} | Không tìm thấy biên bản số **${stt}** của người này.`);
+        }
+
+        // Tính toán tổng nợ (Gốc + Lãi)
+        const { rate, days } = calculateInterest(targetBB.date);
+        const interestMoney = Math.round(targetBB.money * rate);
+        let remainingDebt = targetBB.money + interestMoney;
+
+        // Lấy số dư hiện tại
+        let userMora = await getBalance(targetUser.id, "mora");
+        let userPrimo = await getBalance(targetUser.id, "primo"); // Giả định bạn có hàm getBalance cho primo
+        
+        const initialDebt = remainingDebt;
+        let moraUsed = 0;
+        let primoUsed = 0;
+
+        // Bước 1: Trừ Mora (vét sạch nếu cần)
+        if (userMora > 0) {
+            moraUsed = Math.min(userMora, remainingDebt);
+            await removeMoney(targetUser.id, moraUsed, "mora");
+            remainingDebt -= moraUsed;
+        }
+
+        // Bước 2: Nếu vẫn nợ, quy đổi Primo        
+        if (remainingDebt > 0 && userPrimo > 0) {
+            let primoNeeded = Math.ceil(remainingDebt / exchangeRate);
+            primoUsed = Math.min(userPrimo, primoNeeded);
+            
+            await removeMoney(targetUser.id, primoUsed, "primo");
+            remainingDebt -= (primoUsed * exchangeRate);
+        }
+
+        // Cập nhật Database
+        if (remainingDebt <= 0) {
+            // Đã trả hết: Xóa biên bản
+            const realIndex = allBB.indexOf(targetBB);
+            allBB.splice(realIndex, 1);
+            await setKey(bbKey, allBB);
+        } else {
+            // Vét sạch cả 2 túi vẫn không đủ: Cập nhật lại số tiền còn nợ vào biên bản
+            const realIndex = allBB.indexOf(targetBB);
+            allBB[realIndex].money = remainingDebt;
+            allBB[realIndex].date = new Date().toISOString(); // Reset ngày để tính lãi lại từ số nợ mới
+            await setKey(bbKey, allBB);
+        }
+
+        // Thông báo
+        return message.channel.send({
+            embeds: [{
+                title: `🚨 LỆNH CƯỠNG CHẾ BIÊN BẢN`,
+                color: 0xFF0000,
+                description: `${message.author} đã cưỡng chế tài khoản của ${targetUser} để thanh toán biên bản số **${stt}**.\n\n` +
+                             `> 💰 **Tổng nợ cần thu:** ${initialDebt.toLocaleString()} ${getIcon("mora")}\n` +
+                             `> 📉 **Đã trừ Mora:** ${moraUsed.toLocaleString()} ${getIcon("mora")}\n` +
+                             `> 💎 **Đã quy đổi Primo:** ${primoUsed.toLocaleString()} ${getIcon("primo")}\n` +
+                             `> ⚖️ **Trạng thái:** ${remainingDebt <= 0 ? "✅ Đã thanh toán xong" : `⚠️ Còn nợ **${remainingDebt.toLocaleString()}** ${getIcon("mora")} (Đã vét sạch túi)`}`
+            }]
+        });
       }
     } catch (error) {
       console.error(error);
