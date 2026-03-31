@@ -66,7 +66,7 @@ module.exports = {
                     color: 0x00FFFF,
                     description: `Hệ thống đã thực hiện chuyển đổi nợ cho <@${targetUser.id}>.\n\n` +
                                  `> 👤 **Chủ nợ:** <@${targetLoan.nguoi_cho_vay}> đã được nhận **${totalAmount.toLocaleString()}** ${getIcon(currencyType)}\n` +
-                                 `> 📝 **Người vay:** Khoản nợ đã chuyển thành **Biên bản vi phạm**.\n` +
+                                 `> 📝 Khoản nợ đã chuyển thành **Biên bản vi phạm**.\n` +
                                  `> 📈 **Chi tiết:** Bao gồm gốc và lãi tích lũy trong ${diffDays} ngày.`
                 }]
             });

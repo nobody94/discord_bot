@@ -22,12 +22,13 @@ module.exports = {
         const guildId = message.guild.id;
         const lotteryKey = renderKey("lottery", guildId);
         const jackpotKey = renderKey("lottery_jackpot", guildId);
+        const winNumKey = renderKey("last_win_num", guildId)
         const currencyType = 'mora';
         const isDev = DEVELOPER_IDS.includes(message.author.id);
         const isAdmin = message.member.permissions.has('Administrator') || isDev;
 
         try {
-            // --- 1. MUA VÉ (.soxo mua <số lượng>) ---
+            // --- 1. MUA VÉ (.xoso mua <số lượng>) ---
             if (action === 'mua') {
                 const quantity = parseInt(args[1]) || 1;
                 if (quantity <= 0) return message.reply("⚠️ Số lượng không hợp lệ.");
@@ -58,7 +59,7 @@ module.exports = {
                 return message.reply(`${verifyIcon} | Mua thành công **${quantity}** vé! Hũ Jackpot: **${(currentJackpot + totalCost).toLocaleString()}**.`);
             }
 
-            // --- 2. KIỂM TRA CÁ NHÂN (.soxo check) ---
+            // --- 2. KIỂM TRA CÁ NHÂN (.xoso check) ---
             else if (action === 'check') {
                 const allTickets = (await getKey(lotteryKey)) || [];
                 const myTickets = allTickets.filter(t => t.userId === message.author.id);
@@ -75,21 +76,43 @@ module.exports = {
                 return message.reply({ embeds: [embed] });
             }
 
-            // --- 3. XEM TẤT CẢ (ADMIN/DEV - .soxo all) ---
+            // --- 3. XEM TẤT CẢ (ADMIN/DEV - .xoso all) ---
             else if (action === 'all') {
-                if (!isAdmin) return message.reply(`${errorIcon} | Chỉ Admin mới xem được danh sách.`);
+               if (!isAdmin) return message.reply(`${errorIcon} | Chỉ Admin mới xem được danh sách.`);
+                
                 const allTickets = (await getKey(lotteryKey)) || [];
                 if (allTickets.length === 0) return message.reply("Chưa có vé nào được mua.");
 
-                const list = allTickets.map((t, i) => `**${i+1}.** <@${t.userId}>: \`${t.number}\``).join('\n');
+                // Nhóm vé theo userId
+                const groupedTickets = allTickets.reduce((acc, ticket) => {
+                    if (!acc[ticket.userId]) {
+                        acc[ticket.userId] = [];
+                    }
+                    acc[ticket.userId].push(`\`${ticket.number}\``);
+                    return acc;
+                }, {});
+
+                // Tạo nội dung hiển thị
+                const list = Object.keys(groupedTickets).map((userId, i) => {
+                    return `**${i + 1}.** <@${userId}>\n> 🎟️ Vé: ${groupedTickets[userId].join(', ')}`;
+                }).join('\n\n');
+
+                const currentJackpot = (await getKey(jackpotKey)) || 0;
+
                 const embed = new EmbedBuilder()
-                    .setTitle("📂 TỔNG DANH SÁCH VÉ SERVER")
-                    .setDescription(list.length > 2000 ? "Danh sách quá dài..." : list)
-                    .setColor(0x000000);
+                    .setTitle(`📂 DANH SÁCH VÉ SERVER (${allTickets.length} vé)`)
+                    .setDescription(list.length > 2000 ? "⚠️ Danh sách quá dài để hiển thị tất cả..." : list)
+                    .addFields({ 
+                        name: '💰 Jackpot hiện tại', 
+                        value: `**${currentJackpot.toLocaleString()}** ${getIcon(currencyType)}` 
+                    })
+                    .setColor(0x2F3136) // Màu tối sang trọng
+                    .setTimestamp();
+
                 return message.reply({ embeds: [embed] });
             }
 
-            // --- 4. QUAY SỐ (ADMIN/DEV - .soxo quay) ---
+            // --- 4. QUAY SỐ (ADMIN/DEV - .xoso quay) ---
             else if (action === 'quay') {
                 if (!isAdmin) return message.reply(`${errorIcon} | Bạn không có quyền quay số.`);
                 const allTickets = (await getKey(lotteryKey)) || [];
@@ -134,20 +157,20 @@ module.exports = {
                                  .setDescription(
                                      `🔢 Con số may mắn: **[ ${displayWin} ]**\n\n` +
                                      `🎉 Chúc mừng những người sau đây đã trúng giải!\n${winnerMentions}` +
-                                     `👉 Dùng \`.soxo thuong\` để phát thưởng ngay.`
+                                     `👉 Dùng \`.xoso thuong\` để phát thưởng ngay.`
                                  );
                         } else {
                             embed.setColor(0xFF0000)
                                  .setDescription(
                                      `🔢 Con số may mắn: **[ ${displayWin} ]**\n\n` +
                                      `❌ Rất tiếc, không có ai trúng đợt này.\n` +
-                                     `💰 Jackpot tiếp tục được cộng dồn! Dùng \`.soxo thuong\` để bỏ vé cũ.`
+                                     `💰 Jackpot tiếp tục được cộng dồn! Dùng \`.xoso thuong\` để bỏ vé cũ.`
                                  );
                             await deleteKey(lotteryKey); // Xóa vé cũ
                         }
 
                         // Lưu số trúng vào DB để lệnh 'thuong' sử dụng
-                        await setKey(renderKey("last_win_num", guildId), winNum);
+                        await setKey(winNumKey, winNum);
                         
                         await statusMsg.edit({ 
                             content: "✅ **QUAY THƯỞNG HOÀN TẤT!**", 
@@ -159,7 +182,7 @@ module.exports = {
                 return;
             }
 
-            // --- 5. THƯỞNG (CHỈ DEV - .soxo thuong) ---
+            // --- 5. THƯỞNG (CHỈ DEV - .xoso thuong) ---
             else if (action === 'thuong') {
                 if (!isDev) return message.reply(`${errorIcon} | Chỉ Dev mới phát thưởng được.`);
                 
