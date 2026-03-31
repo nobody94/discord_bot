@@ -119,7 +119,8 @@ async function becaHandler(args, message, fishTank, tankKey, userId) {
       );
 
     //kiểm tra nợ và biên bản
-    await checkPay(message, userId);
+    const isBlocked = await checkPay(message, userId);
+    if (isBlocked) return;
 
     // Trừ cá của người tặng
     for (let i = 0; i < amount; i++) {

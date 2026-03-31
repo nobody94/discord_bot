@@ -10,9 +10,6 @@ module.exports = {
   description: "Xem các vật phẩm bạn đang sở hữu.",
 
   async execute(message, args) {
-    //const userId = message.author.id;
-    // Lấy danh sách item từ DB (mảng các ID đã mua)
-    // Lưu ý: Trong lệnh .buy bạn nên lưu mảng ID;
     const targetUser = message.mentions.users.first() || message.author;
     const userId = targetUser.id;
     const username = targetUser.username;

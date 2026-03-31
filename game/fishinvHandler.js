@@ -29,7 +29,8 @@ async function fishInvHandler(args, message, inventory, invKey, userId) {
     }
 
     //kiểm tra nợ và biên bản
-    await checkPay(message, userId);
+    const isBlocked = await checkPay(message, userId);
+    if (isBlocked) return;
 
     const targetInvKey = renderKey("fish_inv", target.id);
     let targetInventory = (await getKey(targetInvKey)) || [];

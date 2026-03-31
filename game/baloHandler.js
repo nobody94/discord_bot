@@ -38,7 +38,8 @@ async function baloHandler(args, message, inventory, invKey, userId) {
     }
 
     //kiểm tra nợ và biên bản
-    await checkPay(message, userId);
+    const isBlocked = await checkPay(message, userId);
+    if (isBlocked) return;
 
     // 2. Thực hiện chuyển đồ
     const targetInvKey = renderKey("inventory", target.id);

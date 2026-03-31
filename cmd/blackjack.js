@@ -51,6 +51,8 @@ function drawInitialHand() {
   return [card1, card2];
 }
 
+const activePlayers = new Set();
+
 module.exports = {
   name: "blackjack",
   aliases: ["bj"],
@@ -58,13 +60,10 @@ module.exports = {
 
   async execute(message, args) {
     const userId = message.author.id;
-    const dbKey = renderKey("blackjack", userId);
 
-    const isPlaying = await getKey(dbKey);
-
-    if (isPlaying && isPlaying.active) {
+    if (activePlayers.has(userId)) {
       return message.reply(
-        `${errorIcon} Bạn đang có một ván Blackjack chưa kết thúc! Hãy hoàn thành nó trước.`,
+        `${errorIcon} Bạn đang có một hành động chưa kết thúc! Hãy hoàn thành nó trước.`
       );
     }
 
@@ -89,7 +88,7 @@ module.exports = {
 
     // 2. Trừ tiền và khởi tạo ván bài
     await Money.removeMoney(userId, betAmount);
-    await setKey(dbKey, { active: true });
+    activePlayers.add(userId);
 
     let playerHand = drawInitialHand();
     let botHand = drawInitialHand();
@@ -173,7 +172,7 @@ module.exports = {
         result = `🤝 **HÒA!** Cả hai đều có ${finalPoints} điểm. Bạn được hoàn tiền.`;
       }
 
-      await setKey(dbKey, { active: false });
+      activePlayers.delete(userId);
 
       // Cập nhật tin nhắn cuối cùng (Xóa nút bấm)
       await response.edit({

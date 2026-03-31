@@ -40,7 +40,8 @@ module.exports = {
     const receiverId = target.id;
 
     //kiểm tra nợ và biên bản    
-    await checkPay(message,senderId);
+    const isBlocked = await checkPay(message, senderId);
+    if (isBlocked) return;
 
     try {
       // 4. Kiểm tra số dư của người gửi theo loại tiền đã chọn

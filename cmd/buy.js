@@ -44,7 +44,8 @@ module.exports = {
     }
 
     //kiểm tra nợ và biên bản
-    await checkPay(message, userId);
+    const isBlocked = await checkPay(message, userId);
+    if (isBlocked) return;
 
 
     try {
