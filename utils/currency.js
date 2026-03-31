@@ -56,7 +56,8 @@ async function removeMoney(userId, amount, type = DEFAULT_TYPE) {
     return true;
 }
 
-async function checkPay(guildId,userId) {
+async function checkPay(message,userId) {
+    const guildId = message.guild.id;
     //check nợ
     const loanKey = renderKey("loan", guildId);
     let allLoans = (await getKey(loanKey)) || [];
@@ -67,7 +68,7 @@ async function checkPay(guildId,userId) {
       const loanDate = new Date(loan.date);
       const diffTime = Math.abs(new Date() - loanDate);
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
-      return diffDays >= 3;
+      return diffDays >= 2;
     });
 
     //check biên bản
@@ -75,10 +76,17 @@ async function checkPay(guildId,userId) {
     let allBienban = (await getKey(bienbanKey)) || [];
     const userBienban = allBienban.filter(l => l.userId === userId);
     const isBienban = userBienban.length > 0;
-    
-    return {
-        isDebt:hasOverdueDebt,
-        isReport:isBienban
+
+    if (isBienban) {
+      return message.reply(
+        `**GIAO DỊCH BỊ CHẶN!** Bạn đang có biên bản vi phạm. Vui lòng dùng lệnh \`.bienban thanhtoan\` để thanh toán.`,
+      );
+    }
+
+    if (hasOverdueDebt) {
+      return message.reply(
+        `**GIAO DỊCH BỊ CHẶN!** Bạn đang có khoản nợ lâu ngày chưa trả. Vui lòng dùng lệnh \`.trano\` để thanh toán.`,
+      );
     }
 }
 

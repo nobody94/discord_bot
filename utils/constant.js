@@ -30,9 +30,9 @@ function calculateInterest(date) {
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
 
     let interestRate = 0;
-    if (diffDays >= 7) interestRate = 0.10;      // >= 7 ngày lãi 10%
-    else if (diffDays >= 3) interestRate = 0.05; // >= 3 ngày lãi 5%
-    else interestRate = 0.02;                    // < 3 ngày lãi 2%
+    if (diffDays >= 7) interestRate = 0.10;      
+    else if (diffDays >= 3) interestRate = 0.05; 
+    else interestRate = 0.02;                    
 
     return {
         rate: interestRate,

@@ -17,6 +17,8 @@ const { errorIcon } = require("./utils/icon");
 
 // const Token = process.env.BOT_TOKEN;
 const Token = process.env.BOT_TEST_TOKEN;
+//node version 20.19.0
+//npm version 11.8.0
 
 const PREFIX = ".";
 const client = new Client({

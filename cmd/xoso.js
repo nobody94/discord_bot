@@ -10,12 +10,12 @@ const TICKET_PRICE = 1000;
 // số lượng vé có thể mua
 const MAX_TICKETS_PER_USER = 10;
 // Thuế 10%
-const TAX_RATE = 0.1; 
+const TAX_RATE = 0.2; 
 
 module.exports = {
     name: 'xoso',
     aliases: ['xs', 'lottery'],
-    description: 'Hệ thống xổ số Jackpot chuyên sâu.',
+    description: 'Hệ thống xổ số Jackpot.',
 
     async execute(message, args) {
         const action = args[0]?.toLowerCase();
@@ -56,7 +56,7 @@ module.exports = {
                 await setKey(lotteryKey, allTickets);
                 await setKey(jackpotKey, currentJackpot + totalCost);
 
-                return message.reply(`${verifyIcon} | Mua thành công **${quantity}** vé! Hũ Jackpot: **${(currentJackpot + totalCost).toLocaleString()}**.`);
+                return message.reply(`${verifyIcon} | Mua thành công **${quantity}** vé với tổng giá ${totalCost} ${getIcon(currencyType)}.`);
             }
 
             // --- 2. KIỂM TRA CÁ NHÂN (.xoso check) ---
@@ -68,8 +68,8 @@ module.exports = {
                 const embed = new EmbedBuilder()
                     .setTitle(`🎫 VÉ CỦA ${message.author.username.toUpperCase()}`)
                     .addFields(
-                        { name: '💰 Jackpot hiện tại', value: `**${currentJackpot.toLocaleString()}** ${getIcon(currencyType)}`, inline: true },
-                        { name: '🎟️ Số vé', value: `**${myTickets.length}/10**`, inline: true },
+                        { name: '💰 Hũ Jackpot hiện tại', value: `**${currentJackpot.toLocaleString()}** ${getIcon(currencyType)}`, inline: true },
+                        { name: '🎟️ Số vé', value: `**${myTickets.length}/${MAX_TICKETS_PER_USER}**`, inline: true },
                         { name: '🔢 Danh sách số', value: myTickets.length > 0 ? myTickets.map(t => `\`${t.number}\``).join(', ') : 'Chưa có vé nào.' }
                     )
                     .setColor(0xFFAA00);
@@ -103,7 +103,7 @@ module.exports = {
                     .setTitle(`📂 DANH SÁCH VÉ SERVER (${allTickets.length} vé)`)
                     .setDescription(list.length > 2000 ? "⚠️ Danh sách quá dài để hiển thị tất cả..." : list)
                     .addFields({ 
-                        name: '💰 Jackpot hiện tại', 
+                        name: '💰 Hũ Jackpot hiện tại', 
                         value: `**${currentJackpot.toLocaleString()}** ${getIcon(currencyType)}` 
                     })
                     .setColor(0x2F3136) // Màu tối sang trọng
@@ -202,12 +202,8 @@ module.exports = {
                 // --- LOGIC THUẾ ---
                 const tax = Math.floor(jackpot * TAX_RATE);
                 const finalPrizePool = jackpot - tax;
-                const prizePerPerson = Math.floor(finalPrizePool / winners.length);
-                
-                // Cập nhật ngân khố server
-                let currentBank = (await getKey(bankKey)) || 0;
-                await setKey(bankKey, currentBank + tax);
-
+                const prizePerPerson = Math.floor(finalPrizePool / winners.length);               
+               
                 const winnerMentions = winners.map(w => `<@${w.userId}>`).join(', ');
 
                 for (const w of winners) {
@@ -221,7 +217,7 @@ module.exports = {
                         `🔢 Số trúng: **[ ${winNum.split('').join(' | ')} ]**\n\n` +
                         `👤 **Người trúng:** ${winnerMentions}\n` +
                         `💵 **Tổng hũ:** ${jackpot.toLocaleString()}${getIcon(currencyType)}\n` +
-                        `🧧 **Thuế (10%):** ${tax.toLocaleString()}${getIcon(currencyType)}\n` +
+                        `🧧 **Thuế (${TAX_RATE * 100}%):** ${tax.toLocaleString()}${getIcon(currencyType)}\n` +
                         `💰 **Thực nhận:** **${prizePerPerson.toLocaleString()}**${getIcon(currencyType)} / người`
                     )
                     .setFooter({ text: "Tiền thuế đã được nộp vào Ngân khố Server." });

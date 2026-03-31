@@ -44,19 +44,8 @@ module.exports = {
     }
 
     //kiểm tra nợ và biên bản
-    const isPay = await checkPay(message.guild.id, userId);
+    await checkPay(message, userId);
 
-    if (isPay.isReport) {
-      return message.reply(
-        `${errorIcon} | **GIAO DỊCH BỊ CHẶN!** Bạn đang có biên bản vi phạm. Vui lòng dùng lệnh \`.bienban thanhtoan\` để thanh toán.`,
-      );
-    }
-
-    if (isPay.isDebt) {
-      return message.reply(
-        `${errorIcon} | **GIAO DỊCH BỊ CHẶN!** Bạn đang có khoản nợ quá hạn (trên 3 ngày). Vui lòng dùng lệnh \`.trano\` để thanh toán.`,
-      );
-    }
 
     try {
       // 5. Thực hiện trừ tiền

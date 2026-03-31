@@ -40,15 +40,7 @@ module.exports = {
     const receiverId = target.id;
 
     //kiểm tra nợ và biên bản    
-    const isPay = await checkPay(message.guild.id,senderId);
-
-    if (isPay.isReport) {
-      return message.reply(`${errorIcon} | **GIAO DỊCH BỊ CHẶN!** Bạn đang có biên bản vi phạm. Vui lòng dùng lệnh \`.bienban thanhtoan\` để thanh toán.`);
-    }
-
-    if (isPay.isDebt) {
-      return message.reply(`${errorIcon} | **GIAO DỊCH BỊ CHẶN!** Bạn đang có khoản nợ quá hạn (trên 3 ngày). Vui lòng dùng lệnh \`.trano\` để thanh toán.`);
-    }    
+    await checkPay(message,senderId);
 
     try {
       // 4. Kiểm tra số dư của người gửi theo loại tiền đã chọn

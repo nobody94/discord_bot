@@ -29,19 +29,7 @@ async function fishInvHandler(args, message, inventory, invKey, userId) {
     }
 
     //kiểm tra nợ và biên bản
-    const isPay = await checkPay(message.guild.id, userId);
-
-    if (isPay.isReport) {
-      return message.reply(
-        `${errorIcon} | **GIAO DỊCH BỊ CHẶN!** Bạn đang có biên bản vi phạm. Vui lòng dùng lệnh \`.bienban thanhtoan\` để thanh toán.`,
-      );
-    }
-
-    if (isPay.isDebt) {
-      return message.reply(
-        `${errorIcon} | **GIAO DỊCH BỊ CHẶN!** Bạn đang có khoản nợ quá hạn (trên 3 ngày). Vui lòng dùng lệnh \`.trano\` để thanh toán.`,
-      );
-    }
+    await checkPay(message, userId);
 
     const targetInvKey = renderKey("fish_inv", target.id);
     let targetInventory = (await getKey(targetInvKey)) || [];
