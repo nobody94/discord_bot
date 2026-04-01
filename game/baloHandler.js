@@ -282,7 +282,7 @@ async function baloHandler(args, message, inventory, invKey, userId) {
 
                 const randomRoll = Math.random() * 100; // Quay số từ 0 - 100
 
-                if (randomRoll < 3) {
+                if (randomRoll < 5) {
                     // 3% tỉ lệ rơi vào nhóm Pokemon
                     const totalPokeWeight = pokemonItems.reduce((sum, l) => sum + (l.weight || 1), 0);
                     let randPoke = Math.random() * totalPokeWeight;
