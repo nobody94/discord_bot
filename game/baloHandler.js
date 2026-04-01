@@ -1,8 +1,11 @@
 const { getKey, renderKey, setKey } = require("../utils/db");
-const { getIcon, addMoney } = require('../utils/currency.js');
+const { getIcon, addMoney, checkPay } = require("../utils/currency.js");
 const { SHOP_ITEMS, BLIND_BOX_LOOT } = require("../utils/shop");
-const { errorIcon, verifyIcon } = require('../utils/icon.js')
-const { getCustomDate, MAX_LOVE_POINTS_PER_DAY } = require('../utils/constant.js');
+const { errorIcon, verifyIcon } = require("../utils/icon.js");
+const {
+    getCustomDate,
+    MAX_LOVE_POINTS_PER_DAY,
+} = require("../utils/constant.js");
 
 async function baloHandler(args, message, inventory, invKey, userId) {
     // --- LOGIC TẶNG ĐỒ (GIVE) ---
@@ -12,37 +15,31 @@ async function baloHandler(args, message, inventory, invKey, userId) {
         const amountToGive = parseInt(args[3]) || 1; // Lấy số lượng từ đối số thứ 4, mặc định là 1
 
         if (!target)
-            return message.reply(`${errorIcon} | Vui lòng tag người muốn tặng: \`.balo give @user [ID] [số lượng]\``);
+            return message.reply(
+                `${errorIcon} | Vui lòng tag người muốn tặng: \`.balo give @user [ID] [số lượng]\``,
+            );
         if (target.id === userId)
-            return message.reply(`${errorIcon} | Bạn không thể tự tặng đồ cho chính mình.`);
+            return message.reply(
+                `${errorIcon} | Bạn không thể tự tặng đồ cho chính mình.`,
+            );
         if (!itemId)
-            return message.reply(`${errorIcon} | Vui lòng nhập ID vật phẩm muốn tặng.`);
+            return message.reply(
+                `${errorIcon} | Vui lòng nhập ID vật phẩm muốn tặng.`,
+            );
         if (isNaN(amountToGive) || amountToGive <= 0)
             return message.reply(`${errorIcon} | Số lượng tặng không hợp lệ.`);
 
         // 1. Kiểm tra số lượng vật phẩm có trong túi đồ
-        const userItems = inventory.filter(id => id === itemId);
+        const userItems = inventory.filter((id) => id === itemId);
         if (userItems.length < amountToGive) {
             return message.reply(
-                `${errorIcon} | Bạn không đủ số lượng **${itemId}** để tặng (Hiện có: ${userItems.length}).`
+                `${errorIcon} | Bạn không đủ số lượng **${itemId}** để tặng (Hiện có: ${userItems.length}).`,
             );
         }
 
-        const loanKey = renderKey("loan", message.guild.id);
-        let allLoans = (await getKey(loanKey)) || [];
-        const userLoans = allLoans.filter(l => l.nguoi_vay === userId);
-
-        // Kiểm tra xem có khoản nợ nào quá 3 ngày không
-        const hasOverdueDebt = userLoans.some(loan => {
-            const loanDate = new Date(loan.date);
-            const diffTime = Math.abs(new Date() - loanDate);
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            return diffDays >= 3;
-        });
-
-        if (hasOverdueDebt) {
-            return message.reply(`${errorIcon} | **GIAO DỊCH BỊ CHẶN!** Bạn đang có khoản nợ quá hạn (trên 3 ngày). Vui lòng dùng lệnh \`.trano\` để thanh toán trước khi tặng đồ.`);
-        }
+        //kiểm tra nợ và biên bản
+        const isBlocked = await checkPay(message, userId);
+        if (isBlocked) return;
 
         // 2. Thực hiện chuyển đồ
         const targetInvKey = renderKey("inventory", target.id);
@@ -63,13 +60,14 @@ async function baloHandler(args, message, inventory, invKey, userId) {
 
         // --- BẮT ĐẦU LOGIC CẬP NHẬT CHỈ SỐ THÂN MẬT ---
         const guildId = message.guild.id;
-        const coupleKey = renderKey('couple', guildId);
+        const coupleKey = renderKey("couple", guildId);
         let couplesList = (await getKey(coupleKey)) || [];
 
         // Tìm xem hai người có phải cặp đôi trong server này không
-        const coupleIndex = couplesList.findIndex(c =>
-            (c.husband === userId && c.wife === target.id) ||
-            (c.husband === target.id && c.wife === userId)
+        const coupleIndex = couplesList.findIndex(
+            (c) =>
+                (c.husband === userId && c.wife === target.id) ||
+                (c.husband === target.id && c.wife === userId),
         );
 
         let loveMsg = "";
@@ -89,9 +87,10 @@ async function baloHandler(args, message, inventory, invKey, userId) {
                 pointPerItem = -5;
             } else {
                 // Nếu không phải rác: lấy lovePoint định sẵn hoặc 1% giá trị (mặc định tối thiểu 1)
-                pointPerItem = item.lovePoint !== undefined
-                    ? item.lovePoint
-                    : Math.max(Math.floor((item.price || 0) / 100), 1);
+                pointPerItem =
+                    item.lovePoint !== undefined
+                        ? item.lovePoint
+                        : Math.max(Math.floor((item.price || 0) / 100), 1);
             }
 
             const totalLovePoints = pointPerItem * amountToGive;
@@ -104,7 +103,8 @@ async function baloHandler(args, message, inventory, invKey, userId) {
                 } else {
                     const pointsToAdd = Math.min(totalLovePoints, remainingQuota);
                     loveMsg = `\n💖 Chỉ số thân mật tăng: **+${pointsToAdd.toLocaleString()}** điểm!`;
-                    couplesList[coupleIndex].lovePoints = (couplesList[coupleIndex].lovePoints || 0) + pointsToAdd;
+                    couplesList[coupleIndex].lovePoints =
+                        (couplesList[coupleIndex].lovePoints || 0) + pointsToAdd;
                     couplesList[coupleIndex].dailyLovePoints = currentDaily + pointsToAdd;
                     if (totalLovePoints > remainingQuota) {
                         loveMsg += `\n*(Một số điểm bị bỏ qua do vượt giới hạn ngày)*`;
@@ -112,14 +112,17 @@ async function baloHandler(args, message, inventory, invKey, userId) {
                 }
             } else if (totalLovePoints < 0) {
                 loveMsg = `\n💔 Tặng đồ rác làm giảm: **${totalLovePoints}** điểm thân mật!`;
-                couplesList[coupleIndex].lovePoints = (couplesList[coupleIndex].lovePoints || 0) + totalLovePoints;
+                couplesList[coupleIndex].lovePoints =
+                    (couplesList[coupleIndex].lovePoints || 0) + totalLovePoints;
             }
             await setKey(coupleKey, couplesList);
         }
         // --- KẾT THÚC LOGIC CẬP NHẬT CHỈ SỐ THÂN MẬT ---
 
         const itemInfo = SHOP_ITEMS[itemId] || { name: itemId, icon: "📦" };
-        message.reply(`${verifyIcon} | Bạn đã tặng **${amountToGive}x ${itemInfo.icon} ${itemInfo.name}** cho **${target.username}** thành công!${loveMsg}`);
+        message.reply(
+            `${verifyIcon} | Bạn đã tặng **${amountToGive}x ${itemInfo.icon} ${itemInfo.name}** cho **${target.username}** thành công!${loveMsg}`,
+        );
         return true;
     }
     // --- LOGIC BÁN ĐỒ (SELL) ---
@@ -128,7 +131,9 @@ async function baloHandler(args, message, inventory, invKey, userId) {
         let amountToSell = parseInt(args[2]); // Không để mặc định 1 ở đây để check logic sau
 
         if (!itemId) {
-            message.reply(`${errorIcon} | Cú pháp: \`.balo sell [ID] [Số lượng]\` hoặc \`.balo sell trash\``);
+            message.reply(
+                `${errorIcon} | Cú pháp: \`.balo sell [ID] [Số lượng]\` hoặc \`.balo sell trash\``,
+            );
         }
 
         let totalMoraEarned = 0;
@@ -139,15 +144,17 @@ async function baloHandler(args, message, inventory, invKey, userId) {
         // TRƯỜNG HỢP 1: BÁN TẤT CẢ ĐỒ RÁC (.balo sell trash)
         if (itemId === "trash") {
             // Lọc những món có isTrash: true trong SHOP_ITEMS
-            const trashItems = inventory.filter(id => SHOP_ITEMS[id] && SHOP_ITEMS[id].isTrash === true);
+            const trashItems = inventory.filter(
+                (id) => SHOP_ITEMS[id] && SHOP_ITEMS[id].isTrash === true,
+            );
 
             if (trashItems.length === 0) {
                 message.reply(`${errorIcon} | Túi đồ của bạn không có món đồ rác nào.`);
             }
 
-            trashItems.forEach(id => {
+            trashItems.forEach((id) => {
                 const item = SHOP_ITEMS[id];
-                if (item.currency === 'primo') totalPrimoEarned += item.sellPrice;
+                if (item.currency === "primo") totalPrimoEarned += item.sellPrice;
                 else totalMoraEarned += item.sellPrice;
 
                 // Xóa món đó khỏi inventory
@@ -162,20 +169,31 @@ async function baloHandler(args, message, inventory, invKey, userId) {
         // TRƯỜNG HỢP 2: BÁN VẬT PHẨM CỤ THỂ (.balo sell [ID] [Số lượng])
         else {
             const item = SHOP_ITEMS[itemId];
+            if (item.sellPrice == 0) {
+                return message.reply(
+                    `${errorIcon} | Vật phẩm này không thể bán.`,
+                );
+            }
+
             if (!item || item.sellPrice === undefined) {
-                message.reply(`${errorIcon} | Vật phẩm này không thể bán hoặc không tồn tại.`);
+                return message.reply(
+                    `${errorIcon} | Vật phẩm này không thể bán hoặc không tồn tại.`,
+                );
             }
 
             // Đếm xem thực tế có bao nhiêu món này
-            const countInInv = inventory.filter(id => id === itemId).length;
+            const countInInv = inventory.filter((id) => id === itemId).length;
 
             // Nếu không nhập số lượng thì bán 1, nếu nhập 'all' thì bán hết món đó
             if (args[2]?.toLowerCase() === "all") amountToSell = countInInv;
             else amountToSell = amountToSell || 1;
 
-            if (amountToSell <= 0) return message.reply(`${errorIcon} | Số lượng bán không hợp lệ.`);
+            if (amountToSell <= 0)
+                return message.reply(`${errorIcon} | Số lượng bán không hợp lệ.`);
             if (countInInv < amountToSell) {
-                message.reply(`${errorIcon} | Bạn chỉ có **${countInInv}x** ${item.name}, không đủ để bán **${amountToSell}**.`);
+                message.reply(
+                    `${errorIcon} | Bạn chỉ có **${countInInv}x** ${item.name}, không đủ để bán **${amountToSell}**.`,
+                );
             }
 
             // Thực hiện xóa và tính tiền
@@ -183,7 +201,7 @@ async function baloHandler(args, message, inventory, invKey, userId) {
                 const idx = inventory.indexOf(itemId);
                 inventory.splice(idx, 1);
 
-                if (item.currency === 'primo') totalPrimoEarned += item.sellPrice;
+                if (item.currency === "primo") totalPrimoEarned += item.sellPrice;
                 else totalMoraEarned += item.sellPrice;
                 itemsSold++;
             }
@@ -193,31 +211,42 @@ async function baloHandler(args, message, inventory, invKey, userId) {
 
         // CẬP NHẬT DATABASE
         try {
-            if (totalMoraEarned > 0) await addMoney(userId, totalMoraEarned, 'mora');
-            if (totalPrimoEarned > 0) await addMoney(userId, totalPrimoEarned, 'primo');
+            if (totalMoraEarned > 0) await addMoney(userId, totalMoraEarned, "mora");
+            if (totalPrimoEarned > 0)
+                await addMoney(userId, totalPrimoEarned, "primo");
             await setKey(invKey, inventory);
 
             // Tạo thông báo nhận tiền
             let moneyMsg = [];
-            if (totalMoraEarned > 0) moneyMsg.push(`**${totalMoraEarned.toLocaleString()}** ${getIcon('mora')}`);
-            if (totalPrimoEarned > 0) moneyMsg.push(`**${totalPrimoEarned.toLocaleString()}** ${getIcon('primo')}`);
+            if (totalMoraEarned > 0)
+                moneyMsg.push(
+                    `**${totalMoraEarned.toLocaleString()}** ${getIcon("mora")}`,
+                );
+            if (totalPrimoEarned > 0)
+                moneyMsg.push(
+                    `**${totalPrimoEarned.toLocaleString()}** ${getIcon("primo")}`,
+                );
 
             message.reply(
-                `${verifyIcon} | Bạn ${soldDescription}, nhận về tổng cộng ${moneyMsg.join(" và ")}!`
+                `${verifyIcon} | Bạn ${soldDescription}, nhận về tổng cộng ${moneyMsg.join(" và ")}!`,
             );
         } catch (error) {
             console.error("LỖI KHI BÁN ĐỒ:", error);
             message.reply(`${errorIcon} | Đã xảy ra lỗi khi xử lý giao dịch bán đồ.`);
         }
-        return true
+        return true;
     }
     // --- LOGIC MỞ ĐỒ (OPEN) ---
     if (args[0] === "open") {
         const itemId = args[1];
         const amountToOpen = parseInt(args[2]) || 1;
 
-        if (!itemId) return message.reply(`${errorIcon} | Vui lòng nhập ID vật phẩm: \`.balo open [ID] [số lượng]\``);
-        if (amountToOpen <= 0) return message.reply(`${errorIcon} | Số lượng không hợp lệ!`);
+        if (!itemId)
+            return message.reply(
+                `${errorIcon} | Vui lòng nhập ID vật phẩm: \`.balo open [ID] [số lượng]\``,
+            );
+        if (amountToOpen <= 0)
+            return message.reply(`${errorIcon} | Số lượng không hợp lệ!`);
 
         const item = SHOP_ITEMS[itemId];
         const lootTable = BLIND_BOX_LOOT[itemId];
@@ -227,9 +256,11 @@ async function baloHandler(args, message, inventory, invKey, userId) {
         }
 
         // Kiểm tra số lượng thực tế trong túi
-        const countInInv = inventory.filter(id => id === itemId).length;
+        const countInInv = inventory.filter((id) => id === itemId).length;
         if (countInInv < amountToOpen) {
-            return message.reply(`${errorIcon} | Bạn không đủ **${amountToOpen}x ${item.name}** (Hiện có: ${countInInv}).`);
+            return message.reply(
+                `${errorIcon} | Bạn không đủ **${amountToOpen}x ${item.name}** (Hiện có: ${countInInv}).`,
+            );
         }
 
         // Lấy số Pity hiện tại từ DB
@@ -249,14 +280,46 @@ async function baloHandler(args, message, inventory, invKey, userId) {
 
             // KIỂM TRA BẢO HIỂM (PITY 90)
             if (currentPity >= 90) {
-                const goldenItems = lootTable.filter(l => l.isGolden === true);
-                selectedLoot = goldenItems[Math.floor(Math.random() * goldenItems.length)];
+                const goldenItems = lootTable.filter((l) => l.isGolden === true);
+
+                // Tách riêng danh sách Pokemon và các đồ vàng khác
+                const pokemonItems = goldenItems.filter(l => l.item.startsWith("pokemon"));
+                const otherGoldenItems = goldenItems.filter(l => !l.item.startsWith("pokemon"));
+
+                const randomRoll = Math.random() * 100; // Quay số từ 0 - 100
+
+                if (randomRoll < 3) {
+                    // 3% tỉ lệ rơi vào nhóm Pokemon
+                    const totalPokeWeight = pokemonItems.reduce((sum, l) => sum + (l.weight || 1), 0);
+                    let randPoke = Math.random() * totalPokeWeight;
+                    for (const loot of pokemonItems) {
+                        if (randPoke < (loot.weight || 1)) {
+                            selectedLoot = loot;
+                            break;
+                        }
+                        randPoke -= (loot.weight || 1);
+                    }
+                } else {
+                    // 97% tỉ lệ rơi vào các đồ vàng khác (ví dụ: kim_cuong)
+                    const totalOtherWeight = otherGoldenItems.reduce((sum, l) => sum + (l.weight || 1), 0);
+                    let randOther = Math.random() * totalOtherWeight;
+                    for (const loot of otherGoldenItems) {
+                        if (randOther < (loot.weight || 1)) {
+                            selectedLoot = loot;
+                            break;
+                        }
+                        randOther -= (loot.weight || 1);
+                    }
+                }
 
                 goldenNotes.push(`🌟 **${selectedLoot.item}** (Nổ tại lần thứ **90**)`);
-                currentPity = 0; // Reset
+                currentPity = 0;
             } else {
                 // QUAY GACHA BÌNH THƯỜNG
-                const totalWeight = lootTable.reduce((sum, loot) => sum + (loot.weight || 0), 0);
+                const totalWeight = lootTable.reduce(
+                    (sum, loot) => sum + (loot.weight || 0),
+                    0,
+                );
                 let random = Math.random() * totalWeight;
 
                 for (const loot of lootTable) {
@@ -269,7 +332,9 @@ async function baloHandler(args, message, inventory, invKey, userId) {
 
                 // Nếu may mắn nổ vàng sớm
                 if (selectedLoot && selectedLoot.isGolden) {
-                    goldenNotes.push(`🌟 **${selectedLoot.item}** (Nổ sớm tại lần thứ **${currentPity}**)`);
+                    goldenNotes.push(
+                        `🌟 **${selectedLoot.item}** (Nổ sớm tại lần thứ **${currentPity}**)`,
+                    );
                     currentPity = 0; // Reset ngay lập tức
                 }
             }
@@ -289,7 +354,9 @@ async function baloHandler(args, message, inventory, invKey, userId) {
         for (const [rewardId, rewardAmount] of Object.entries(totalRewards)) {
             if (rewardId === "mora" || rewardId === "primo") {
                 await addMoney(userId, rewardAmount, rewardId);
-                rewardStrings.push(`**${rewardAmount.toLocaleString()}** ${getIcon(rewardId)}`);
+                rewardStrings.push(
+                    `**${rewardAmount.toLocaleString()}** ${getIcon(rewardId)}`,
+                );
             } else {
                 for (let k = 0; k < rewardAmount; k++) inventory.push(rewardId);
                 const rInfo = SHOP_ITEMS[rewardId] || { name: rewardId, icon: "📦" };
@@ -309,11 +376,11 @@ async function baloHandler(args, message, inventory, invKey, userId) {
 
         message.reply({
             content: responseContent,
-            allowedMentions: { repliedUser: false }
+            allowedMentions: { repliedUser: false },
         });
-        return true
+        return true;
     }
     return false;
 }
 
-module.exports = { baloHandler }
+module.exports = { baloHandler };
