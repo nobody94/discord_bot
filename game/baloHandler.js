@@ -1,5 +1,5 @@
 const { getKey, renderKey, setKey } = require("../utils/db");
-const { getIcon, addMoney,checkPay } = require("../utils/currency.js");
+const { getIcon, addMoney, checkPay } = require("../utils/currency.js");
 const { SHOP_ITEMS, BLIND_BOX_LOOT } = require("../utils/shop");
 const { errorIcon, verifyIcon } = require("../utils/icon.js");
 const {
@@ -275,11 +275,26 @@ async function baloHandler(args, message, inventory, invKey, userId) {
       // KIỂM TRA BẢO HIỂM (PITY 90)
       if (currentPity >= 90) {
         const goldenItems = lootTable.filter((l) => l.isGolden === true);
-        selectedLoot =
-          goldenItems[Math.floor(Math.random() * goldenItems.length)];
+        const rate = 5;
+        const totalGoldenWeight = goldenItems.reduce((sum, l) => {
+          let w = l.weight || 1;
+          if (l.item.startsWith("pokemon")) w = w / rate; // <--- GIẢM rate LẦN TỈ LỆ TẠI ĐÂY
+          return sum + w;
+        }, 0);
+        let random = Math.random() * totalGoldenWeight;
+        for (const loot of goldenItems) {
+          let w = loot.weight || 1;
+          if (loot.item.startsWith("pokemon")) w = w / rate; // <--- PHẢI GIẢM ĐỒNG BỘ Ở ĐÂY
+
+          if (random < w) {
+            selectedLoot = loot;
+            break;
+          }
+          random -= w;
+        }
 
         goldenNotes.push(`🌟 **${selectedLoot.item}** (Nổ tại lần thứ **90**)`);
-        currentPity = 0; // Reset
+        currentPity = 0;
       } else {
         // QUAY GACHA BÌNH THƯỜNG
         const totalWeight = lootTable.reduce(

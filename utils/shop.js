@@ -11,6 +11,119 @@ const desc = {
   legendary: "Vật phẩm quý hiếm chỉ có từ túi mù",
 };
 
+const GachaItem = {
+  kim_cuong: {
+    name: "Một viên kim cương quý giá",
+    price: 100,
+    sellPrice: 100,
+    currency: primo,
+    description: desc.legendary,
+    icon: "<:diamond:1451466638103806012>",
+    hideFromShop: true,
+    lovePoint: 200,
+  },
+  pokemon_1: {
+    name: "Pikachu",
+    price: 100,
+    sellPrice: 100,
+    currency: primo,
+    description: desc.legendary,
+    icon: "<:pikachu:1488804588009291796>",
+    hideFromShop: true,
+    lovePoint: 200,
+  },
+  pokemon_2: {
+    name: "Squirtle",
+    price: 100,
+    sellPrice: 100,
+    currency: primo,
+    description: desc.legendary,
+    icon: "<:squirtle:1488804602919784550>",
+    hideFromShop: true,
+    lovePoint: 200,
+  },
+  pokemon_3: {
+    name: "Jigglypuff",
+    price: 100,
+    sellPrice: 100,
+    currency: primo,
+    description: desc.legendary,
+    icon: "<:jigglypuff:1488804614747984013>",
+    hideFromShop: true,
+    lovePoint: 200,
+  },
+  pokemon_4: {
+    name: "Eevee",
+    price: 100,
+    sellPrice: 100,
+    currency: primo,
+    description: desc.legendary,
+    icon: "<:eevee:1488804628392054835>",
+    hideFromShop: true,
+    lovePoint: 200,
+  },
+   pokemon_5: {
+    name: "Charmander",
+    price: 100,
+    sellPrice: 100,
+    currency: primo,
+    description: desc.legendary,
+    icon: "<:charmander:1488804640190365878>",
+    hideFromShop: true,
+    lovePoint: 200,
+  },
+   pokemon_6: {
+    name: "Bulbasaur",
+    price: 100,
+    sellPrice: 100,
+    currency: primo,
+    description: desc.legendary,
+    icon: "<:bulbasaur:1488804650235723946>",
+    hideFromShop: true,
+    lovePoint: 200,
+  },
+   pokemon_7: {
+    name: "Meowth",
+    price: 100,
+    sellPrice: 100,
+    currency: primo,
+    description: desc.legendary,
+    icon: "<:meowth:1488804659924828260>",
+    hideFromShop: true,
+    lovePoint: 200,
+  },
+   pokemon_8: {
+    name: "Dratini",
+    price: 100,
+    sellPrice: 100,
+    currency: primo,
+    description: desc.legendary,
+    icon: "<:dratini:1488806346785689730>",
+    hideFromShop: true,
+    lovePoint: 200,
+  },
+   pokemon_9: {
+    name: "Mankey",
+    price: 100,
+    sellPrice: 100,
+    currency: primo,
+    description: desc.legendary,
+    icon: "<:mankey:1488806371741929582>",
+    hideFromShop: true,
+    lovePoint: 200,
+  },
+   pokemon_10: {
+    name: "Psyduck",
+    price: 100,
+    sellPrice: 100,
+    currency: primo,
+    description: desc.legendary,
+    icon: "<:psyduck:1488810240429391944>",
+    hideFromShop: true,
+    lovePoint: 200,
+  }
+};
+
 const TrashItem = {
   tui_rac: {
     name: "Túi rác 3 ngày chưa vứt",
@@ -75,16 +188,6 @@ const TrashItem = {
 };
 
 const HideItem = {
-    kim_cuong: {
-    name: "Một viên kim cương quý giá",
-    price: 100,
-    sellPrice: 100,
-    currency: primo,
-    description: desc.legendary,
-    icon: "<:diamond:1451466638103806012>",
-    hideFromShop: true,
-    lovePoint: 200,
-  },
   nhan_cuoi: {
     name: "Nhẫn cưới",
     price: 100000,
@@ -144,7 +247,7 @@ const HideItem = {
     lovePoint: 3,
     hideFromShop: true,
   },
-}
+};
 
 const SHOP_ITEMS = {
   tui_mu: {
@@ -166,7 +269,7 @@ const SHOP_ITEMS = {
     icon: "<:mansion:1479705680943251628>",
     lovePoint: 500,
   },
-   pha_le: {
+  pha_le: {
     name: "Trái tim pha lê",
     price: 999,
     sellPrice: 999,
@@ -202,7 +305,7 @@ const SHOP_ITEMS = {
     icon: "<:flowers:1479707548192870532>",
     lovePoint: 10,
   },
-   socola_box: {
+  socola_box: {
     name: "Hộp socola",
     price: 200000,
     sellPrice: 200000,
@@ -210,7 +313,7 @@ const SHOP_ITEMS = {
     description: desc.onlyView,
     icon: "<:chocolatebox:1452491394663841803>",
     lovePoint: 40,
-  },  
+  },
   gau_bong: {
     name: "Gấu bông",
     price: 100000,
@@ -291,7 +394,7 @@ const SHOP_ITEMS = {
     description: desc.onlyView,
     icon: "<:ramen:1451606668826775573>",
     lovePoint: 8,
-  },  
+  },
   donut: {
     name: "Donut",
     price: 30000,
@@ -309,9 +412,10 @@ const SHOP_ITEMS = {
     description: desc.onlyView,
     icon: "<:xucxich:1452491332261253182>",
     lovePoint: 3,
-  }, 
+  },
   ...HideItem,
   ...TrashItem,
+  ...GachaItem
 };
 
 const BLIND_BOX_LOOT = {
@@ -325,6 +429,16 @@ const BLIND_BOX_LOOT = {
     { item: "mora", amount: 10000, weight: 500 },
     { item: "primo", amount: 2, weight: 200 },
     { item: "kim_cuong", amount: 1, weight: 60, isGolden: true },
+    { item: "pokemon_1", amount: 1, weight: 2, isGolden: true },
+    { item: "pokemon_2", amount: 1, weight: 2, isGolden: true },
+    { item: "pokemon_3", amount: 1, weight: 2, isGolden: true },
+    { item: "pokemon_4", amount: 1, weight: 2, isGolden: true },
+    { item: "pokemon_5", amount: 1, weight: 2, isGolden: true },
+    { item: "pokemon_6", amount: 1, weight: 2, isGolden: true },
+    { item: "pokemon_7", amount: 1, weight: 2, isGolden: true },
+    { item: "pokemon_8", amount: 1, weight: 2, isGolden: true },
+    { item: "pokemon_9", amount: 1, weight: 2, isGolden: true },
+    { item: "pokemon_10", amount: 1, weight: 2, isGolden: true }
   ],
 };
 

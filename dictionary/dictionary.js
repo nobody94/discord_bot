@@ -49,8 +49,40 @@ const saveWord = (lang, word) => {
     }
 };
 
+const removeWord = (lang, word) => {
+    const targetWord = word.trim().toLowerCase();
+    const isVi = lang === 'vi';
+    const filePath = isVi ? pathViToFile : pathEnToFile;
+    const dictionary = isVi ? viDictionary : enDictionary;
+
+    // 1. Xóa từ khỏi bộ nhớ tạm (Array)
+    const index = dictionary.indexOf(targetWord);
+    if (index !== -1) {
+        dictionary.splice(index, 1);
+    }
+
+    // 2. Cập nhật lại file .txt
+    try {
+        // Đọc toàn bộ file, lọc bỏ từ cần xóa
+        const data = fs.readFileSync(filePath, "utf8");
+        const remainingWords = data
+            .split("\n")
+            .map(w => w.trim().toLowerCase())
+            .filter(w => Boolean(w) && w !== targetWord);
+
+        // Ghi đè lại file với danh sách mới
+        fs.writeFileSync(filePath, remainingWords.join("\n"), "utf8");
+        
+        console.log(`[Dictionary] Đã xóa từ "${targetWord}" khỏi file ${lang}`);
+    } catch (err) {
+        console.error(`[Dictionary] Lỗi khi ghi file sau khi xóa:`, err);
+        throw err;
+    }
+};
+
 module.exports = {
     viDictionary,
     enDictionary,
-    saveWord
+    saveWord,
+    removeWord
 };
