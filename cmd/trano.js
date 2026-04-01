@@ -1,6 +1,7 @@
 const { addMoney, removeMoney, getIcon, getBalance } = require('../utils/currency.js'); 
 const { errorIcon, verifyIcon } = require('../utils/icon.js');
 const { renderKey, getKey, setKey } = require('../utils/db.js'); 
+const { calculateInterest } = require('../utils/constant.js');
 
 module.exports = {
     name: 'trano',
@@ -36,14 +37,8 @@ module.exports = {
             const currencyType = 'mora';
 
             // 4. Tính toán lãi suất dựa trên thời gian
-            const startDate = new Date(targetLoan.date);
-            const diffDays = Math.ceil(Math.abs(new Date() - startDate) / (1000 * 60 * 60 * 24)) || 1;
-
-            let interestRate = 0;
-            if (diffDays >= 7) interestRate = 0.10;      // >= 7 ngày lãi 10%
-            else if (diffDays >= 3) interestRate = 0.05; // >= 3 ngày lãi 5%
-            else interestRate = 0.02;                    // < 3 ngày lãi 2%
-
+            const { rate: interestRate, days: diffDays } = calculateInterest(targetLoan.date);
+            
             // 5. Xác định số tiền thanh toán thực tế
             // Tổng số tiền cần để xóa sạch nợ (Gốc + Lãi toàn bộ)
             const maxTotalToPay = Math.round(targetLoan.money * (1 + interestRate));

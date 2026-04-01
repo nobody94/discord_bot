@@ -1,6 +1,7 @@
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ModalBuilder, TextInputBuilder, TextInputStyle } = require("discord.js");
 const { getIcon, getBalance, removeMoney, addMoney } = require("../utils/currency");
 const { verifyIcon, errorIcon } = require('../utils/icon');
+const { exchangeRate } = require('../utils/constant');
 
 module.exports = {
     name: "exchange",
@@ -8,7 +9,7 @@ module.exports = {
     description: "Giao diện chuyển đổi giữa Mora và Nguyên Thạch",
 
     async execute(message, args) {
-        const RATE = 10000; // 1 Primo = 10,000 Mora
+        const RATE = exchangeRate; // 1 Primo = 10,000 Mora
 
         const embed = new EmbedBuilder()
             .setTitle("🏦 Ngân Hàng Bắc Quốc")

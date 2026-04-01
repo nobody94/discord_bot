@@ -1,7 +1,8 @@
 const { addMoney, removeMoney, getIcon, getBalance } = require('../utils/currency.js'); 
 const { errorIcon, verifyIcon } = require('../utils/icon.js');
 const { renderKey, getKey, setKey } = require('../utils/db.js'); 
-const { DEVELOPER_IDS } = require('../utils/constant.js'); // Lấy danh sách ID Dev
+const { DEVELOPER_IDS } = require('../utils/constant.js'); 
+const { calculateInterest } = require('../utils/constant.js');
 
 module.exports = {
     name: 'battrano',
@@ -38,10 +39,7 @@ module.exports = {
             const currencyType = 'mora';
 
             // 4. Tính toán tổng nợ (Gốc + Lãi)
-            const startDate = new Date(targetLoan.date);
-            const diffDays = Math.ceil(Math.abs(new Date() - startDate) / (1000 * 60 * 60 * 24)) || 1;
-
-            let interestRate = diffDays >= 7 ? 0.10 : (diffDays >= 3 ? 0.05 : 0.02);
+            const { rate: interestRate, days: diffDays } = calculateInterest(targetLoan.date);
             const totalToPay = Math.round(targetLoan.money * (1 + interestRate));
 
             // 5. Kiểm tra ví người vay (Nếu không đủ tiền vẫn trừ về 0 hoặc âm tùy logic server của bạn)
@@ -63,9 +61,9 @@ module.exports = {
                 content: `🚨 **LỆNH CƯỠNG CHẾ TÀI CHÍNH**`,
                 embeds: [{
                     color: 0xFF0000,
-                    description: `Developer ${message.author} đã ép <@${targetUser.id}> trả nợ.\n\n` +
-                                 `> 👤 Chủ nợ nhận: **${totalToPay.toLocaleString()}** ${getIcon(currencyType)}\n` +
-                                 `> 📉 Lãi suất áp dụng: **${(interestRate * 100)}%**\n` +
+                    description: `${message.author} đã cưỡng chế <@${targetUser.id}> trả nợ.\n\n` +
+                                 `> 👤 Chủ nợ <@${targetLoan.nguoi_cho_vay}> nhận: **${totalToPay.toLocaleString()}** ${getIcon(currencyType)}\n` +
+                                 `> 📉 Lãi suất áp dụng (${diffDays} ngày): **${(interestRate * 100)}%**\n` +
                                  `> ✅ Trạng thái: **Đã xóa khoản nợ khỏi hệ thống.**`
                 }]
             });

@@ -1,61 +1,104 @@
-const {renderKey,getKey,setKey,addKey} = require('./db');
+const { renderKey, getKey, setKey, addKey } = require("./db");
 
 // Cấu hình các loại tiền
 const CURRENCIES = {
   mora: { icon: "<:mora:1450698996170363063>", key: "mora" },
-  primo: { icon: "<:primogem:1451037556635336776>", key: "primo" }, 
+  primo: { icon: "<:primogem:1451037556635336776>", key: "primo" },
 };
 
-const DEFAULT_TYPE = 'mora';
+const DEFAULT_TYPE = "mora";
 
 // Hàm lấy Icon theo loại tiền
 function getIcon(type = DEFAULT_TYPE) {
-    return CURRENCIES[type]?.icon || CURRENCIES[DEFAULT_TYPE].icon;
+  return CURRENCIES[type]?.icon || CURRENCIES[DEFAULT_TYPE].icon;
 }
 
 async function getAllBalances(userId) {
-    const balances = {};
-    
-    // Chạy vòng lặp qua danh sách các loại tiền đã định nghĩa
-    for (const [type, config] of Object.entries(CURRENCIES)) {
-        const key = renderKey(config.key,userId);
-        const rawValue = await getKey(key);    
-        balances[type] = Number(rawValue) || 0;
-    }
-    
-    return balances;
+  const balances = {};
+
+  // Chạy vòng lặp qua danh sách các loại tiền đã định nghĩa
+  for (const [type, config] of Object.entries(CURRENCIES)) {
+    const key = renderKey(config.key, userId);
+    const rawValue = await getKey(key);
+    balances[type] = Number(rawValue) || 0;
+  }
+
+  return balances;
 }
 
 // Lấy số dư theo loại tiền
 async function getBalance(userId, type = DEFAULT_TYPE) {
-    const key = renderKey(CURRENCIES[type]?.key || DEFAULT_TYPE,userId);
-    const rawBalance = await getKey(key);
-    return Number(rawBalance) || 0;
+  const key = renderKey(CURRENCIES[type]?.key || DEFAULT_TYPE, userId);
+  const rawBalance = await getKey(key);
+  return Number(rawBalance) || 0;
 }
 
 // Cộng tiền theo loại tiền
 async function addMoney(userId, amount, type = DEFAULT_TYPE) {
-   try {
-        const key = renderKey(CURRENCIES[type]?.key || DEFAULT_TYPE,userId);
-        await addKey(key, amount);
-        return true;
-    } catch (error) {
-        console.error("LỖI CỘNG TIỀN:", error);
-        return false;
-    }
+  try {
+    const key = renderKey(CURRENCIES[type]?.key || DEFAULT_TYPE, userId);
+    await addKey(key, amount);
+    return true;
+  } catch (error) {
+    console.error("LỖI CỘNG TIỀN:", error);
+    return false;
+  }
 }
 
 // Trừ tiền theo loại tiền
 async function removeMoney(userId, amount, type = DEFAULT_TYPE) {
-    if (typeof amount !== "number" || amount <= 0) return false;
-    const current = await getBalance(userId, type);
-    if (amount > current) return false;
+  if (typeof amount !== "number" || amount <= 0) return false;
+  const current = await getBalance(userId, type);
+  if (amount > current) return false;
 
-    const key = renderKey(CURRENCIES[type]?.key || DEFAULT_TYPE,userId);
-    await setKey(key, current - amount);
-    return true;
+  const key = renderKey(CURRENCIES[type]?.key || DEFAULT_TYPE, userId);
+  await setKey(key, current - amount);
+  return true;
 }
 
+async function checkPay(message, userId) {
+  const guildId = message.guild.id;
+  //check nợ
+  const loanKey = renderKey("loan", guildId);
+  let allLoans = (await getKey(loanKey)) || [];
+  const userLoans = allLoans.filter((l) => l.nguoi_vay === userId);
 
+  // Kiểm tra xem có khoản nợ nào quá 3 ngày không
+  const hasOverdueDebt = userLoans.some((loan) => {
+    const loanDate = new Date(loan.date);
+    const diffTime = Math.abs(new Date() - loanDate);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays >= 2;
+  });
 
-module.exports = { getAllBalances,getBalance, addMoney, removeMoney, getIcon,CURRENCIES };
+  //check biên bản
+  const bienbanKey = renderKey("bienban", guildId);
+  let allBienban = (await getKey(bienbanKey)) || [];
+  const userBienban = allBienban.filter((l) => l.userId === userId);
+  const isBienban = userBienban.length > 0;
+
+  if (isBienban) {
+    await message.reply(
+      `**GIAO DỊCH BỊ CHẶN!** Bạn đang có biên bản vi phạm. Vui lòng dùng lệnh \`.bienban thanhtoan\` để thanh toán.`,
+    );
+    return true;
+  }
+
+  if (hasOverdueDebt) {
+    await message.reply(
+      `**GIAO DỊCH BỊ CHẶN!** Bạn đang có khoản nợ lâu ngày chưa trả. Vui lòng dùng lệnh \`.trano\` để thanh toán.`,
+    );
+    return true;
+  }
+  return false;
+}
+
+module.exports = {
+  getAllBalances,
+  getBalance,
+  addMoney,
+  removeMoney,
+  getIcon,
+  CURRENCIES,
+  checkPay,
+};

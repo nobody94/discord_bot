@@ -1,9 +1,14 @@
+//max tiền được đánh cược
 const maxAmount = 10000;
 
 const DEVELOPER_IDS = ['1446889473374683400','1016709206780411924']; 
-const MAX_LOVE_POINTS_PER_DAY = 500;
+const MAX_LOVE_POINTS_PER_DAY = 500; 
 const managerIds = ['1182987381662556253', "1446889473374683400"];
 const giftManagerIds = ['1016709206780411924', "1446889473374683400"];
+//số tiền đổi từ primo ra mora
+const exchangeRate = 10000;
+//id kênh báo cáo
+const ADMIN_CHANNEL_ID = '1447195483637420165';
 
 function getCustomDate() {
    const vnTime = new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Ho_Chi_Minh"}));
@@ -20,11 +25,31 @@ function getCustomDate() {
     return `${year}-${month}-${day}`;
 }
 
+function calculateInterest(date) {
+    const startDate = new Date(date);
+    const now = new Date();
+    const diffTime = Math.abs(now - startDate);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
+
+    let interestRate = 0;
+    if (diffDays >= 7) interestRate = 0.10;      
+    else if (diffDays >= 3) interestRate = 0.05; 
+    else interestRate = 0.02;                    
+
+    return {
+        rate: interestRate,
+        days: diffDays
+    };
+}
+
 module.exports={
     maxAmount,
     DEVELOPER_IDS,
     getCustomDate,
     MAX_LOVE_POINTS_PER_DAY,
     managerIds,
-    giftManagerIds
+    giftManagerIds,
+    calculateInterest,
+    exchangeRate,
+    ADMIN_CHANNEL_ID
 }
