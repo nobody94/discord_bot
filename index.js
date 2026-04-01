@@ -39,8 +39,12 @@ const commandFiles = fs
 for (const file of commandFiles) {
   const filePath = path.join(commandsPath, file);
   const command = require(filePath);
-  if (command.name && command.execute) {
-    client.commands.set(command.name, command);
+  
+  // Lấy tên lệnh: Ưu tiên command.name (lệnh cũ), nếu không có thì lấy command.data.name (Slash Command)
+  const commandName = command.name || (command.data && command.data.name);
+
+  if (commandName && command.execute) {
+    client.commands.set(commandName, command);
   } else {
     console.log(`[Cảnh báo] Lệnh tại ${filePath} thiếu 'name' hoặc 'execute'.`);
   }
@@ -49,7 +53,6 @@ for (const file of commandFiles) {
 client.once(Events.ClientReady, (c) => {
   console.log(`Bot ${c.user.tag} đã sẵn sàng và đang hoạt động!`);
 });
-
 
 client.on("messageCreate", async (message) => {
   // Bỏ qua tin nhắn của bot
@@ -66,7 +69,7 @@ client.on("messageCreate", async (message) => {
     const command =
       client.commands.get(commandName) ||
       client.commands.find(
-        (cmd) => cmd.aliases && cmd.aliases.includes(commandName)
+        (cmd) => cmd.aliases && cmd.aliases.includes(commandName),
       );
 
     if (!command) return;
@@ -98,6 +101,23 @@ client.on("messageCreate", async (message) => {
 
 // 🖱️ Xử lý Tương tác (Button, Modal, Select Menu, v.v.)
 client.on("interactionCreate", async (interaction) => {
+  // --- Xử lý Slash Commands ---
+  if (interaction.isChatInputCommand()) {
+    const command = client.commands.get(interaction.commandName);
+    if (!command) return;
+
+    try {
+      await command.execute(interaction);
+    } catch (error) {
+      console.error(`Lỗi thực thi lệnh ${interaction.commandName}:`, error);
+      await interaction.reply({
+        content: "Đã xảy ra lỗi khi thực hiện lệnh này!",
+        ephemeral: true,
+      });
+    }
+    return;
+  }
+
   // 1. XỬ LÝ NÚT BẤM (Button Interaction)
   if (interaction.isButton()) {
     // Kiểm tra nếu là các nút của trò chơi Tài Xỉu
@@ -223,9 +243,9 @@ client.on("interactionCreate", async (interaction) => {
       }
     }
 
-     // Kiểm tra modal của thêm đồ tạp hóa trò chơi
+    // Kiểm tra modal của thêm đồ tạp hóa trò chơi
     if (interaction.customId.startsWith("modal_taphoa_")) {
-     const command = client.commands.get("taphoa");
+      const command = client.commands.get("taphoa");
       if (command && command.handleInteraction) {
         try {
           return await command.handleInteraction(interaction);
@@ -245,8 +265,10 @@ async function startBot() {
     console.log("--- ĐANG CHUẨN BỊ LOGIN ---");
 
     if (!Token) {
-        console.error("❌ LỖI: BOT_TOKEN không tồn tại trong Environment Variables!");
-        return;
+      console.error(
+        "❌ LỖI: BOT_TOKEN không tồn tại trong Environment Variables!",
+      );
+      return;
     }
     console.log("🔑 Đang tiến hành đăng nhập vào Discord...");
     // Kiểm tra nếu client đã login rồi thì không login lại

@@ -7,6 +7,8 @@ const managerIds = ['1182987381662556253', "1446889473374683400"];
 const giftManagerIds = ['1016709206780411924', "1446889473374683400"];
 //số tiền đổi từ primo ra mora
 const exchangeRate = 10000;
+//id kênh báo cáo
+const ADMIN_CHANNEL_ID = '1447195483637420165';
 
 function getCustomDate() {
    const vnTime = new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Ho_Chi_Minh"}));
@@ -48,5 +50,6 @@ module.exports={
     managerIds,
     giftManagerIds,
     calculateInterest,
-    exchangeRate
+    exchangeRate,
+    ADMIN_CHANNEL_ID
 }

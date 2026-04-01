@@ -21,7 +21,8 @@ module.exports = {
         const guildId = message.guild.id;
         const lotteryKey = renderKey("lottery", guildId);
         const jackpotKey = renderKey("lottery_jackpot", guildId);
-        const winNumKey = renderKey("last_win_num", guildId)
+        const winNumKey = renderKey("last_win_num", guildId);
+        const statusKey = renderKey("lottery_status", guildId);
         const currencyType = 'mora';
         const isDev = DEVELOPER_IDS.includes(message.author.id);
         const isAdmin = message.member.permissions.has('Administrator') || isDev;
@@ -29,6 +30,11 @@ module.exports = {
         try {
             // --- 1. MUA VÉ (.xoso mua <số lượng>) ---
             if (action === 'mua') {
+                const isClosed = await getKey(statusKey);
+                if (isClosed === 'closed') {
+                    return message.reply(`${errorIcon} | Hiện tại cửa hàng xổ số đang **đóng cửa** để chuẩn bị quay số. Vui lòng quay lại sau!`);
+                }
+
                 const quantity = parseInt(args[1]) || 1;
                 if (quantity <= 0) return message.reply("⚠️ Số lượng không hợp lệ.");
 
@@ -56,6 +62,20 @@ module.exports = {
                 await setKey(jackpotKey, currentJackpot + totalCost);
 
                 return message.reply(`${verifyIcon} | Mua thành công **${quantity}** vé với tổng giá ${totalCost} ${getIcon(currencyType)}.`);
+            }
+
+            // --- LỆNH ĐÓNG CỬA (ADMIN/DEV) ---
+            else if (action === 'dong') {
+                if (!isAdmin) return message.reply(`${errorIcon} | Bạn không có quyền đóng cửa hàng.`);
+                await setKey(statusKey, 'closed');
+                return message.reply(`🔒 **Cửa hàng xổ số đã ĐÓNG.** Không thể mua vé mới.`);
+            }
+
+            // --- LỆNH MỞ CỬA (ADMIN/DEV) ---
+            else if (action === 'mo') {
+                if (!isAdmin) return message.reply(`${errorIcon} | Bạn không có quyền mở cửa hàng.`);
+                await setKey(statusKey, 'open')
+                return message.reply(`🔓 **Cửa hàng xổ số đã MỞ.** Chúc mọi người may mắn!`);
             }
 
             // --- 2. KIỂM TRA CÁ NHÂN (.xoso check) ---
