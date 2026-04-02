@@ -62,7 +62,7 @@ const GachaItem = {
     hideFromShop: true,
     lovePoint: 200,
   },
-   pokemon_5: {
+  pokemon_5: {
     name: "Charmander",
     price: 100,
     sellPrice: 0,
@@ -72,7 +72,7 @@ const GachaItem = {
     hideFromShop: true,
     lovePoint: 200,
   },
-   pokemon_6: {
+  pokemon_6: {
     name: "Bulbasaur",
     price: 100,
     sellPrice: 0,
@@ -82,7 +82,7 @@ const GachaItem = {
     hideFromShop: true,
     lovePoint: 200,
   },
-   pokemon_7: {
+  pokemon_7: {
     name: "Meowth",
     price: 100,
     sellPrice: 0,
@@ -92,7 +92,7 @@ const GachaItem = {
     hideFromShop: true,
     lovePoint: 200,
   },
-   pokemon_8: {
+  pokemon_8: {
     name: "Flutter Mane",
     price: 100,
     sellPrice: 0,
@@ -102,7 +102,7 @@ const GachaItem = {
     hideFromShop: true,
     lovePoint: 200,
   },
-   pokemon_9: {
+  pokemon_9: {
     name: "Iron Boulder",
     price: 100,
     sellPrice: 0,
@@ -112,7 +112,7 @@ const GachaItem = {
     hideFromShop: true,
     lovePoint: 200,
   },
-   pokemon_10: {
+  pokemon_10: {
     name: "Psyduck",
     price: 100,
     sellPrice: 0,
@@ -162,7 +162,7 @@ const GachaItem = {
     hideFromShop: true,
     lovePoint: 200,
   },
-   pokemon_15: {
+  pokemon_15: {
     name: "Togekiss",
     price: 100,
     sellPrice: 0,
@@ -172,7 +172,7 @@ const GachaItem = {
     hideFromShop: true,
     lovePoint: 200,
   },
-   pokemon_16: {
+  pokemon_16: {
     name: "Gabite",
     price: 100,
     sellPrice: 0,
@@ -182,7 +182,7 @@ const GachaItem = {
     hideFromShop: true,
     lovePoint: 200,
   },
-   pokemon_17: {
+  pokemon_17: {
     name: "Glameow",
     price: 100,
     sellPrice: 0,
@@ -192,7 +192,7 @@ const GachaItem = {
     hideFromShop: true,
     lovePoint: 200,
   },
-   pokemon_18: {
+  pokemon_18: {
     name: "Rattata",
     price: 100,
     sellPrice: 0,
@@ -202,7 +202,7 @@ const GachaItem = {
     hideFromShop: true,
     lovePoint: 200,
   },
-   pokemon_19: {
+  pokemon_19: {
     name: "Chikorita",
     price: 100,
     sellPrice: 0,
@@ -212,7 +212,7 @@ const GachaItem = {
     hideFromShop: true,
     lovePoint: 200,
   },
-   pokemon_20: {
+  pokemon_20: {
     name: "Moltres",
     price: 100,
     sellPrice: 0,
@@ -222,7 +222,7 @@ const GachaItem = {
     hideFromShop: true,
     lovePoint: 200,
   },
-   pokemon_21: {
+  pokemon_21: {
     name: "Articuno",
     price: 100,
     sellPrice: 0,
@@ -262,7 +262,7 @@ const GachaItem = {
     hideFromShop: true,
     lovePoint: 200,
   },
-   pokemon_25: {
+  pokemon_25: {
     name: "Dodrio",
     price: 100,
     sellPrice: 0,
@@ -272,7 +272,7 @@ const GachaItem = {
     hideFromShop: true,
     lovePoint: 200,
   },
-   pokemon_26: {
+  pokemon_26: {
     name: "Ponyta",
     price: 100,
     sellPrice: 0,
@@ -282,7 +282,7 @@ const GachaItem = {
     hideFromShop: true,
     lovePoint: 200,
   },
-   pokemon_27: {
+  pokemon_27: {
     name: "Dugtrio",
     price: 100,
     sellPrice: 0,
@@ -292,7 +292,7 @@ const GachaItem = {
     hideFromShop: true,
     lovePoint: 200,
   },
-   pokemon_28: {
+  pokemon_28: {
     name: "Venonat",
     price: 100,
     sellPrice: 0,
@@ -302,7 +302,7 @@ const GachaItem = {
     hideFromShop: true,
     lovePoint: 200,
   },
-   pokemon_29: {
+  pokemon_29: {
     name: "Vulpix",
     price: 100,
     sellPrice: 0,
@@ -312,7 +312,7 @@ const GachaItem = {
     hideFromShop: true,
     lovePoint: 200,
   },
-   pokemon_30: {
+  pokemon_30: {
     name: "Clefairy",
     price: 100,
     sellPrice: 0,
@@ -322,7 +322,7 @@ const GachaItem = {
     hideFromShop: true,
     lovePoint: 200,
   },
-   pokemon_31: {
+  pokemon_31: {
     name: "Butterfree",
     price: 100,
     sellPrice: 0,
@@ -332,7 +332,7 @@ const GachaItem = {
     hideFromShop: true,
     lovePoint: 200,
   },
-   pokemon_32: {
+  pokemon_32: {
     name: "Abra",
     price: 100,
     sellPrice: 0,
@@ -342,7 +342,7 @@ const GachaItem = {
     hideFromShop: true,
     lovePoint: 200,
   },
-   pokemon_33: {
+  pokemon_33: {
     name: "Beedrill",
     price: 100,
     sellPrice: 0,
@@ -352,7 +352,7 @@ const GachaItem = {
     hideFromShop: true,
     lovePoint: 200,
   },
-   pokemon_34: {
+  pokemon_34: {
     name: "Charizard",
     price: 100,
     sellPrice: 0,
@@ -362,7 +362,7 @@ const GachaItem = {
     hideFromShop: true,
     lovePoint: 200,
   },
-   pokemon_35: {
+  pokemon_35: {
     name: "Dragonite",
     price: 100,
     sellPrice: 0,
@@ -371,7 +371,57 @@ const GachaItem = {
     icon: "<:dragonite:1488894309431513129>",
     hideFromShop: true,
     lovePoint: 200,
-  }
+  },
+  pokemon_36: {
+    name: "Ekans",
+    price: 100,
+    sellPrice: 0,
+    currency: primo,
+    description: desc.legendary,
+    icon: "<:ekans:1489114331537870909>",
+    hideFromShop: true,
+    lovePoint: 200,
+  },
+  pokemon_37: {
+    name: "Sandslash",
+    price: 100,
+    sellPrice: 0,
+    currency: primo,
+    description: desc.legendary,
+    icon: "<:sandslash:1489114639856959600>",
+    hideFromShop: true,
+    lovePoint: 200,
+  },
+  pokemon_38: {
+    name: "Vileplume",
+    price: 100,
+    sellPrice: 0,
+    currency: primo,
+    description: desc.legendary,
+    icon: "<:vileplume:1489114908564918385>",
+    hideFromShop: true,
+    lovePoint: 200,
+  },
+  pokemon_39: {
+    name: "Sentret",
+    price: 100,
+    sellPrice: 0,
+    currency: primo,
+    description: desc.legendary,
+    icon: "<:sentret:1489115499039297726>",
+    hideFromShop: true,
+    lovePoint: 200,
+  },
+  pokemon_40: {
+    name: "Aerodactyl",
+    price: 100,
+    sellPrice: 0,
+    currency: primo,
+    description: desc.legendary,
+    icon: "<:aerodactyl:1489115206943637726>",
+    hideFromShop: true,
+    lovePoint: 200,
+  },
 };
 
 const TrashItem = {
@@ -665,7 +715,7 @@ const SHOP_ITEMS = {
   },
   ...HideItem,
   ...TrashItem,
-  ...GachaItem
+  ...GachaItem,
 };
 
 const BLIND_BOX_LOOT = {
@@ -713,7 +763,12 @@ const BLIND_BOX_LOOT = {
     { item: "pokemon_32", amount: 1, weight: 0.5, isGolden: true },
     { item: "pokemon_33", amount: 1, weight: 0.5, isGolden: true },
     { item: "pokemon_34", amount: 1, weight: 0.5, isGolden: true },
-    { item: "pokemon_35", amount: 1, weight: 0.5, isGolden: true }
+    { item: "pokemon_35", amount: 1, weight: 0.5, isGolden: true },
+    { item: "pokemon_36", amount: 1, weight: 0.5, isGolden: true },
+    { item: "pokemon_37", amount: 1, weight: 0.5, isGolden: true },
+    { item: "pokemon_38", amount: 1, weight: 0.5, isGolden: true },
+    { item: "pokemon_39", amount: 1, weight: 0.5, isGolden: true },
+    { item: "pokemon_40", amount: 1, weight: 0.5, isGolden: true }
   ],
 };
 

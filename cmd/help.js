@@ -40,14 +40,7 @@ module.exports = {
         color: "#FFB6C1", 
         commands:
           "• Hạnh phúc: kiss, hug, cuddle, cheek, airkiss, lick, can_yeu\n• Vui vẻ: laugh, highfive, pat, stare, pinch\n• Mạnh bạo: slap, poke, punch, kick, fight, bonk, rip,spank,hien_te,shoot\n • marry, kethon: Dùng để cầu hôn\n• divorce, lyhon: Dùng để ly hôn\n• couple, cp: Xem tình trạng hôn nhân\n• marrylist, mrl: Danh sách các cặp đôi",
-      },      
-      taphoa: {
-        label: "Game kinh dị",
-        emoji: "🎮",
-        color: "#95a5a6", // Màu xám hệ thống
-        commands:
-          "• taphoa: Xem đồ trong cửa hàng trao đổi\n• taphoa mua: mua đồ trong cửa hàng trao đổi\n• tuido: Xem đồ trong túi\n• taphoa/tuido gift: Xem đồ trong cửa hàng/túi đồ vật phẩm tặng\n• point check:check điểm hiện tại\n\nChỉ dành cho người quản lý\n• point add/remove: Thêm hoặc trừ điểm\n• taphoa give: tặng vật phẩm trong mục vật phẩm tặng\n• taphoa themdo: thêm đồ cho cửa hàng trao đổi\n• taphoa gift themdo: thêm đồ cửa hàng vật phẩm tặng \n• tuido @user remove id: để xóa vật phẩm trao đổi khỏi túi của 1 người \n• tuido gift @user remove id: để xóa vật phẩm tặng khỏi túi của 1 người",
-      },
+      },    
       admin: {
         label: "Anniversary và Cấu hình (Admin)",
         emoji: "⚙️",

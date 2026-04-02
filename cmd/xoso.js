@@ -7,7 +7,7 @@ const { DEVELOPER_IDS } = require('../utils/constant.js');
 // Giá vé
 const TICKET_PRICE = 1000;
 // số lượng vé có thể mua
-const MAX_TICKETS_PER_USER = 10;
+const MAX_TICKETS_PER_USER = 20;
 // Thuế 10%
 const TAX_RATE = 0.2; 
 
