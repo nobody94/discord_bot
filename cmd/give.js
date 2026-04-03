@@ -1,17 +1,21 @@
 const Money = require("../utils/currency");
-const { errorIcon, verifyIcon } = require('../utils/icon.js');
-const { checkPay } = require('../utils/currency.js');
+const { errorIcon, verifyIcon } = require("../utils/icon.js");
+const { checkPay } = require("../utils/currency.js");
+const { handleTransaction } = require("../utils/transaction.js");
 
 module.exports = {
   name: "give",
   aliases: ["gui"],
-  description: "Chuyển tiền cho người dùng khác (Chỉ chấp nhận mora hoặc primo)",
+  description:
+    "Chuyển tiền cho người dùng khác (Chỉ chấp nhận mora hoặc primo)",
 
   async execute(message, args) {
     // 1. Kiểm tra tag người nhận
     const target = message.mentions.users.first();
     if (!target) {
-      return message.reply("⚠️ | Bạn cần tag người muốn tặng tiền! Ví dụ: `.give @user 100 primo`.");
+      return message.reply(
+        "⚠️ | Bạn cần tag người muốn tặng tiền! Ví dụ: `.give @user 100 primo`.",
+      );
     }
 
     if (target.id === message.author.id) {
@@ -29,17 +33,19 @@ module.exports = {
     }
 
     // 3. Kiểm tra loại tiền (Chỉ cho phép mora hoặc primo)
-    const currencyType = args[2] ? args[2].toLowerCase() : 'mora';
-    const allowedCurrencies = ['mora', 'primo'];
+    const currencyType = args[2] ? args[2].toLowerCase() : "mora";
+    const allowedCurrencies = ["mora", "primo"];
 
     if (!allowedCurrencies.includes(currencyType)) {
-      return message.reply(`${errorIcon} | Loại tiền không hợp lệ! Bạn chỉ có thể tặng **mora** hoặc **primo**.`);
+      return message.reply(
+        `${errorIcon} | Loại tiền không hợp lệ! Bạn chỉ có thể tặng **mora** hoặc **primo**.`,
+      );
     }
 
     const senderId = message.author.id;
     const receiverId = target.id;
 
-    //kiểm tra nợ và biên bản    
+    //kiểm tra nợ và biên bản
     const isBlocked = await checkPay(message, senderId);
     if (isBlocked) return;
 
@@ -49,7 +55,7 @@ module.exports = {
 
       if (senderBalance < amount) {
         return message.reply(
-          `${errorIcon} | Bạn không đủ **${currencyType}**! Số dư hiện tại: **${senderBalance.toLocaleString()}** ${Money.getIcon(currencyType)}`
+          `${errorIcon} | Bạn không đủ **${currencyType}**! Số dư hiện tại: **${senderBalance.toLocaleString()}** ${Money.getIcon(currencyType)}`,
         );
       }
 
@@ -57,13 +63,22 @@ module.exports = {
       await Money.removeMoney(senderId, amount, currencyType);
       await Money.addMoney(receiverId, amount, currencyType);
 
-      return message.channel.send(
-        `${verifyIcon} | **${message.author.username}** đã tặng **${amount.toLocaleString()}** ${Money.getIcon(currencyType)} cho **${target.username}**!`
+      //Thêm log
+      await handleTransaction(
+        senderId,
+        receiverId,
+        "give",
+        `${amount.toLocaleString()} ${currencyType}`,
       );
 
+      return message.channel.send(
+        `${verifyIcon} | **${message.author.username}** đã tặng **${amount.toLocaleString()}** ${Money.getIcon(currencyType)} cho **${target.username}**!`,
+      );
     } catch (error) {
       console.error("Lỗi khi thực hiện lệnh give:", error);
-      return message.reply(`${errorIcon} | Đã xảy ra lỗi khi thực hiện giao dịch.`);
+      return message.reply(
+        `${errorIcon} | Đã xảy ra lỗi khi thực hiện giao dịch.`,
+      );
     }
   },
 };

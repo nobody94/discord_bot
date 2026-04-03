@@ -6,8 +6,9 @@ const {
   getCustomDate,
   MAX_LOVE_POINTS_PER_DAY,
 } = require("../utils/constant.js");
+const {handleTransaction} = require('../utils/transaction.js');
 
-async function baloHandler(args, message, inventory, invKey, userId) {
+async function baloHandler(args, message, inventory, invKey, userId) { 
   // --- LOGIC TẶNG ĐỒ (GIVE) ---
   if (args[0] === "give") {
     const target = message.mentions.users.first();
@@ -53,6 +54,9 @@ async function baloHandler(args, message, inventory, invKey, userId) {
         targetInventory.push(itemId);
       }
     }
+    const itemInfo = SHOP_ITEMS[itemId] || { name: itemId, icon: "📦" };
+    //Thêm log
+    await handleTransaction(userId,target.id,'balo give',`${amountToGive} x ${itemInfo.name} - ${itemInfo.id}`);
 
     // 3. Cập nhật lại Database cho cả 2 người
     await setKey(invKey, inventory);
@@ -118,8 +122,6 @@ async function baloHandler(args, message, inventory, invKey, userId) {
       await setKey(coupleKey, couplesList);
     }
     // --- KẾT THÚC LOGIC CẬP NHẬT CHỈ SỐ THÂN MẬT ---
-
-    const itemInfo = SHOP_ITEMS[itemId] || { name: itemId, icon: "📦" };
     message.reply(
       `${verifyIcon} | Bạn đã tặng **${amountToGive}x ${itemInfo.icon} ${itemInfo.name}** cho **${target.username}** thành công!${loveMsg}`,
     );
@@ -149,7 +151,7 @@ async function baloHandler(args, message, inventory, invKey, userId) {
       );
 
       if (trashItems.length === 0) {
-        message.reply(`${errorIcon} | Túi đồ của bạn không có món đồ rác nào.`);
+       return message.reply(`${errorIcon} | Túi đồ của bạn không có món đồ rác nào.`);
       }
 
       trashItems.forEach((id) => {
@@ -220,6 +222,9 @@ async function baloHandler(args, message, inventory, invKey, userId) {
         moneyMsg.push(
           `**${totalPrimoEarned.toLocaleString()}** ${getIcon("primo")}`,
         );
+
+      //Thêm log
+      await handleTransaction(userId,userId,'balo sell',`${soldDescription}, nhận về tổng cộng ${moneyMsg.join(" và ")}!`);
 
       message.reply(
         `${verifyIcon} | Bạn ${soldDescription}, nhận về tổng cộng ${moneyMsg.join(" và ")}!`,
