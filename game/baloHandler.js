@@ -187,7 +187,7 @@ async function baloHandler(args, message, inventory, invKey, userId) {
       if (amountToSell <= 0)
         return message.reply(`${errorIcon} | Số lượng bán không hợp lệ.`);
       if (countInInv < amountToSell) {
-        message.reply(
+        return message.reply(
           `${errorIcon} | Bạn chỉ có **${countInInv}x** ${item.name}, không đủ để bán **${amountToSell}**.`,
         );
       }
