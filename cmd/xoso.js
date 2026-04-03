@@ -8,8 +8,8 @@ const { DEVELOPER_IDS } = require('../utils/constant.js');
 const TICKET_PRICE = 1000;
 // số lượng vé có thể mua
 const MAX_TICKETS_PER_USER = 10;
-// Thuế 10%
-const TAX_RATE = 0.2; 
+// Thuế 
+const TAX_RATE = 0.2;
 
 module.exports = {
     name: 'xoso',
@@ -97,8 +97,8 @@ module.exports = {
 
             // --- 3. XEM TẤT CẢ (ADMIN/DEV - .xoso all) ---
             else if (action === 'all') {
-               if (!isAdmin) return message.reply(`${errorIcon} | Chỉ Admin mới xem được danh sách.`);
-                
+                if (!isAdmin) return message.reply(`${errorIcon} | Chỉ Admin mới xem được danh sách.`);
+
                 const allTickets = (await getKey(lotteryKey)) || [];
                 if (allTickets.length === 0) return message.reply("Chưa có vé nào được mua.");
 
@@ -121,9 +121,9 @@ module.exports = {
                 const embed = new EmbedBuilder()
                     .setTitle(`📂 DANH SÁCH VÉ SERVER (${allTickets.length} vé)`)
                     .setDescription(list.length > 2000 ? "⚠️ Danh sách quá dài để hiển thị tất cả..." : list)
-                    .addFields({ 
-                        name: '💰 Hũ Jackpot hiện tại', 
-                        value: `**${currentJackpot.toLocaleString()}** ${getIcon(currencyType)}` 
+                    .addFields({
+                        name: '💰 Hũ Jackpot hiện tại',
+                        value: `**${currentJackpot.toLocaleString()}** ${getIcon(currencyType)}`
                     })
                     .setColor(0x2F3136) // Màu tối sang trọng
                     .setTimestamp();
@@ -140,7 +140,7 @@ module.exports = {
                 const statusMsg = await message.channel.send("🎰 **CHUẨN BỊ QUAY THƯỞNG...** 🎰");
 
                 let secondsLeft = 5; // Đếm ngược 5 giây
-                
+
                 const animation = setInterval(async () => {
                     if (secondsLeft > 0) {
                         // Tạo dãy số random kiểu [0|0|0]
@@ -151,17 +151,17 @@ module.exports = {
                         await statusMsg.edit(
                             `🎰 Đang quay: **[ ${r1} | ${r2} | ${r3} ]** 🎰\n` +
                             `⏱️ Kết quả sẽ có sau: **${secondsLeft}** giây...`
-                        ).catch(() => {});
-                        
+                        ).catch(() => { });
+
                         secondsLeft--;
                     } else {
                         // KẾT THÚC QUAY
                         clearInterval(animation);
-                        
+
                         // Tạo số trúng thưởng thực tế (000-999)
                         const winNumRaw = Math.floor(Math.random() * 1000);
                         const winNum = winNumRaw.toString().padStart(3, '0');
-                        
+
                         // Tách số để hiển thị đẹp [X|X|X]
                         const displayWin = winNum.split('').join(' | ');
 
@@ -173,28 +173,27 @@ module.exports = {
                         if (winners.length > 0) {
                             const winnerMentions = winners.map(w => `<@${w.userId}>`).join(', ');
                             embed.setColor(0x00FF00)
-                                 .setDescription(
-                                     `🔢 Con số may mắn: **[ ${displayWin} ]**\n\n` +
-                                     `🎉 Chúc mừng những người sau đây đã trúng giải!\n${winnerMentions}` +
-                                     `👉 Dùng \`.xoso thuong\` để phát thưởng ngay.`
-                                 );
+                                .setDescription(
+                                    `🔢 Con số may mắn: **[ ${displayWin} ]**\n\n` +
+                                    `🎉 Chúc mừng những người sau đây đã trúng giải!\n${winnerMentions}` +
+                                    `👉 Dùng \`.xoso thuong\` để phát thưởng ngay.`
+                                );
                         } else {
                             embed.setColor(0xFF0000)
-                                 .setDescription(
-                                     `🔢 Con số may mắn: **[ ${displayWin} ]**\n\n` +
-                                     `❌ Rất tiếc, không có ai trúng đợt này.\n` +
-                                     `💰 Jackpot tiếp tục được cộng dồn! Dùng \`.xoso thuong\` để bỏ vé cũ.`
-                                 );
-                            await deleteKey(lotteryKey); // Xóa vé cũ
+                                .setDescription(
+                                    `🔢 Con số may mắn: **[ ${displayWin} ]**\n\n` +
+                                    `❌ Rất tiếc, không có ai trúng đợt này.\n` +
+                                    `💰 Jackpot tiếp tục được cộng dồn! Dùng \`.xoso thuong\` để bỏ vé cũ.`
+                                );
                         }
 
                         // Lưu số trúng vào DB để lệnh 'thuong' sử dụng
                         await setKey(winNumKey, winNum);
-                        
-                        await statusMsg.edit({ 
-                            content: "✅ **QUAY THƯỞNG HOÀN TẤT!**", 
-                            embeds: [embed] 
-                        }).catch(() => {});
+
+                        await statusMsg.edit({
+                            content: "✅ **QUAY THƯỞNG HOÀN TẤT!**",
+                            embeds: [embed]
+                        }).catch(() => { });
                     }
                 }, 1000); // Mỗi 1 giây cập nhật một lần (an toàn cho Discord Rate Limit)
 
@@ -204,7 +203,7 @@ module.exports = {
             // --- 5. THƯỞNG (CHỈ DEV - .xoso thuong) ---
             else if (action === 'thuong') {
                 if (!isDev) return message.reply(`${errorIcon} | Chỉ Dev mới phát thưởng được.`);
-                
+
                 const allTickets = (await getKey(lotteryKey)) || [];
                 const jackpot = (await getKey(jackpotKey)) || 0;
                 const winNum = await getKey(winNumKey);
@@ -221,8 +220,8 @@ module.exports = {
                 // --- LOGIC THUẾ ---
                 const tax = Math.floor(jackpot * TAX_RATE);
                 const finalPrizePool = jackpot - tax;
-                const prizePerPerson = Math.floor(finalPrizePool / winners.length);               
-               
+                const prizePerPerson = Math.floor(finalPrizePool / winners.length);
+
                 const winnerMentions = winners.map(w => `<@${w.userId}>`).join(', ');
 
                 for (const w of winners) {
