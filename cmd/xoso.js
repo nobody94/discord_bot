@@ -7,7 +7,7 @@ const { DEVELOPER_IDS } = require('../utils/constant.js');
 // Giá vé
 const TICKET_PRICE = 1000;
 // số lượng vé có thể mua
-const MAX_TICKETS_PER_USER = 10;
+const MAX_TICKETS_PER_USER = 40;
 // Thuế 
 const TAX_RATE = 0.2;
 
@@ -80,12 +80,13 @@ module.exports = {
 
             // --- 2. KIỂM TRA CÁ NHÂN (.xoso check) ---
             else if (action === 'check') {
+                const targetUser = message.mentions.users.first() || message.author
                 const allTickets = (await getKey(lotteryKey)) || [];
-                const myTickets = allTickets.filter(t => t.userId === message.author.id);
+                const myTickets = allTickets.filter(t => t.userId === targetUser.id);
                 const currentJackpot = (await getKey(jackpotKey)) || 0;
 
                 const embed = new EmbedBuilder()
-                    .setTitle(`🎫 VÉ CỦA ${message.author.username.toUpperCase()}`)
+                    .setTitle(`🎫 VÉ CỦA ${targetUser.username.toUpperCase()}`)
                     .addFields(
                         { name: '💰 Hũ Jackpot hiện tại', value: `**${currentJackpot.toLocaleString()}** ${getIcon(currencyType)}`, inline: true },
                         { name: '🎟️ Số vé', value: `**${myTickets.length}/${MAX_TICKETS_PER_USER}**`, inline: true },
@@ -96,13 +97,13 @@ module.exports = {
             }
 
             // --- 3. XEM TẤT CẢ (ADMIN/DEV - .xoso all) ---
-            else if (action === 'all') {
+            else if (action === 'all') {                
                 if (!isAdmin) return message.reply(`${errorIcon} | Chỉ Admin mới xem được danh sách.`);
 
                 const allTickets = (await getKey(lotteryKey)) || [];
                 if (allTickets.length === 0) return message.reply("Chưa có vé nào được mua.");
 
-                // Nhóm vé theo userId
+                // 1. Nhóm vé theo userId
                 const groupedTickets = allTickets.reduce((acc, ticket) => {
                     if (!acc[ticket.userId]) {
                         acc[ticket.userId] = [];
@@ -111,21 +112,38 @@ module.exports = {
                     return acc;
                 }, {});
 
-                // Tạo nội dung hiển thị
-                const list = Object.keys(groupedTickets).map((userId, i) => {
-                    return `**${i + 1}.** <@${userId}>\n> 🎟️ Vé: ${groupedTickets[userId].join(', ')}`;
+                const userIds = Object.keys(groupedTickets);
+                const totalUsers = userIds.length;
+                const itemsPerPage = 5; // Mỗi trang hiển thị 10 người
+                const totalPages = Math.ceil(totalUsers / itemsPerPage);
+
+                // 2. Lấy số trang từ args[1] (ví dụ: .xs all 2)
+                let page = parseInt(args[1]) || 1;
+                if (page < 1) page = 1;
+                if (page > totalPages) page = totalPages;
+
+                // 3. Cắt danh sách người chơi cho trang hiện tại
+                const start = (page - 1) * itemsPerPage;
+                const end = start + itemsPerPage;
+                const pageUsers = userIds.slice(start, end);
+
+                // 4. Tạo nội dung hiển thị cho trang đó
+                const list = pageUsers.map((userId, i) => {
+                    const globalIndex = start + i + 1;
+                    return `**${globalIndex}.** <@${userId}>\n> 🎟️ Vé: ${groupedTickets[userId].join(', ')}`;
                 }).join('\n\n');
 
                 const currentJackpot = (await getKey(jackpotKey)) || 0;
 
                 const embed = new EmbedBuilder()
-                    .setTitle(`📂 DANH SÁCH VÉ SERVER (${allTickets.length} vé)`)
-                    .setDescription(list.length > 2000 ? "⚠️ Danh sách quá dài để hiển thị tất cả..." : list)
-                    .addFields({
-                        name: '💰 Hũ Jackpot hiện tại',
-                        value: `**${currentJackpot.toLocaleString()}** ${getIcon(currencyType)}`
-                    })
-                    .setColor(0x2F3136) // Màu tối sang trọng
+                    .setTitle(`📂 DANH SÁCH VÉ SERVER - TRANG ${page}/${totalPages}`)
+                    .setDescription(list)
+                    .addFields(
+                        { name: '📊 Thống kê', value: `Tổng: **${totalUsers}** người chơi | **${allTickets.length}** vé`, inline: true },
+                        { name: '💰 Hũ Jackpot', value: `**${currentJackpot.toLocaleString()}** ${getIcon(currencyType)}`, inline: true }
+                    )
+                    .setFooter({ text: `Dùng .xoso all <số trang> để xem trang tiếp theo.` })
+                    .setColor(0x2F3136)
                     .setTimestamp();
 
                 return message.reply({ embeds: [embed] });

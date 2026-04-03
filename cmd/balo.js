@@ -17,7 +17,7 @@ module.exports = {
     const inventory = (await getKey(invKey)) || [];
 
     //Xử lý bán, cho, mở đồ
-    if (args[0] && ["sell", "give", "open"].includes(args[0].toLowerCase())) {
+    if (args[0] && ["sell", "give", "open","cat"].includes(args[0].toLowerCase())) {
       const authorId = message.author.id;
       const authorBaloKey = renderKey("inventory", authorId);
       let authorBalo = (await getKey(authorBaloKey)) || [];

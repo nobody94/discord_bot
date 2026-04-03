@@ -6,6 +6,7 @@ const {
   getCustomDate,
   MAX_LOVE_POINTS_PER_DAY,
 } = require("../utils/constant.js");
+const {handleTransaction} = require('../utils/transaction.js');
 
 async function becaHandler(args, message, fishTank, tankKey, userId) {
   const action = args[0]?.toLowerCase();
@@ -88,6 +89,9 @@ async function becaHandler(args, message, fishTank, tankKey, userId) {
       await addMoney(userId, totalPrimo, "primo");
       rewards.push(`**${totalPrimo.toLocaleString()}** ${getIcon("primo")}`);
     }
+    //Thêm log
+    await handleTransaction(userId,userId,'beca sell',`${soldCount} con cá - Nhận: ${rewards.join(" và ")}`);
+
     return message.reply(
       `${verifyIcon} | Đã bán **${soldCount}** con cá. Nhận: ${rewards.join(" và ")} (Cá hiếm đã được giữ lại).`,
     );
@@ -195,6 +199,9 @@ async function becaHandler(args, message, fishTank, tankKey, userId) {
       }
       await setKey(coupleKey, couplesList);
     }
+
+    //Thêm log
+    await handleTransaction(userId,target.id,'beca give',`${amount} x ${fish.name} - ${fishId}`);
 
     return message.reply(
       `${verifyIcon} | Bạn đã tặng **${amount}x ${fish.icon} ${fish.name}** cho **${target.username}** thành công!${loveMsg}`,

@@ -53,7 +53,7 @@ module.exports = {
           times = 1
       }
 
-    if((user.data?.quest?.current == user.data?.quest?.target || user.data?.quest?.claimed) && times > 1){
+    if((user.data?.quest?.current == user.data?.quest?.target || user.data?.quest?.claimed) && times > 1 || user.data?.quest?.type !== subCommand){
       times = 1
     }
 
