@@ -201,7 +201,7 @@ async function becaHandler(args, message, fishTank, tankKey, userId) {
     }
 
     //Thêm log
-    await handleTransaction(userId,target.id,'beca give',`${amount} x ${fish.name} - ${fish.id}`);
+    await handleTransaction(userId,target.id,'beca give',`${amount} x ${fish.name} - ${fishId}`);
 
     return message.reply(
       `${verifyIcon} | Bạn đã tặng **${amount}x ${fish.icon} ${fish.name}** cho **${target.username}** thành công!${loveMsg}`,

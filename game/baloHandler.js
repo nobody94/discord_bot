@@ -56,7 +56,7 @@ async function baloHandler(args, message, inventory, invKey, userId) {
     }
     const itemInfo = SHOP_ITEMS[itemId] || { name: itemId, icon: "📦" };
     //Thêm log
-    await handleTransaction(userId,target.id,'balo give',`${amountToGive} x ${itemInfo.name} - ${itemInfo.id}`);
+    await handleTransaction(userId,target.id,'balo give',`${amountToGive} x ${itemInfo.name} - ${itemId}`);
 
     // 3. Cập nhật lại Database cho cả 2 người
     await setKey(invKey, inventory);
