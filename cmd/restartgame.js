@@ -1,5 +1,7 @@
 const ViWordchain = require("../game/wcViHandler");
 const EnWordchain = require("../game/wcEnHandler");
+const {DEVELOPER_IDS} = require('../utils/constant.js');
+const { PermissionsBitField } = require('discord.js');
 
 module.exports = {
   name: "restart",
@@ -7,6 +9,9 @@ module.exports = {
 
   async execute(message, args) {
     const guildId = message.guild.id;
+     if (!message.member.permissions.has(PermissionsBitField.Flags.ManageChannels) && !DEVELOPER_IDS.includes(message.author.id)) {
+      return message.reply(`${errorIcon} Bạn cần quyền sử dụng lệnh này.`);
+    }
 
     // Lệnh restart: restart
     const viState = await ViWordchain.getWCViData(guildId);

@@ -8,7 +8,6 @@ const Money = require("../utils/currency");
 const { getIcon } = require("../utils/currency");
 const { errorIcon, verifyIcon } = require("../utils/icon");
 const { maxAmount } = require("../utils/constant");
-const { renderKey, getKey, setKey } = require("../utils/db");
 
 // Hàm hỗ trợ tính điểm bài
 function calculatePoints(hand) {
