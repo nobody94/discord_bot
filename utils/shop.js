@@ -422,6 +422,36 @@ const GachaItem = {
     hideFromShop: true,
     lovePoint: 200,
   },
+  gi_1: {
+    name: "Luonnotar",
+    price: 100,
+    sellPrice: 0,
+    currency: primo,
+    description: desc.legendary,
+    icon: "<:luonnotar:1490597128815513600>",
+    hideFromShop: true,
+    lovePoint: 200,
+  },
+  gi_2: {
+    name: "Durin",
+    price: 100,
+    sellPrice: 0,
+    currency: primo,
+    description: desc.legendary,
+    icon: "<:durin:1490597297107505182>",
+    hideFromShop: true,
+    lovePoint: 200,
+  },
+  gi_3: {
+    name: "Nấm quỷ phù du",
+    price: 100,
+    sellPrice: 0,
+    currency: primo,
+    description: desc.legendary,
+    icon: "<:fungus:1490597310495854702>",
+    hideFromShop: true,
+    lovePoint: 200,
+  },
 };
 
 const TrashItem = {
@@ -768,7 +798,10 @@ const BLIND_BOX_LOOT = {
     { item: "pokemon_37", amount: 1, weight: 0.5, isGolden: true },
     { item: "pokemon_38", amount: 1, weight: 0.5, isGolden: true },
     { item: "pokemon_39", amount: 1, weight: 0.5, isGolden: true },
-    { item: "pokemon_40", amount: 1, weight: 0.5, isGolden: true }
+    { item: "pokemon_40", amount: 1, weight: 0.5, isGolden: true },
+    { item: "gi_1", amount: 1, weight: 0.5, isGolden: true },
+    { item: "gi_2", amount: 1, weight: 0.5, isGolden: true },
+    { item: "gi_3", amount: 1, weight: 0.5, isGolden: true },
   ],
 };
 
