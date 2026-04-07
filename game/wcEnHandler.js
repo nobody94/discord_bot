@@ -166,7 +166,8 @@ async function gameProcess(guildId, newWord) {
   // Lấy tất cả từ chưa dùng và bắt đầu bằng secondWord
   const nextOptions = dictionary.filter((p) => {
     if (enState.wordHistory.includes(p)) return false;
-    return getSecondPart(p) === secondWord;
+    const wLower = p.toLowerCase();
+    return getSecondPart(wLower) === secondWord && wLower != newWord.toLowerCase();
   });
 
   //hết từ nối
