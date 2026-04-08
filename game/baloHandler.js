@@ -286,13 +286,13 @@ async function baloHandler(args, message, inventory, invKey, userId) {
           l.item.startsWith("pokemon") || l.item.startsWith("gi")
         );
         const otherGoldenItems = goldenItems.filter(
-          (l) => !l.item.startsWith("pokemon"),
+          (l) => !l.item.startsWith("pokemon") && !l.item.startsWith("gi")
         );
 
         const randomRoll = Math.random() * 100; // Quay số từ 0 - 100
 
         if (randomRoll < 5) {
-          // 3% tỉ lệ rơi vào nhóm Pokemon
+          // 5% tỉ lệ rơi vào nhóm Pokemon
           const totalPokeWeight = pokemonItems.reduce(
             (sum, l) => sum + (l.weight || 1),
             0,

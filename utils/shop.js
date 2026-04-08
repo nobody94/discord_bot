@@ -422,6 +422,9 @@ const GachaItem = {
     hideFromShop: true,
     lovePoint: 200,
   },
+};
+
+const GenshinItem = {
   gi_1: {
     name: "Luonnotar",
     price: 100,
@@ -449,6 +452,26 @@ const GachaItem = {
     currency: primo,
     description: desc.legendary,
     icon: "<:fungus:1490597310495854702>",
+    hideFromShop: true,
+    lovePoint: 200,
+  },
+   lech_1: {
+    name: "",
+    price: 100,
+    sellPrice: 0,
+    currency: primo,
+    description: desc.legendary,
+    icon: "",
+    hideFromShop: true,
+    lovePoint: 200,
+  },
+  char_1: {
+    name: "",
+    price: 100,
+    sellPrice: 0,
+    currency: primo,
+    description: desc.legendary,
+    icon: "",
     hideFromShop: true,
     lovePoint: 200,
   },
@@ -586,7 +609,17 @@ const SHOP_ITEMS = {
     sellPrice: 5,
     currency: primo,
     description: "Mở ra ngẫu nhiên vật phẩm hiếm",
-    icon: "<:lootbox:1452243400332935179>",
+    icon: "<:gacha:1491250817318129694>",
+    canOpen: true,
+    lovePoint: 10,
+  },
+  ruong_hiem: {
+    name: "Rương hiếm",
+    price: 5,
+    sellPrice: 5,
+    currency: primo,
+    description: "Mở ra ngẫu nhiên vật phẩm hiếm",
+    icon: "<:treasurechest:1491250933127053363>",
     canOpen: true,
     lovePoint: 10,
   },
@@ -746,18 +779,22 @@ const SHOP_ITEMS = {
   ...HideItem,
   ...TrashItem,
   ...GachaItem,
+  ...GenshinItem,
 };
+const RacItem = [
+  { item: "tui_rac", amount: 1, weight: 1000 },
+  { item: "canh_cay", amount: 1, weight: 1000 },
+  { item: "vien_da", amount: 1, weight: 1000 },
+  { item: "tat_thung", amount: 1, weight: 800 },
+  { item: "bong_den", amount: 1, weight: 800 },
+  { item: "an_do", amount: 1, weight: 800 },
+  { item: "mora", amount: 10000, weight: 500 },
+  { item: "primo", amount: 2, weight: 200 },
+];
 
 const BLIND_BOX_LOOT = {
   tui_mu: [
-    { item: "tui_rac", amount: 1, weight: 1000 },
-    { item: "canh_cay", amount: 1, weight: 1000 },
-    { item: "vien_da", amount: 1, weight: 1000 },
-    { item: "tat_thung", amount: 1, weight: 800 },
-    { item: "bong_den", amount: 1, weight: 800 },
-    { item: "an_do", amount: 1, weight: 800 },
-    { item: "mora", amount: 10000, weight: 500 },
-    { item: "primo", amount: 2, weight: 200 },
+    ...RacItem,
     { item: "kim_cuong", amount: 1, weight: 60, isGolden: true },
     { item: "pokemon_1", amount: 1, weight: 0.5, isGolden: true },
     { item: "pokemon_2", amount: 1, weight: 0.5, isGolden: true },
@@ -799,6 +836,9 @@ const BLIND_BOX_LOOT = {
     { item: "pokemon_38", amount: 1, weight: 0.5, isGolden: true },
     { item: "pokemon_39", amount: 1, weight: 0.5, isGolden: true },
     { item: "pokemon_40", amount: 1, weight: 0.5, isGolden: true },
+  ],
+  ruong_hiem: [
+    ...RacItem,
     { item: "gi_1", amount: 1, weight: 0.5, isGolden: true },
     { item: "gi_2", amount: 1, weight: 0.5, isGolden: true },
     { item: "gi_3", amount: 1, weight: 0.5, isGolden: true },
