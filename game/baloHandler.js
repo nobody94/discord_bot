@@ -283,10 +283,10 @@ async function baloHandler(args, message, inventory, invKey, userId) {
 
         // Tách riêng danh sách Pokemon và các đồ vàng khác
         const pokemonItems = goldenItems.filter((l) =>
-          l.item.startsWith("pokemon") || l.item.startsWith("gi")
+          l.item.startsWith("pokemon") || l.item.startsWith("gi") || l.item.startsWith("char")
         );
         const otherGoldenItems = goldenItems.filter(
-          (l) => !l.item.startsWith("pokemon") && !l.item.startsWith("gi")
+          (l) => !l.item.startsWith("pokemon") && !l.item.startsWith("gi") && !l.item.startsWith("char")
         );
 
         const randomRoll = Math.random() * 100; // Quay số từ 0 - 100
