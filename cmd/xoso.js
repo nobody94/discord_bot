@@ -10,6 +10,8 @@ const TICKET_PRICE = 1000;
 const MAX_TICKETS_PER_USER = 40;
 // Thuế 
 const TAX_RATE = 0.2;
+//
+const OVER_MONEY = 1000000;
 
 module.exports = {
     name: 'xoso',
@@ -68,14 +70,14 @@ module.exports = {
             else if (action === 'dong') {
                 if (!isAdmin) return message.reply(`${errorIcon} | Bạn không có quyền đóng cửa hàng.`);
                 await setKey(statusKey, 'closed');
-                return message.reply(`🔒 **Cửa hàng xổ số đã ĐÓNG.** Không thể mua vé mới.`);
+                return message.reply(`**Cửa hàng xổ số đã ĐÓNG.** Không thể mua vé mới.`);
             }
 
             // --- LỆNH MỞ CỬA (ADMIN/DEV) ---
             else if (action === 'mo') {
                 if (!isAdmin) return message.reply(`${errorIcon} | Bạn không có quyền mở cửa hàng.`);
                 await setKey(statusKey, 'open')
-                return message.reply(`🔓 **Cửa hàng xổ số đã MỞ.** Chúc mọi người may mắn!`);
+                return message.reply(`**Cửa hàng xổ số đã MỞ.** Chúc mọi người may mắn!`);
             }
 
             // --- 2. KIỂM TRA CÁ NHÂN (.xoso check) ---
@@ -97,7 +99,7 @@ module.exports = {
             }
 
             // --- 3. XEM TẤT CẢ (ADMIN/DEV - .xoso all) ---
-            else if (action === 'all') {                
+            else if (action === 'all') {
                 if (!isAdmin) return message.reply(`${errorIcon} | Chỉ Admin mới xem được danh sách.`);
 
                 const allTickets = (await getKey(lotteryKey)) || [];
@@ -155,13 +157,13 @@ module.exports = {
                 const allTickets = (await getKey(lotteryKey)) || [];
                 if (allTickets.length === 0) return message.reply("⚠️ Chưa có vé nào để quay.");
 
+                const currentJackpot = (await getKey(jackpotKey)) || 0; // Lấy số tiền hũ hiện tại
                 const statusMsg = await message.channel.send("🎰 **CHUẨN BỊ QUAY THƯỞNG...** 🎰");
 
-                let secondsLeft = 5; // Đếm ngược 5 giây
+                let secondsLeft = 5;
 
                 const animation = setInterval(async () => {
                     if (secondsLeft > 0) {
-                        // Tạo dãy số random kiểu [0|0|0]
                         const r1 = Math.floor(Math.random() * 10);
                         const r2 = Math.floor(Math.random() * 10);
                         const r3 = Math.floor(Math.random() * 10);
@@ -173,27 +175,33 @@ module.exports = {
 
                         secondsLeft--;
                     } else {
-                        // KẾT THÚC QUAY
                         clearInterval(animation);
 
-                        // Tạo số trúng thưởng thực tế (000-999)
-                        const winNumRaw = Math.floor(Math.random() * 1000);
-                        const winNum = winNumRaw.toString().padStart(3, '0');
+                        let winNum;
+                        // --- LOGIC CẬP NHẬT: KIỂM TRA HŨ > OVER_MONEY MORA ---
+                        if (currentJackpot > OVER_MONEY) {
+                            // Lấy ngẫu nhiên một vé từ danh sách những người đã mua
+                            const luckyTicket = allTickets[Math.floor(Math.random() * allTickets.length)];
+                            winNum = luckyTicket.number;
+                        } else {
+                            // Nếu hũ thấp hơn hoặc bằng 1 triệu, quay số ngẫu nhiên hoàn toàn (000-999)
+                            const winNumRaw = Math.floor(Math.random() * 1000);
+                            winNum = winNumRaw.toString().padStart(3, '0');
+                        }
 
-                        // Tách số để hiển thị đẹp [X|X|X]
                         const displayWin = winNum.split('').join(' | ');
-
                         const winners = allTickets.filter(t => t.number === winNum);
+
                         const embed = new EmbedBuilder()
                             .setTitle("🎊 KẾT QUẢ XỔ SỐ CHÍNH THỨC 🎊")
                             .setTimestamp();
 
                         if (winners.length > 0) {
-                            const winnerMentions = winners.map(w => `<@${w.userId}>`).join(', ');
+                            const winnerMentions = [...new Set(winners.map(w => `<@${w.userId}>`))].join(', ');
                             embed.setColor(0x00FF00)
                                 .setDescription(
                                     `🔢 Con số may mắn: **[ ${displayWin} ]**\n\n` +
-                                    `🎉 Chúc mừng những người sau đây đã trúng giải!\n${winnerMentions}` +
+                                    `🎉 Chúc mừng những người sau đây đã trúng giải!\n${winnerMentions}\n` +
                                     `👉 Dùng \`.xoso thuong\` để phát thưởng ngay.`
                                 );
                         } else {
@@ -205,15 +213,13 @@ module.exports = {
                                 );
                         }
 
-                        // Lưu số trúng vào DB để lệnh 'thuong' sử dụng
                         await setKey(winNumKey, winNum);
-
                         await statusMsg.edit({
                             content: "✅ **QUAY THƯỞNG HOÀN TẤT!**",
                             embeds: [embed]
                         }).catch(() => { });
                     }
-                }, 1000); // Mỗi 1 giây cập nhật một lần (an toàn cho Discord Rate Limit)
+                }, 1000);
 
                 return;
             }
@@ -266,7 +272,7 @@ module.exports = {
             }
 
             else {
-                return message.reply("📝 **LỆNH XỔ SỐ:**\n> `.xoso mua <số>`: Mua vé (Max 10).\n> `.xoso check`: Xem vé cá nhân.\n> `.xoso all`: Xem tất cả vé (Admin/Dev).\n> `.xoso quay`: Quay số (Admin/Dev).\n> `.xoso thuong`: Phát giải (Dev).");
+                return message.reply(`📝 **LỆNH XỔ SỐ:**\n> .xoso mua <số>: Mua vé (Max ${MAX_TICKETS_PER_USER}).\n> .xoso check: Xem vé cá nhân.\n> .xoso all: Xem tất cả vé (Admin/Dev).\n> .xoso quay: Quay số (Admin/Dev).\n> .xoso thuong: Phát giải (Dev).`);
             }
 
         } catch (error) {

@@ -987,7 +987,7 @@ fair
 fairly
 faith
 fall
-FALSE
+false
 familiar
 family
 famous
@@ -1446,8 +1446,6 @@ key
 keyboard
 kick
 kid
-kill
-killing
 kilometre
 kind
 king
@@ -2344,7 +2342,6 @@ seventeen
 seventy
 several
 severe
-sex
 sexual
 shade
 shadow
@@ -2752,7 +2749,7 @@ tropical
 trouble
 trousers
 truck
-TRUE
+true
 truly
 trust
 truth
@@ -2976,3 +2973,11 @@ yourself
 youth
 zero
 zone
+dice
+dungeon
+null
+yarn
+enitity
+demon
+devil
+done

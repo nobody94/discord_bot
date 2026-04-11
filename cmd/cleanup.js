@@ -1,9 +1,9 @@
 const { DEVELOPER_IDS } = require("../utils/constant.js");
-const { renderKey, setKey, getKey, deleteKey, db } = require("../utils/db");
+const { renderKey, setKey, getKey, deleteKey } = require("../utils/db");
 
 module.exports = {
   name: "cleanup",
-  description: "Dọn dẹp dữ liệu an toàn (Không dùng lệnh quét lỗi $where)",
+  description: "Dọn dẹp dữ liệu an toàn",
 
   async execute(message, args) {
     if (!DEVELOPER_IDS.includes(message.author.id)) return;
