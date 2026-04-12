@@ -1,47 +1,56 @@
 const { DEVELOPER_IDS } = require("../utils/constant.js");
-const { getKey, setKey } = require("../utils/db.js");
+const { getKey, setKey, renderKey } = require("../utils/db.js");
 const { verifyIcon, errorIcon } = require('../utils/icon.js');
 
 module.exports = {
-  name: "migrate",
+  name: "migratepity",
   async execute(message, args) {
     if (!DEVELOPER_IDS.includes(message.author.id)) return;
 
-    const msg = await message.reply("⏳ Đang bắt đầu chuyển đổi dữ liệu (Có thể mất 1-2 phút)...");
+    // Cú pháp: .migratepity [itemId] (ví dụ: .migratepity ruong_hiem)
+    const targetItemId = args[0] || "tui_mu";
+    
+    const msg = await message.reply(`⏳ Đang bắt đầu chuyển đổi Pity cũ sang rương **${targetItemId}**...`);
 
     try {
-      const guildId = message.guild.id;
-      const newKey = `birthday_${guildId}`;
-      
-      // Khắc phục lỗi Timeout: Tăng thời gian chờ lên 60s
+      // Tải danh sách thành viên (tăng timeout lên 60s như file cũ của bạn)
       const members = await message.guild.members.fetch({ time: 60000 }).catch(() => null);
       
-      if (!members) return msg.edit(`${errorIcon} | Lỗi: Không thể tải danh sách thành viên. Kiểm tra 'Server Members Intent'.`);
+      if (!members) return msg.edit(`${errorIcon} | Lỗi: Không thể tải danh sách thành viên.`);
 
-      let newGuildData = (await getKey(newKey)) || {};
       let count = 0;
 
       for (const [userId, member] of members) {
-        // Cấu trúc cũ bạn đang dùng là renderKey("user_birthday", userId)
-        // Trong db.js renderKey mặc định thêm prefix "nobody_bot"
-        const oldKey = `nobody_bot_user_birthday_${userId}`;
-        const oldData = await getKey(oldKey);
+        if (member.user.bot) continue; // Bỏ qua bot
 
-        if (oldData && !newGuildData[userId]) {
-          newGuildData[userId] = oldData;
+        // 1. Key cũ dùng chung (nobody_bot_pity_counter_...)
+        const oldPityKey = renderKey("pity_counter", userId);
+        const oldPity = (await getKey(oldPityKey)) || 0;
+
+        if (oldPity > 0) {
+          // 2. Key mới cho từng loại rương (nobody_bot_pity_ruong_hiem_...)
+          const newPityKey = renderKey(`pity_${targetItemId}`, userId);
+          let currentNewPity = (await getKey(newPityKey)) || 0;
+
+          // Cộng dồn Pity cũ vào Pity mới
+          await setKey(newPityKey, currentNewPity + oldPity);
+          
+          // Reset Pity cũ về 0
+          await setKey(oldPityKey, 0);
+          
           count++;
         }
       }
 
       if (count > 0) {
-        await setKey(newKey, newGuildData);
-        return msg.edit(`${verifyIcon} | Hoàn tất! Đã gộp **${count}** sinh nhật vào key Server: \`${newKey}\`.`);
+        return msg.edit(`${verifyIcon} | Hoàn tất! Đã chuyển đổi Pity cho **${count}** thành viên sang rương \`${targetItemId}\`.`);
       } else {
-        return msg.edit("ℹ️ | Không tìm thấy dữ liệu cũ hoặc dữ liệu đã được gộp trước đó.");
+        return msg.edit(`${errorIcon} | Không tìm thấy thành viên nào có Pity cũ để chuyển đổi.`);
       }
+
     } catch (error) {
-      console.error("Lỗi migrate:", error);
-      return msg.edit(`${errorIcon} | Lỗi: ${error.message}`);
+      console.error(error);
+      return msg.edit(`${errorIcon} | Đã xảy ra lỗi trong quá trình chuyển đổi.`);
     }
   },
 };

@@ -1,7 +1,7 @@
-const { EmbedBuilder } = require("discord.js");
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType } = require("discord.js");
 const { SHOP_ITEMS, BLIND_BOX_LOOT } = require("../utils/shop");
-const { errorIcon, verifyIcon } = require('../utils/icon.js');
-const { getIcon } = require('../utils/currency.js')
+const { errorIcon } = require('../utils/icon.js');
+const { getIcon } = require('../utils/currency.js');
 
 module.exports = {
   name: "gacha",
@@ -10,47 +10,75 @@ module.exports = {
 
   async execute(message, args) {
     const itemId = args[0];
+    if (!itemId) return message.reply(`${errorIcon} | Vui lòng nhập ID vật phẩm.`);
 
-    // 1. Kiểm tra nếu người dùng không nhập ID
-    if (!itemId) {
-      return message.reply(`${errorIcon} | Vui lòng nhập ID vật phẩm để xem tỉ lệ. Ví dụ: \`.gacha tui_mu_01\``);
-    }
-
-    // 2. Lấy dữ liệu loot table từ utils/shop.js
     const lootTable = BLIND_BOX_LOOT[itemId];
     const itemInfo = SHOP_ITEMS[itemId];
+    if (!lootTable) return message.reply(`${errorIcon} | Vật phẩm này không phải là hộp quà!`);
 
-    if (!lootTable) {
-      return message.reply(`${errorIcon} | Vật phẩm này không có tỉ lệ hoặc không phải là hộp quà!`);
-    }
-
-    // 3. Tính tổng trọng số (Weight)
     const totalWeight = lootTable.reduce((sum, loot) => sum + (loot.weight || 0), 0);
+    if (totalWeight <= 0) return message.reply(`${errorIcon} | Lỗi trọng số bằng 0!`);
 
-    if (totalWeight <= 0) {
-      return message.reply(`${errorIcon} | Lỗi: Tổng trọng số quà tặng bằng 0. Vui lòng báo Admin!`);
+    // --- LOGIC PHÂN TRANG ---
+    const itemsPerPage = 20; // Mỗi trang hiển thị 10 vật phẩm
+    const pages = [];
+    
+    for (let i = 0; i < lootTable.length; i += itemsPerPage) {
+      const currentItems = lootTable.slice(i, i + itemsPerPage);
+      let pageDescription = "";
+
+      currentItems.forEach(loot => {
+        const percentage = ((loot.weight / totalWeight) * 100).toFixed(2);
+        const rewardItem = loot.item === 'mora' ? { name: 'Mora', icon: getIcon('mora') } : 
+                           loot.item === 'primo' ? { name: 'Primo', icon: getIcon('primo') } : 
+                           SHOP_ITEMS[loot.item] || { name: loot.item, icon: "🎁" };
+
+        pageDescription += `${rewardItem.icon} **${rewardItem.name}**: \`${percentage}%\` (x${loot.amount})\n`;
+      });
+
+      const embed = new EmbedBuilder()
+        .setTitle(`📊 TỈ LỆ: ${itemInfo ? itemInfo.name.toUpperCase() : itemId}`)
+        .setColor(0x00FFFF)
+        .setDescription(pageDescription)
+        .setFooter({ text: `Trang ${pages.length + 1} / ${Math.ceil(lootTable.length / itemsPerPage)}` });
+
+      pages.push(embed);
     }
 
-    // 4. Tạo mô tả tỉ lệ phần trăm
-    let rateDescription = "";
-    lootTable.forEach(loot => {
-      const percentage = ((loot.weight / totalWeight) * 100).toFixed(2);
-      const rewardItem = loot.item == 'mora' ? { name: loot.item, icon: getIcon('mora') } : loot.item == 'primo' ? { name: loot.item, icon: getIcon('primo') } : SHOP_ITEMS[loot.item] || { name: loot.item, icon: "🎁" };
+    if (pages.length === 1) {
+      return message.reply({ embeds: [pages[0]] });
+    }
 
-      rateDescription += `${rewardItem.icon} **${rewardItem.name}**: \`${percentage}%\` (Số lượng: ${loot.amount})\n`;
+    // --- TẠO NÚT ĐIỀU KHIỂN ---
+    let currentPage = 0;
+    const row = new ActionRowBuilder().addComponents(
+      new ButtonBuilder().setCustomId('prev').setLabel('◀️').setStyle(ButtonStyle.Primary).setDisabled(true),
+      new ButtonBuilder().setCustomId('next').setLabel('▶️').setStyle(ButtonStyle.Primary)
+    );
+
+    const response = await message.reply({ embeds: [pages[currentPage]], components: [row] });
+
+    // --- BỘ THU THẬP TƯƠNG TÁC (COLLECTOR) ---
+    const collector = response.createMessageComponentCollector({
+      componentType: ComponentType.Button,
+      time: 60000 // Hết hạn sau 60 giây
     });
 
-    // 5. Gửi Embed
-    const embed = new EmbedBuilder()
-      .setTitle(`📊 TỈ LỆ VẬT PHẨM: ${itemInfo ? itemInfo.name.toUpperCase() : itemId}`)
-      .setColor(0x00FFFF)
-      .setThumbnail(itemInfo ? (itemInfo.image || null) : null)
-      .setDescription(rateDescription)
-      .addFields({
-        name: "Hướng dẫn",
-        value: `Dùng lệnh \`.balo open ${itemId}\` để mở.`
-      })
+    collector.on('collect', async (i) => {
+      if (i.user.id !== message.author.id) return i.reply({ content: "Nút này không dành cho bạn!", ephemeral: true });
 
-    return message.reply({ embeds: [embed] });
+      if (i.customId === 'prev') currentPage--;
+      else if (i.customId === 'next') currentPage++;
+
+      row.components[0].setDisabled(currentPage === 0);
+      row.components[1].setDisabled(currentPage === pages.length - 1);
+
+      await i.update({ embeds: [pages[currentPage]], components: [row] });
+    });
+
+    collector.on('end', () => {
+      row.components.forEach(btn => btn.setDisabled(true));
+      response.edit({ components: [row] }).catch(() => {});
+    });
   },
 };

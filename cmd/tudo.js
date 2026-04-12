@@ -1,4 +1,4 @@
-const { EmbedBuilder } = require("discord.js");
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType } = require("discord.js");
 const { getKey, renderKey, setKey } = require("../utils/db");
 const { getIcon } = require("../utils/currency.js");
 const { SHOP_ITEMS } = require("../utils/shop");
@@ -6,7 +6,7 @@ const { errorIcon, verifyIcon, bagIcon } = require("../utils/icon.js");
 
 module.exports = {
   name: "tudo",
-  description: "Xem tủ đồ cá nhân và lấy đồ ra ba lô.",
+  description: "Xem tủ đồ cá nhân với tính năng phân trang bằng nút bấm.",
 
   async execute(message, args) {
     // --- CẤU HÌNH GIỚI HẠN ---
@@ -21,7 +21,6 @@ module.exports = {
     if (!allowedChannels.includes(message.channel.id)) return;
     if (!allowedUsers.includes(message.author.id)) return;
 
-    // Luôn xác định người thực hiện lệnh là author
     const senderId = message.author.id;
     const senderTudoKey = renderKey("tudo", senderId);
     let senderTudo = (await getKey(senderTudoKey)) || [];
@@ -31,19 +30,12 @@ module.exports = {
       const itemId = args[1];
       const amountToTake = parseInt(args[2]) || 1;
 
-      if (!itemId)
-        return message.reply(
-          `${errorIcon} | Vui lòng nhập ID vật phẩm: \`.tudo lay [ID] [số lượng]\``,
-        );
-
-      if (isNaN(amountToTake) || amountToTake <= 0)
-        return message.reply(`${errorIcon} | Số lượng lấy ra không hợp lệ.`);
+      if (!itemId) return message.reply(`${errorIcon} | HD: \`.tudo lay [ID] [SL]\``);
+      if (isNaN(amountToTake) || amountToTake <= 0) return message.reply(`${errorIcon} | SL không hợp lệ.`);
 
       const itemInTudo = senderTudo.filter((id) => id === itemId);
       if (itemInTudo.length < amountToTake) {
-        return message.reply(
-          `${errorIcon} | Bạn không đủ **${itemId}** trong tủ đồ (Hiện có: ${itemInTudo.length}).`,
-        );
+        return message.reply(`${errorIcon} | Bạn không đủ **${itemId}** (Hiện có: ${itemInTudo.length}).`);
       }
 
       const baloKey = renderKey("inventory", senderId);
@@ -61,9 +53,7 @@ module.exports = {
       await setKey(baloKey, baloInventory);
 
       const itemInfo = SHOP_ITEMS[itemId] || { name: itemId, icon: "📦" };
-      return message.reply(
-        `${verifyIcon} | Bạn đã lấy **${amountToTake}x ${itemInfo.icon} ${itemInfo.name}** từ Tủ đồ vào Bao lô thành công!`,
-      );
+      return message.reply(`${verifyIcon} | Đã lấy **${amountToTake}x ${itemInfo.icon} ${itemInfo.name}** vào bao lô.`);
     }
 
     // --- LOGIC TẶNG ĐỒ (GIVE) ---
@@ -72,30 +62,12 @@ module.exports = {
       const itemId = args[2];
       const amountToGive = parseInt(args[3]) || 1;
 
-      if (!target)
-        return message.reply(
-          `${errorIcon} | Vui lòng tag người muốn tặng: \`.tudo give @user [ID] [số lượng]\``,
-        );
-      if (target.id === senderId)
-        return message.reply(
-          `${errorIcon} | Bạn không thể tự tặng đồ cho chính mình.`,
-        );
-      if (!itemId)
-        return message.reply(
-          `${errorIcon} | Vui lòng nhập ID vật phẩm muốn tặng.`,
-        );
-      if (isNaN(amountToGive) || amountToGive <= 0)
-        return message.reply(`${errorIcon} | Số lượng tặng không hợp lệ.`);
-
-      const userItems = senderTudo.filter((id) => id === itemId);
-      if (userItems.length < amountToGive) {
-        return message.reply(
-          `${errorIcon} | Bạn không đủ số lượng **${itemId}** để tặng (Hiện có: ${userItems.length}).`,
-        );
+      if (!target || target.id === senderId || !itemId || isNaN(amountToGive) || amountToGive <= 0) {
+        return message.reply(`${errorIcon} | Sai cú pháp hoặc đối tượng!`);
       }
 
-      // Logic xử lý quà tặng không thể trao đổi
-      // Lưu ý: Kiểm tra ID vật phẩm tại đây nếu bạn muốn áp dụng quy tắc quà tặng Pokémon không thể bán/trao đổi.
+      const userItems = senderTudo.filter((id) => id === itemId);
+      if (userItems.length < amountToGive) return message.reply(`${errorIcon} | Không đủ đồ để tặng.`);
 
       const targetInvKey = renderKey("tudo", target.id);
       let targetInventory = (await getKey(targetInvKey)) || [];
@@ -112,55 +84,87 @@ module.exports = {
       await setKey(targetInvKey, targetInventory);
 
       const itemInfo = SHOP_ITEMS[itemId] || { name: itemId, icon: "📦" };
-      return message.reply(
-        `${verifyIcon} | Bạn đã tặng **${amountToGive}x ${itemInfo.icon} ${itemInfo.name}** cho **${target.username}** thành công!`,
-      );
+      return message.reply(`${verifyIcon} | Đã tặng **${amountToGive}x ${itemInfo.icon} ${itemInfo.name}** cho **${target.username}**.`);
     }
 
-    // --- HIỂN THỊ TỦ ĐỒ ---
-    // Nếu không có args (chỉ gõ .tudo) hoặc .tudo @user để xem tủ đồ người khác
+    // --- HIỂN THỊ TỦ ĐỒ PHÂN TRANG ---
     const viewTarget = message.mentions.users.first() || message.author;
     const viewKey = renderKey("tudo", viewTarget.id);
-    const viewInventory =
-      viewTarget.id === senderId ? senderTudo : (await getKey(viewKey)) || [];
-
-    const embed = new EmbedBuilder()
-      .setTitle(
-        `${bagIcon} TỦ ĐỒ ĐẶC BIỆT CỦA ${viewTarget.username.toUpperCase()}`,
-      )
-      .setColor(0xe74c3c)
-      .setFooter({
-        text: "Lệnh: .tudo lay <ID> <SL> | .tudo give @user <ID> <SL>",
-      });
+    const viewInventory = viewTarget.id === senderId ? senderTudo : (await getKey(viewKey)) || [];
 
     if (viewInventory.length === 0) {
-      embed.setDescription("*Tủ đồ đang trống rỗng...*");
-    } else {
-      const counts = {};
-      viewInventory.forEach((id) => {
-        counts[id] = (counts[id] || 0) + 1;
-      });
-
-      // Chuyển object sang array để sắp xếp
-      const itemList = Object.entries(counts)
-        .map(([id, count]) => {
-          const item = SHOP_ITEMS[id] || {
-            name: "Vật phẩm lạ",
-            icon: "❓",
-            id: id,
-          };
-          return { ...item, count, originalId: id };
-        })
-        // Sắp xếp theo tên (A-Z) để danh sách luôn cố định, dễ nhìn
-        .sort((a, b) => a.originalId.localeCompare(b.originalId, undefined, { numeric: true, sensitivity: 'base' }))
-        .map((item, index) => {
-          return `**${index + 1}.** ${item.icon} **${item.name}** x${item.count} (ID: \`${item.originalId}\`)`;
-        })
-        .join("\n");
-
-      embed.setDescription(itemList);
+      return message.reply({ embeds: [new EmbedBuilder().setColor(0xe74c3c).setDescription(`${bagIcon} Tủ đồ của **${viewTarget.username}** trống.`)] });
     }
 
-    message.reply({ embeds: [embed] });
+    const counts = {};
+    viewInventory.forEach((id) => { counts[id] = (counts[id] || 0) + 1; });
+
+    const sortedItems = Object.entries(counts)
+      .map(([id, count]) => {
+        const item = SHOP_ITEMS[id] || { name: "Vật phẩm lạ", icon: "❓", id: id };
+        return { ...item, count, originalId: id };
+      })
+      .sort((a, b) => a.originalId.localeCompare(b.originalId, undefined, { numeric: true, sensitivity: 'base' }));
+
+    // Chia danh sách (ví dụ: 10 vật phẩm mỗi trang)
+    const itemsPerPage = 20;
+    const pages = [];
+    for (let i = 0; i < sortedItems.length; i += itemsPerPage) {
+      const current = sortedItems.slice(i, i + itemsPerPage);
+      const description = current.map((item, index) => 
+        `**${i + index + 1}.** ${item.icon} **${item.name}** x${item.count} (ID: \`${item.originalId}\`)`
+      ).join("\n");
+      pages.push(description);
+    }
+
+    let currentPage = 0;
+
+    const generateEmbed = (pageIdx) => {
+      return new EmbedBuilder()
+        .setTitle(`${bagIcon} TỦ ĐỒ: ${viewTarget.username.toUpperCase()}`)
+        .setColor(0xe74c3c)
+        .setDescription(pages[pageIdx])
+        .setFooter({ text: `Trang ${pageIdx + 1}/${pages.length} | .tudo lay <ID> <SL>` });
+    };
+
+    const row = new ActionRowBuilder().addComponents(
+      new ButtonBuilder().setCustomId("prev").setLabel("⬅️").setStyle(ButtonStyle.Primary).setDisabled(true),
+      new ButtonBuilder().setCustomId("next").setLabel("➡️").setStyle(ButtonStyle.Primary).setDisabled(pages.length === 1)
+    );
+
+    const curMessage = await message.reply({
+      embeds: [generateEmbed(0)],
+      components: [row],
+      allowedMentions: { repliedUser: false }
+    });
+
+    if (pages.length === 1) return;
+
+    const collector = curMessage.createMessageComponentCollector({
+      componentType: ComponentType.Button,
+      time: 60000 // Nút bấm có hiệu lực trong 60 giây
+    });
+
+    collector.on("collect", async (i) => {
+      if (i.user.id !== message.author.id) return i.reply({ content: "Bạn không thể điều khiển menu này!", ephemeral: true });
+
+      if (i.customId === "prev") currentPage--;
+      else if (i.customId === "next") currentPage++;
+
+      const newRow = new ActionRowBuilder().addComponents(
+        new ButtonBuilder().setCustomId("prev").setLabel("⬅️").setStyle(ButtonStyle.Primary).setDisabled(currentPage === 0),
+        new ButtonBuilder().setCustomId("next").setLabel("➡️").setStyle(ButtonStyle.Primary).setDisabled(currentPage === pages.length - 1)
+      );
+
+      await i.update({ embeds: [generateEmbed(currentPage)], components: [newRow] });
+    });
+
+    collector.on("end", () => {
+      const disabledRow = new ActionRowBuilder().addComponents(
+        new ButtonBuilder().setCustomId("prev").setLabel("⬅️").setStyle(ButtonStyle.Secondary).setDisabled(true),
+        new ButtonBuilder().setCustomId("next").setLabel("➡️").setStyle(ButtonStyle.Secondary).setDisabled(true)
+      );
+      curMessage.edit({ components: [disabledRow] }).catch(() => {});
+    });
   },
 };
