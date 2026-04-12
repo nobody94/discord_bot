@@ -47,6 +47,17 @@ const interactions = {
     color: "#FF1493",
     msg: "đã trao một nụ hôn nồng cháy cho",
     lovePoint: 10,
+    images:[
+      "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExc3h3dzhna2pveXdnZmM3OW1nemE5MjV1NWoweDRvOXhxOWcxb3JzMSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/MQVpBqASxSlFu/giphy.gif",
+      "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExc3h3dzhna2pveXdnZmM3OW1nemE5MjV1NWoweDRvOXhxOWcxb3JzMSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/11rWoZNpAKw8w/giphy.gif",
+      "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExc3h3dzhna2pveXdnZmM3OW1nemE5MjV1NWoweDRvOXhxOWcxb3JzMSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/zkppEMFvRX5FC/giphy.gif",
+      "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExc3h3dzhna2pveXdnZmM3OW1nemE5MjV1NWoweDRvOXhxOWcxb3JzMSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/QGc8RgRvMonFm/giphy.gif",
+      "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExc3h3dzhna2pveXdnZmM3OW1nemE5MjV1NWoweDRvOXhxOWcxb3JzMSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/jR22gdcPiOLaE/giphy.gif",
+      "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExc3h3dzhna2pveXdnZmM3OW1nemE5MjV1NWoweDRvOXhxOWcxb3JzMSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/FqBTvSNjNzeZG/giphy.gif",
+      "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3OHhudnFmMTV5MTNmMnc4c2pjbXVlcjZvbXV0OHR5MGpldnpyaWE4bCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/KmeIYo9IGBoGY/giphy.gif",
+      "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3aWFleTEzandtMTd0Z2drZTh6b3B0aTRxYXV1emMyc2lwb3BxdDZhYiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/bm2O3nXTcKJeU/giphy.gif",
+      "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3OHhudnFmMTV5MTNmMnc4c2pjbXVlcjZvbXV0OHR5MGpldnpyaWE4bCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/rhnibMSVMeQy5ZdfPP/giphy.gif"
+    ]
   },
   airkiss: {
     tag: "airkiss",
@@ -199,10 +210,10 @@ const interactions = {
       "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExaGgzYW9zYWkzb21sdnNvaDc1Z3lrb3hkOTl1YzZ5ZjIxZ2ZzNXFpayZlcD12MV9naWZzX3NlYXJjaCZjdD1n/La3G8N3tn4nzW/giphy.gif",
       "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3NnB3ZW5wc3A0dGY4ZmJ3cWl5azQ0ZTcwamUxMXBpeW50Z3p1OXNraiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/1vRgUJWrZ5Sfy93IjM/giphy.gif",
       "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3b2prZzZjbm91ZWY0bjkyMDV4a2JydnVlODRxMjNkNWt6Yjg3a285ZCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/WKFprEiHzNDttpPCIf/giphy.gif",
-      "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExd2Y2NzYwd2R3eWd1MGM2cTV6dGlwcmVuc2d5NGU2ZXowYjRvYWN4bSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/lsuzxXh9Eiwqz1jlHv/giphy.gif",      
+      "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExd2Y2NzYwd2R3eWd1MGM2cTV6dGlwcmVuc2d5NGU2ZXowYjRvYWN4bSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/lsuzxXh9Eiwqz1jlHv/giphy.gif",
     ],
   },
-   shoot: {
+  shoot: {
     tag: "shoot",
     color: "#1b1202",
     msg: "đã bắn",
@@ -234,21 +245,21 @@ module.exports = {
 
     if (config.images && config.images.length > 0) {
       gifUrl = config.images[Math.floor(Math.random() * config.images.length)];
-    }
-
-    try {
-      // THỬ API 1: Nekos.best (Rất ổn định cho các tag tương tác)
-      const res = await axios.get(`https://nekos.best/api/v2/${config.tag}`);
-      gifUrl = res.data.results[0].url;
-    } catch (err) {
+    } else {
       try {
-        // THỬ API 2: Waifu.im (Dự phòng nếu Nekos.best lỗi)
-        const res = await axios.get(
-          `https://api.waifu.im/search?included_tags=${config.tag}&is_nsfw=false&limit=1`
-        );
-        gifUrl = res.data.images[0].url;
-      } catch (err2) {
-        console.error("Cả 2 API đều thất bại:", err2.message);
+        // THỬ API 1: Nekos.best (Rất ổn định cho các tag tương tác)
+        const res = await axios.get(`https://nekos.best/api/v2/${config.tag}`);
+        gifUrl = res.data.results[0].url;
+      } catch (err) {
+        try {
+          // THỬ API 2: Waifu.im (Dự phòng nếu Nekos.best lỗi)
+          const res = await axios.get(
+            `https://api.waifu.im/search?included_tags=${config.tag}&is_nsfw=false&limit=1`
+          );
+          gifUrl = res.data.images[0].url;
+        } catch (err2) {
+          console.error("Cả 2 API đều thất bại:", err2.message);
+        }
       }
     }
 
@@ -295,7 +306,7 @@ module.exports = {
           }
         }
       }
-      else if(points>2 && target.id !== userId){
+      else if (points > 2 && target.id !== userId) {
         couple.lovePoints = (couple.lovePoints || 0) - points;
         loveNote = `\n🔥 **Bắt quả tang!** Bạn dám ${config.msg} người khác sao? \n💔 Bạn đời của bạn đã buồn và hai bạn bị trừ **${points}** điểm thân mật!`;
       }
