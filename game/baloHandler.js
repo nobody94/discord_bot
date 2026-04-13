@@ -172,9 +172,15 @@ async function baloHandler(args, message, inventory, invKey, userId) {
     // TRƯỜNG HỢP 2: BÁN VẬT PHẨM CỤ THỂ (.balo sell [ID] [Số lượng])
     else {
       const item = SHOP_ITEMS[itemId];
-      if (!item || item.sellPrice === undefined) {
+      if (!item) {
         return message.reply(
-          `${errorIcon} | Vật phẩm này không thể bán hoặc không tồn tại.`,
+          `${errorIcon} | Vật phẩm này không tồn tại.`,
+        );
+      }
+
+       if (item.sellPrice === 0) {
+        return message.reply(
+          `${errorIcon} | Vật phẩm này không thể bán.`,
         );
       }
 
