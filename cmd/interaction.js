@@ -32,6 +32,7 @@ const interactions = {
       "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExeXJneHVpeHoyb2wya3Zzc3Zoem8zdDBvazd2aTdjbW9uM2d6d25lbSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/K2PhVaUSgGKkDsXeEa/giphy.gif",
       "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExeXJneHVpeHoyb2wya3Zzc3Zoem8zdDBvazd2aTdjbW9uM2d6d25lbSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/rfHc3U73N07tKPgCvJ/giphy.gif",
       "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExeXJneHVpeHoyb2wya3Zzc3Zoem8zdDBvazd2aTdjbW9uM2d6d25lbSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/fsa01PUHKndNNCcadS/giphy.gif",
+      "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExdjUxZTJrZ212b3c1a2xhZzh3NTBwcmE0dmw2azBhbWltbnpuaHZrcCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/qs4ll1FSxKnNHeSmom/giphy.gif",      
     ],
     lovePoint: -5,
   },
@@ -70,6 +71,7 @@ const interactions = {
       "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3ZjZvMGk2N2R4aXp4OW5wd2p4dzFmbDhrYXJ2aDR1OWp2dDVoODdnNSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/9VTe635RMSfEkGaZGd/giphy.gif",
       "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3N3l0ZXNsc2MybDQycGV3eDM0dnBvbGZiNDNwczZhY282eW9laGF3dyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/VLqvh9JBs0lQnIOOn5/giphy.gif",
       "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNzFkcGlua292dDd5bzg5bXR4ejh4aTVucWozZXJhZmNkM3duZ2p0NyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/108M7gCS1JSoO4/giphy.gif",
+      "https://media.giphy.com/media/v1.Y2lkPTZjMDliOTUyZjJuMWE1azNnZjAwbTZsd3RoYjN3M285NXZodWNtY2NkODRsdG00ZSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/dKBES1ypGwZdyFQBQ7/giphy.gif"
     ],
   },
   cuddle: {
@@ -107,13 +109,21 @@ const interactions = {
     tag: "stare",
     color: "#4682B4",
     msg: "đang nhìn chằm chằm (phán xét) vào",
-    lovePoint: -2,
+    lovePoint: -2   
   },
   laugh: {
     tag: "laugh",
     color: "#f1c40f",
     msg: "đã cười vào mặt của",
     lovePoint: -5,
+    images:[
+      "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExYmJubjVvOWhlZzl4emF1MWw4aTFtazJzZnluYnBodXFzZjFsdHhubCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/2g6sCTsSoVuSfSxK4W/giphy.gif",
+      "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3aXV0aDBzeWo3eWRmaXB6MG50MDJ3ZDZrc244cGpiaDM3Mzc3ZHI4aSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/GhjexFacI6U7TGCd09/giphy.gif",
+      "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3aXV0aDBzeWo3eWRmaXB6MG50MDJ3ZDZrc244cGpiaDM3Mzc3ZHI4aSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/ZechFo0yBIQpEve1Sm/giphy.gif",
+      "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3OHY2NDVqb2ppaWJsanN2MzAyZXZzbnhpbmFpcHY3dnJhcWhwdnVuaCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/fYvSlf9tbKm7XLOLrR/giphy.gif",
+      "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNm1wazRoZXR2azFxbXhlbTAwd2VxMGd6aGlobmhsYm95bXFvbmpueiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/fb5lozVxhBwVFFByW8/giphy.gif",
+      "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3eXB0MWk3ejdibDJkM3NmaWZiem43cnR3cWxzNjkzanZjOTMzczNueSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/0SVAVxeJsnJ1WRMIPX/giphy.gif"
+    ]
   },
   cheek: {
     tag: "cheek",
