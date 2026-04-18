@@ -1,7 +1,8 @@
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType } = require('discord.js');
 const { getKey, setKey, renderKey } = require("../utils/db");
 const { getBalance, removeMoney, addMoney, getIcon } = require('../utils/currency');
-const { DEVELOPER_IDS } = require("../utils/constant.js");
+const { DEVELOPER_IDS, exchangeRate } = require("../utils/constant.js");
+const {verifyIcon,errorIcon} = require('../utils/icon.js');
 
 module.exports = {
     name: "thachdau",
@@ -105,7 +106,7 @@ module.exports = {
             const pendingDuels = await getKey(dbKey) || [];
             const duel = pendingDuels.find(d => d.id === duelId);
 
-            if (!duel) return message.reply("❌ Không tìm thấy trận thách đấu với ID này.");
+            if (!duel) return message.reply(`${errorIcon} Không tìm thấy trận thách đấu với ID này.`);
 
             // Phân loại danh sách người đặt cược
             const betterSide1 = (duel.betters || []).filter(b => b.side === "1");
@@ -187,7 +188,7 @@ module.exports = {
             const allowedCurrencies = ['mora', 'primo'];
 
             if (!allowedCurrencies.includes(currencyType)) {
-                return message.reply(`❌ Loại tiền không hợp lệ (mora/primo).`);
+                return message.reply(`${errorIcon} Loại tiền không hợp lệ (mora/primo).`);
             }
 
             if (!duelId || !["1", "2"].includes(side) || isNaN(betAmount) || betAmount <= 0) {
@@ -196,14 +197,14 @@ module.exports = {
 
             let pendingDuels = await getKey(dbKey) || [];
             const duel = pendingDuels.find(d => d.id === duelId);
-            if (!duel) return message.reply("❌ Không tìm thấy trận đấu.");
+            if (!duel) return message.reply(`${errorIcon} Không tìm thấy trận đấu.`);
 
-            if(message.author.id == duel.player1.id || message.author.id == duel.player2.id){
-                return message.reply(`❌ Bạn đang tham gia trận đấu không được đặt cược.`);
+            if (message.author.id == duel.player1.id || message.author.id == duel.player2.id) {
+                return message.reply(`${errorIcon} Bạn đang tham gia trận đấu không được đặt cược.`);
             }
 
             const userBal = await getBalance(message.author.id, currencyType) || 0;
-            if (userBal < betAmount) return message.reply(`❌ Bạn không đủ ${getIcon(currencyType)} để đặt cược!`);
+            if (userBal < betAmount) return message.reply(`${errorIcon} Bạn không đủ ${getIcon(currencyType)} để đặt cược!`);
 
             // Trừ tiền người cược
             await removeMoney(message.author.id, betAmount, currencyType);
@@ -218,7 +219,7 @@ module.exports = {
             });
 
             await setKey(dbKey, pendingDuels);
-            return message.reply(`✅ Bạn đã cược **${betAmount.toLocaleString()} ${getIcon(currencyType)}** cho bên **${side === "1" ? duel.player1.tag : duel.player2.tag}**.`);
+            return message.reply(`${verifyIcon} Bạn đã cược **${betAmount.toLocaleString()} ${getIcon(currencyType)}** cho bên **${side === "1" ? duel.player1.tag : duel.player2.tag}**.`);
         }
 
         // XỬ LÝ THẮNG THUA (Dành cho Admin/Dev)
@@ -231,7 +232,7 @@ module.exports = {
             let pendingDuels = await getKey(dbKey) || [];
             const duelIndex = pendingDuels.findIndex(d => d.id === duelId);
 
-            if (duelIndex === -1) return message.reply("❌ Không tìm thấy ID trận đấu này.");
+            if (duelIndex === -1) return message.reply(`${errorIcon} Không tìm thấy ID trận đấu này.`);
 
             const duel = pendingDuels[duelIndex];
             let winnerId;
@@ -260,7 +261,7 @@ module.exports = {
             let totalWinningBetMora = 0;
             let totalWinningBetPrimo = 0;
 
-            // 1. Trả thưởng X2 cho người cược đúng và tính quỹ hoa hồng 10%
+            // 1. Trả thưởng X2 cho người cược đúng và gom quỹ hoa hồng 10%
             if (duel.betters && duel.betters.length > 0) {
                 for (const better of duel.betters) {
                     if (better.side === winnerSide) {
@@ -277,16 +278,29 @@ module.exports = {
                 }
             }
 
-            // 2. Tính toán tiền thưởng cho Đấu thủ thắng
+            // 2. Tính toán tiền thưởng cho Đấu thủ thắng và Logic quy đổi Primo lẻ
             const basePrize = duel.bet * 2;
-            const commissionMora = Math.floor(totalWinningBetMora * 0.1); // 10% hoa hồng Mora
-            const commissionPrimo = Math.floor(totalWinningBetPrimo * 0.1); // 10% hoa hồng Primo
 
-            // Tổng tiền thưởng theo từng loại
-            const totalMoraPrize = (duel.currency === 'mora' ? basePrize : 0) + commissionMora;
-            const totalPrimoPrize = (duel.currency === 'primo' ? basePrize : 0) + commissionPrimo;
+            // Tính hoa hồng 10% thô
+            const rawCommMora = totalWinningBetMora * 0.1;
+            const rawCommPrimo = totalWinningBetPrimo * 0.1;
 
-            // 3. Thực hiện cộng tiền cho đấu thủ
+            // Lấy phần nguyên của hoa hồng
+            let finalCommMora = Math.floor(rawCommMora);
+            let finalCommPrimo = Math.floor(rawCommPrimo);
+
+            // XỬ LÝ QUY ĐỔI: Nếu hoa hồng Primo có phần lẻ, đổi sang Mora dựa trên exchangeRate
+            const leftoverPrimo = rawCommPrimo - finalCommPrimo;
+            if (leftoverPrimo > 0) {                
+                const convertedMora = Math.floor(leftoverPrimo * exchangeRate);
+                finalCommMora += convertedMora;
+            }
+
+            // Tổng tiền thưởng theo từng loại tiền cho đấu thủ
+            const totalMoraPrize = (duel.currency === 'mora' ? basePrize : 0) + finalCommMora;
+            const totalPrimoPrize = (duel.currency === 'primo' ? basePrize : 0) + finalCommPrimo;
+
+            // 3. Thực hiện cộng tiền cho đấu thủ thắng
             if (totalMoraPrize > 0) { await addMoney(winnerId, totalMoraPrize, 'mora'); }
             if (totalPrimoPrize > 0) { await addMoney(winnerId, totalPrimoPrize, 'primo'); }
 
@@ -303,7 +317,7 @@ module.exports = {
             const winnerInfo = `🏆 **${winnerTag}** thắng và nhận được ${prizeStrings.join(' và ')}.`;
             const betterInfo = betMsg.length > 0 ? `\n---\n**Người đặt cược thắng:**\n${betMsg.join('\n')}` : "";
 
-            return message.reply(`✅ Trận \`${duelId}\` đã được xử lý xong!\n${winnerInfo}${betterInfo}`);
+            return message.reply(`Trận \`${duelId}\` đã được xử lý xong!\n${winnerInfo}${betterInfo}`);
         }
 
         // KHỞI TẠO THÁCH ĐẤU   
@@ -319,7 +333,7 @@ module.exports = {
                 "🔹 `.thachdau list` để xem danh sách trận đang chờ.");
         }
 
-        if (!allowedCurrencies.includes(currencyType)) return message.reply(`❌ Loại tiền không hợp lệ (mora/primo).`);
+        if (!allowedCurrencies.includes(currencyType)) return message.reply(`${errorIcon} Loại tiền không hợp lệ (mora/primo).`);
         if (!target || target.id === message.author.id || target.bot) return message.reply("⚠️ Tag đối thủ hợp lệ!");
         if (isNaN(betAmount) || betAmount <= 0) return message.reply("⚠️ Nhập tiền cược hợp lệ!");
 
@@ -327,8 +341,8 @@ module.exports = {
         const authBal = await getBalance(message.author.id, currencyType) || 0;
         const tarBal = await getBalance(target.id, currencyType) || 0;
 
-        if (authBal < betAmount) { return message.reply(`❌ Bạn không đủ **${betAmount.toLocaleString()} ${getIcon(currencyType)}** để tạo thách đấu!`); }
-        if (tarBal < betAmount) { return message.reply(`❌ **${target.tag}** không đủ **${betAmount.toLocaleString()} ${getIcon(currencyType)}** để theo kèo!`); }
+        if (authBal < betAmount) { return message.reply(`${errorIcon} Bạn không đủ **${betAmount.toLocaleString()} ${getIcon(currencyType)}** để tạo thách đấu!`); }
+        if (tarBal < betAmount) { return message.reply(`${errorIcon} **${target.tag}** không đủ **${betAmount.toLocaleString()} ${getIcon(currencyType)}** để theo kèo!`); }
 
         // 2. Tạo nút xác nhận
         const row = new ActionRowBuilder()
@@ -362,7 +376,7 @@ module.exports = {
 
         collector.on('collect', async (i) => {
             if (i.user.id !== target.id) {
-                return i.reply({ content: "❌ Chỉ người được thách đấu mới có thể nhấn nút này!", ephemeral: true });
+                return i.reply({ content: `${errorIcon} Chỉ người được thách đấu mới có thể nhấn nút này!`, ephemeral: true });
             }
 
             if (i.customId === 'decline_duel') {
@@ -376,7 +390,7 @@ module.exports = {
                 const finalTarBal = await getBalance(target.id, currencyType) || 0;
 
                 if (finalAuthBal < betAmount || finalTarBal < betAmount) {
-                    await i.update({ content: "❌ Giao dịch thất bại: Một trong hai người không còn đủ tiền cược!", embeds: [], components: [] });
+                    await i.update({ content: `${errorIcon} Giao dịch thất bại: Một trong hai người không còn đủ tiền cược!`, embeds: [], components: [] });
                     return collector.stop('insufficient_funds');
                 }
 
@@ -400,11 +414,11 @@ module.exports = {
 
                 const startEmbed = new EmbedBuilder()
                     .setTitle("⚔️ KÈO THÁCH ĐẤU ĐÃ LÊN")
-                    .setDescription(`ID: \`${duelId}\`\n**1. ${message.author.tag}** \n**2. ${target.tag}** \nCược mỗi bên: **${betAmount.toLocaleString()} ${getIcon(currencyType)}**`)
+                    .setDescription(`ID: \`${duelId}\`\n**1. <@${message.author.id}>** \n**2. <@${target.id}>** \nCược mỗi bên: **${betAmount.toLocaleString()} ${getIcon(currencyType)}**`)
                     .setFooter({ text: "Người xem có thể đặt cược bằng lệnh .thachdau cuoc" })
                     .setColor(0xf1c40f);
 
-                await i.update({ content: "✅ Thách đấu đã được khởi tạo!", embeds: [startEmbed], components: [] });
+                await i.update({ content: "Thách đấu đã được khởi tạo!", embeds: [startEmbed], components: [] });
                 collector.stop('confirmed');
             }
         });
