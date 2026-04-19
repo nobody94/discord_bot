@@ -18,7 +18,7 @@ module.exports = {
             const pendingDuels = await getKey(dbKey) || [];
 
             if (pendingDuels.length === 0) {
-                return message.reply("Hiện không có trận thách đấu nào đang chờ xử lý.");
+                return message.reply("Hiện không có trận thách đấu nào.");
             }
 
             const itemsPerPage = 5; // Số trận mỗi trang
@@ -330,7 +330,9 @@ module.exports = {
             return message.reply("**Hướng dẫn thách đấu:**\n" +
                 "🔹 `.td @user <số tiền> <mora/primo>` để tạo trận.\n" +
                 "🔹 `.td cuoc <id> <1/2> <số tiền> <mora/primo>` để đặt cược.\n" +
-                "🔹 `.td list` để xem danh sách trận đang chờ.");
+                "🔹 `.td list` để xem danh sách trận đang chờ.\n"+
+                "🔹 `.td check <id>` để xem chi tiết trận đấu."
+            );
         }
 
         if (!allowedCurrencies.includes(currencyType)) return message.reply(`${errorIcon} Loại tiền không hợp lệ (mora/primo).`);

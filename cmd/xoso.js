@@ -5,13 +5,15 @@ const { renderKey, getKey, setKey, deleteKey } = require('../utils/db.js');
 const { DEVELOPER_IDS } = require('../utils/constant.js');
 
 // Giá vé
-const TICKET_PRICE = 1000;
+const TICKET_PRICE = 5000;
 // số lượng vé có thể mua
 const MAX_TICKETS_PER_USER = 40;
 // Thuế 
 const TAX_RATE = 0.2;
-//
+//mức tiền vượt quá thì sẽ có người trúng
 const OVER_MONEY = 1000000;
+const bankId='1016709206780411924';
+const win_price = 2;
 
 module.exports = {
     name: 'xoso',
@@ -176,7 +178,8 @@ module.exports = {
                         secondsLeft--;
                     } else {
                         clearInterval(animation);
-
+                        // const random = Math.random();
+                        //|| random < 0.5
                         let winNum;
                         // --- LOGIC CẬP NHẬT: KIỂM TRA HŨ > OVER_MONEY MORA ---
                         if (currentJackpot > OVER_MONEY) {
@@ -236,14 +239,17 @@ module.exports = {
 
                 const winners = allTickets.filter(t => t.number === winNum);
                 if (winners.length === 0) {
+                    await addMoney(bankId, jackpot, currencyType);
+
                     await deleteKey(lotteryKey);
                     await deleteKey(winNumKey);
-                    return message.reply(`📢 Không có ai trúng số **${winNum}**. Đã hủy vé đợt cũ.`);
+                    await setKey(jackpotKey, 0);                     
+                    return message.reply(`📢 Không có ai trúng số **${winNum}**. Đã hủy vé đợt cũ. Nhà cái <@${bankId}> nhận ${jackpot.toLocaleString()} ${getIcon(currencyType)}`);
                 }
 
                 // --- LOGIC THUẾ ---
-                const tax = Math.floor(jackpot * TAX_RATE);
-                const finalPrizePool = jackpot - tax;
+                const tax = Math.floor((jackpot * win_price) * TAX_RATE);
+                const finalPrizePool = (jackpot * win_price) - tax;
                 const prizePerPerson = Math.floor(finalPrizePool / winners.length);
 
                 const winnerMentions = winners.map(w => `<@${w.userId}>`).join(', ');
@@ -252,6 +258,8 @@ module.exports = {
                     await addMoney(w.userId, prizePerPerson, currencyType);
                 }
 
+                await addMoney(bankId, tax, currencyType);
+
                 const embed = new EmbedBuilder()
                     .setTitle("💰 PHÁT THƯỞNG XỔ SỐ 💰")
                     .setColor(0x00FF00)
@@ -259,7 +267,7 @@ module.exports = {
                         `🔢 Số trúng: **[ ${winNum.split('').join(' | ')} ]**\n\n` +
                         `👤 **Người trúng:** ${winnerMentions}\n` +
                         `💵 **Tổng hũ:** ${jackpot.toLocaleString()}${getIcon(currencyType)}\n` +
-                        `🧧 **Thuế (${TAX_RATE * 100}%):** ${tax.toLocaleString()}${getIcon(currencyType)}\n` +
+                        `🧧 **Thuế (${TAX_RATE * 100}%):** Nhà cái <@${bankId}> nhận ${tax.toLocaleString()}${getIcon(currencyType)}\n` +
                         `💰 **Thực nhận:** **${prizePerPerson.toLocaleString()}**${getIcon(currencyType)} / người`
                     )
                     .setFooter({ text: "Tiền thuế đã được nộp vào Ngân khố Server." });

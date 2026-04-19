@@ -20,6 +20,10 @@ module.exports = {
     if (!allowedCurrencies.includes(currencyType)) {
       return message.reply(`${errorIcon} | Loại tiền không hợp lệ! Chỉ có thể lì xì **mora** hoặc **primo**.`);
     }
+
+    //kiểm tra nợ và biên bản
+    const isBlocked = await Money.checkPay(message, userId);
+    if (isBlocked) return;
     
     const isAdmin = message.member.permissions.has(PermissionsBitField.Flags.Administrator) || DEVELOPER_IDS.includes(message.author.id);
     const senderId = message.author.id;
