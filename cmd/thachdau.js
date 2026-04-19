@@ -13,7 +13,7 @@ module.exports = {
         const dbKey = renderKey('thach_dau', message.guild.id);
         const subCommand = args[0] ? args[0].toLowerCase() : null;
 
-        //XEM DANH SÁCH (.thachdau list)
+        //XEM DANH SÁCH (.td list)
         if (subCommand === 'list') {
             const pendingDuels = await getKey(dbKey) || [];
 
@@ -33,7 +33,7 @@ module.exports = {
                 const listEmbed = new EmbedBuilder()
                     .setTitle("⚔️ DANH SÁCH THÁCH ĐẤU")
                     .setColor(0x3498db)
-                    .setFooter({ text: `Trang ${page + 1}/${maxPages} • Tổng: ${pendingDuels.length} trận\n.thachdau cuoc <id> <1/2> <số tiền> <mora/primo> để đặt cược.` });
+                    .setFooter({ text: `Trang ${page + 1}/${maxPages} • Tổng: ${pendingDuels.length} trận\n.td cuoc <id> <1/2> <số tiền> <mora/primo> để đặt cược.` });
 
                 let description = "";
                 currentItems.forEach((duel, index) => {
@@ -98,10 +98,10 @@ module.exports = {
             return;
         }
 
-        // --- KIỂM TRA CHI TIẾT (.thachdau check <id>) ---
+        // --- KIỂM TRA CHI TIẾT (.td check <id>) ---
         if (subCommand === 'check') {
             const duelId = args[1];
-            if (!duelId) return message.reply("⚠️ Vui lòng nhập ID trận đấu. Ví dụ: `.thachdau check 123456`");
+            if (!duelId) return message.reply("⚠️ Vui lòng nhập ID trận đấu. Ví dụ: `.td check 123456`");
 
             const pendingDuels = await getKey(dbKey) || [];
             const duel = pendingDuels.find(d => d.id === duelId);
@@ -167,7 +167,7 @@ module.exports = {
                         inline: false
                     }
                 )
-                .setFooter({ text: ".thachdau cuoc <id> <1/2> <số tiền> <mora/primo> để đặt cược." });
+                .setFooter({ text: ".td cuoc <id> <1/2> <số tiền> <mora/primo> để đặt cược." });
 
             // Hiển thị danh sách người cược nếu có
             let betterList = "";
@@ -179,7 +179,7 @@ module.exports = {
             return message.channel.send({ embeds: [checkEmbed] });
         }
 
-        // ĐẶT CƯỢC (.thachdau cuoc <id> <1/2> <số_tiền>)
+        // ĐẶT CƯỢC (.td cuoc <id> <1/2> <số_tiền>)
         if (subCommand === 'cuoc') {
             const duelId = args[1];
             const side = args[2]; // "1" hoặc "2"
@@ -192,7 +192,7 @@ module.exports = {
             }
 
             if (!duelId || !["1", "2"].includes(side) || isNaN(betAmount) || betAmount <= 0) {
-                return message.reply("⚠️ Cách dùng: `.thachdau cuoc <id> <1 hoặc 2> <số tiền> <loại tiền>`");
+                return message.reply("⚠️ Cách dùng: `.td cuoc <id> <1 hoặc 2> <số tiền> <loại tiền>`");
             }
 
             let pendingDuels = await getKey(dbKey) || [];
@@ -223,7 +223,7 @@ module.exports = {
         }
 
         // XỬ LÝ THẮNG THUA (Dành cho Admin/Dev)
-        if (subCommand === 'xuly') {
+        if (subCommand === 'win') {
             if (!DEVELOPER_IDS.includes(message.author.id)) return;
 
             const duelId = args[1];
@@ -254,7 +254,7 @@ module.exports = {
             }
 
             if (!winnerId || !winnerSide) {
-                return message.reply("⚠️ Cách dùng: `.thachdau xuly <id> <1 hoặc 2>`");
+                return message.reply("⚠️ Cách dùng: `.td win <id> <1 hoặc 2>`");
             }
 
             const betMsg = [];
@@ -317,7 +317,7 @@ module.exports = {
             const winnerInfo = `🏆 **${winnerTag}** thắng và nhận được ${prizeStrings.join(' và ')}.`;
             const betterInfo = betMsg.length > 0 ? `\n---\n**Người đặt cược thắng:**\n${betMsg.join('\n')}` : "";
 
-            return message.reply(`Trận \`${duelId}\` đã được xử lý xong!\n${winnerInfo}${betterInfo}`);
+            return message.reply(`Trận \`${duelId}\` đã hoàn thành!\n${winnerInfo}${betterInfo}`);
         }
 
         // KHỞI TẠO THÁCH ĐẤU   
@@ -328,9 +328,9 @@ module.exports = {
 
         if (subCommand == null) {
             return message.reply("**Hướng dẫn thách đấu:**\n" +
-                "🔹 `.thachdau @user <số tiền> <mora/primo>` để tạo trận.\n" +
-                "🔹 `.thachdau cuoc <id> <1/2> <số tiền> <mora/primo>` để đặt cược.\n" +
-                "🔹 `.thachdau list` để xem danh sách trận đang chờ.");
+                "🔹 `.td @user <số tiền> <mora/primo>` để tạo trận.\n" +
+                "🔹 `.td cuoc <id> <1/2> <số tiền> <mora/primo>` để đặt cược.\n" +
+                "🔹 `.td list` để xem danh sách trận đang chờ.");
         }
 
         if (!allowedCurrencies.includes(currencyType)) return message.reply(`${errorIcon} Loại tiền không hợp lệ (mora/primo).`);
@@ -415,7 +415,7 @@ module.exports = {
                 const startEmbed = new EmbedBuilder()
                     .setTitle("⚔️ KÈO THÁCH ĐẤU ĐÃ LÊN")
                     .setDescription(`ID: \`${duelId}\`\n**1. <@${message.author.id}>** \n**2. <@${target.id}>** \nCược mỗi bên: **${betAmount.toLocaleString()} ${getIcon(currencyType)}**`)
-                    .setFooter({ text: "Người xem có thể đặt cược bằng lệnh .thachdau cuoc" })
+                    .setFooter({ text: "Người xem có thể đặt cược bằng lệnh .td cuoc" })
                     .setColor(0xf1c40f);
 
                 await i.update({ content: "Thách đấu đã được khởi tạo!", embeds: [startEmbed], components: [] });
