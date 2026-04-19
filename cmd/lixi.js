@@ -22,7 +22,7 @@ module.exports = {
     }
 
     //kiểm tra nợ và biên bản
-    const isBlocked = await Money.checkPay(message, userId);
+    const isBlocked = await Money.checkPay(message, message.author.id);
     if (isBlocked) return;
     
     const isAdmin = message.member.permissions.has(PermissionsBitField.Flags.Administrator) || DEVELOPER_IDS.includes(message.author.id);
