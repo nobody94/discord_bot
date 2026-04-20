@@ -248,9 +248,11 @@ module.exports = {
                 }
 
                 // --- LOGIC THUẾ ---
-                const tax = Math.floor((jackpot * win_price) * TAX_RATE);
-                const finalPrizePool = (jackpot * win_price) - tax;
+                const totalWin = jackpot * win_price;
+                const tax = Math.floor(totalWin * TAX_RATE);
+                const finalPrizePool = totalWin - tax;
                 const prizePerPerson = Math.floor(finalPrizePool / winners.length);
+               
 
                 const winnerMentions = winners.map(w => `<@${w.userId}>`).join(', ');
 
@@ -266,7 +268,7 @@ module.exports = {
                     .setDescription(
                         `🔢 Số trúng: **[ ${winNum.split('').join(' | ')} ]**\n\n` +
                         `👤 **Người trúng:** ${winnerMentions}\n` +
-                        `💵 **Tổng hũ:** ${jackpot.toLocaleString()}${getIcon(currencyType)}\n` +
+                        `💵 **Tổng hũ:** ${totalWin.toLocaleString()}${getIcon(currencyType)}\n` +
                         `🧧 **Thuế (${TAX_RATE * 100}%):** Nhà cái <@${bankId}> nhận ${tax.toLocaleString()}${getIcon(currencyType)}\n` +
                         `💰 **Thực nhận:** **${prizePerPerson.toLocaleString()}**${getIcon(currencyType)} / người`
                     )
