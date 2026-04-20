@@ -4,6 +4,9 @@ const { getBalance, removeMoney, addMoney, getIcon } = require('../utils/currenc
 const { DEVELOPER_IDS, exchangeRate } = require("../utils/constant.js");
 const {verifyIcon,errorIcon} = require('../utils/icon.js');
 
+const maxMora = 500000;
+const maxPrimo = 50;
+
 module.exports = {
     name: "thachdau",
     aliases: ["td"],
@@ -12,6 +15,20 @@ module.exports = {
     async execute(message, args) {
         const dbKey = renderKey('thach_dau', message.guild.id);
         const subCommand = args[0] ? args[0].toLowerCase() : null;
+
+        if (subCommand === 'dong'){
+            const duelId = args[1];
+            if (!duelId) return message.reply("⚠️ Vui lòng nhập ID trận đấu. Ví dụ: `.td dong 123456`");
+
+            const pendingDuels = await getKey(dbKey) || [];
+            const duel = pendingDuels.find(d => d.id === duelId);            
+
+            if (!duel) return message.reply(`${errorIcon} Không tìm thấy trận thách đấu với ID này.`);
+
+            const updateDuels = pendingDuels.map(d => d.id === duelId ? {...d,status:'closed'} : d);
+            await setKey(dbKey, updateDuels);
+            return message.reply(`Trận đấu ${duelId} đã ngừng nhận cược.`);
+        }
 
         //XEM DANH SÁCH (.td list)
         if (subCommand === 'list') {
@@ -199,8 +216,26 @@ module.exports = {
             const duel = pendingDuels.find(d => d.id === duelId);
             if (!duel) return message.reply(`${errorIcon} Không tìm thấy trận đấu.`);
 
+            if(duel.status === 'closed'){
+                return message.reply(`Trận đấu ${duelId} đã ngừng nhận cược.`);
+            }
+
             if (message.author.id == duel.player1.id || message.author.id == duel.player2.id) {
                 return message.reply(`${errorIcon} Bạn đang tham gia trận đấu không được đặt cược.`);
+            }
+
+            const listBet =  duel.betters || [];
+            const checkBet = listBet.filter((b)=> b.userId == message.author.id && side === side);
+            let betCheck = betAmount;
+
+            for(const better of checkBet){
+                if(better.currency == currencyType){
+                    betCheck += better.amount
+                }
+            }
+
+            if(betCheck > (currencyType == 'primo' ? maxPrimo : maxMora)){
+                return message.reply(`Mức cược chỉ được tối đa ${currencyType == 'primo' ? maxPrimo.toLocaleString() : maxMora.toLocaleString()} ${getIcon(currencyType)}.`);
             }
 
             const userBal = await getBalance(message.author.id, currencyType) || 0;
@@ -409,7 +444,8 @@ module.exports = {
                     player2: { id: target.id, tag: target.tag },
                     bet: betAmount,
                     currency: currencyType,
-                    betters: []
+                    betters: [],
+                    status:'open'
                 });
 
                 await setKey(dbKey, pendingDuels);
