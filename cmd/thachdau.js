@@ -17,6 +17,8 @@ module.exports = {
         const subCommand = args[0] ? args[0].toLowerCase() : null;
 
         if (subCommand === 'dong'){
+            if (!DEVELOPER_IDS.includes(message.author.id)) return;
+            
             const duelId = args[1];
             if (!duelId) return message.reply("⚠️ Vui lòng nhập ID trận đấu. Ví dụ: `.td dong 123456`");
 
