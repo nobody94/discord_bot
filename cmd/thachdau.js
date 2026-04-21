@@ -16,6 +16,34 @@ module.exports = {
         const dbKey = renderKey('thach_dau', message.guild.id);
         const subCommand = args[0] ? args[0].toLowerCase() : null;
 
+        if (subCommand === 'huy'){
+            if (!DEVELOPER_IDS.includes(message.author.id)) return;
+
+            const duelId = args[1];
+            if (!duelId) return message.reply("⚠️ Vui lòng nhập ID trận đấu. Ví dụ: `.td dong 123456`");
+
+            const pendingDuels = await getKey(dbKey) || [];
+            const duel = pendingDuels.find(d => d.id === duelId);            
+
+            if (!duel) return message.reply(`${errorIcon} Không tìm thấy trận thách đấu với ID này.`);
+
+            const betters = duel.betters || [];
+            
+            await addMoney(duel.player1.id,duel.bet,duel.currency);
+            await addMoney(duel.player2.id,duel.bet,duel.currency);
+
+            const betMsg = [];
+
+            if(betters.length > 0){
+                for(const better of betters){
+                    betMsg.push(`<@${better.userId}> nhận ${better.amount.toLocaleString()} ${getIcon(better.currency)}`)
+                    await addMoney(better.userId,better.amount,better.currency);                    
+                }
+            }
+
+            return message.reply(`${verifyIcon} Trận đấu đã bị hủy.\n<@${duel.player1.id}> và <@${duel.player2.id}> nhận ${duel.bet.toLocaleString()} ${getIcon(duel.currency)}\n${betMsg.join('\n')}`);
+        }
+
         if (subCommand === 'dong'){
             if (!DEVELOPER_IDS.includes(message.author.id)) return;
             
@@ -368,7 +396,11 @@ module.exports = {
                 "🔹 `.td @user <số tiền> <mora/primo>` để tạo trận.\n" +
                 "🔹 `.td cuoc <id> <1/2> <số tiền> <mora/primo>` để đặt cược.\n" +
                 "🔹 `.td list` để xem danh sách trận đang chờ.\n"+
-                "🔹 `.td check <id>` để xem chi tiết trận đấu."
+                "🔹 `.td check <id>` để xem chi tiết trận đấu.\n"+
+                "Chỉ dành cho dev\n"+
+                "🔹 `.td dong <id>` để đóng trận đấu.\n"+
+                "🔹 `.td huy <id>` để hủy trận đấu.\n"+
+                "🔹 `.td win <id> <1/2>` để trao giải cho người thắng."
             );
         }
 
