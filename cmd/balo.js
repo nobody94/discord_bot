@@ -64,7 +64,7 @@ module.exports = {
         .setColor(0x3498db)
         .setDescription(pages[pageIdx])
         .setFooter({
-          text: `Trang ${pageIdx + 1}/${pages.length} • Lệnh: .balo open/sell/give/cat`,
+          text: `Trang ${pageIdx + 1}/${pages.length} • Lệnh: .balo open/sell/give`,
         });
     };
 
