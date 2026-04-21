@@ -18,7 +18,7 @@ module.exports = {
     const key = await renderKey("rpg_user", userId);
     const subCommand = args[0]?.toLowerCase();
     let user = await getKey(key);
-      
+
     if (!subCommand) {
       if (user && user.data && user.data.element) {
         return this.showProfile(message, user.data);
@@ -40,28 +40,35 @@ module.exports = {
       return message.reply({ embeds: [embed] });
     }
 
-    const isHandled = await rpgHandler(args, message, key, user,userId);
+    const isHandled = await rpgHandler(args, message, key, user, userId);
     if (isHandled) return;
 
     if (!user?.data) return message.reply(`${errorIcon} | Hãy chọn hệ trước!`);
-      
-      // 1. XỬ LÝ SỐ LẦN ĐÁNH (args[1]) - Mặc định 1, tối đa 5
-    let times = parseInt(args[1]) || 1;
-     if (times < 1) { times = 1; }
-      
-      if(!user.data.quest && times > 1){
-          times = 1
-      }
 
-    if((user.data?.quest?.current == user.data?.quest?.target || user.data?.quest?.claimed) && times > 1 || user.data?.quest?.type !== subCommand){
-      times = 1
+    // 1. XỬ LÝ SỐ LẦN ĐÁNH (args[1]) - Mặc định 1, tối đa 5
+    let times = parseInt(args[1]) || 1;
+    if (times < 1) {
+      times = 1;
     }
 
-    if(user.data?.quest?.current < user.data?.quest?.target){
-      if(times > (user.data.quest.target / 2)){
-        times = user.data.quest.target / 2
+    if (!user.data.quest && times > 1) {
+      times = 1;
+    }
+
+    if (
+      ((user.data?.quest?.current == user.data?.quest?.target ||
+        user.data?.quest?.claimed) &&
+        times > 1) ||
+      user.data?.quest?.type !== subCommand
+    ) {
+      times = 1;
+    }
+
+    if (user.data?.quest?.current < user.data?.quest?.target) {
+      if (times > user.data.quest.target / 2) {
+        times = user.data.quest.target / 2;
       }
-    }   
+    }
 
     // --- KIỂM TRA COOLDOWN ĐỘNG ---
     const actionCommands = ["hunt", "battle", "dungeon"];
@@ -81,20 +88,29 @@ module.exports = {
 
           return message
             .reply(
-              `${errorIcon} | Bạn vẫn đang trong thời gian hồi sức! Chờ thêm ${timeText}.`
+              `${errorIcon} | Bạn vẫn đang trong thời gian hồi sức! Chờ thêm ${timeText}.`,
             )
             .then((msg) =>
-              setTimeout(() => msg.delete().catch(() => null), 5000)
+              setTimeout(() => msg.delete().catch(() => null), 5000),
             );
         }
       }
 
       // Thiết lập Cooldown mới cho lượt NÀY
       const currentLimit = times > 1 ? 240000 : 30000; // Đánh nhanh 4p, lẻ 30s
-      cooldowns.set(`${userId}_${subCommand}`, {
+      const cooldownKey = `${userId}_${subCommand}`;
+      cooldowns.set(cooldownKey, {
         time: now,
         limit: currentLimit,
       });
+
+      setTimeout(() => {
+        const currentData = cooldowns.get(cooldownKey);
+        // Kiểm tra nếu dữ liệu trong Map vẫn là dữ liệu cũ (tránh xóa nhầm cooldown mới hơn)
+        if (currentData && currentData.time === now) {
+          cooldowns.delete(cooldownKey);
+        }
+      }, currentLimit);
     }
 
     const userSkill = user.data.skill || "Đòn đánh thường";
@@ -205,7 +221,7 @@ module.exports = {
 
   async showProfile(message, d) {
     const elConfig = Object.values(ELEMENTS_CONFIG).find(
-      (e) => e.name === d.element
+      (e) => e.name === d.element,
     );
     const reqXP = getRequiredXP(d.level);
     const embed = new EmbedBuilder()
@@ -229,7 +245,7 @@ module.exports = {
           inline: false,
         },
         { name: "⚔️ ATK", value: `\`${d.atk}\``, inline: true },
-        { name: "❤️ HP", value: `\`${d.hp}\``, inline: true }
+        { name: "❤️ HP", value: `\`${d.hp}\``, inline: true },
       );
     return message.reply({ embeds: [embed] });
   },
