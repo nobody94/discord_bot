@@ -23,7 +23,8 @@ module.exports = {
             if (!duelId) return message.reply("⚠️ Vui lòng nhập ID trận đấu. Ví dụ: `.td dong 123456`");
 
             const pendingDuels = await getKey(dbKey) || [];
-            const duel = pendingDuels.find(d => d.id === duelId);            
+            const duel = pendingDuels.find(d => d.id === duelId); 
+            const duelIndex = pendingDuels.findIndex(d => d.id === duelId);           
 
             if (!duel) return message.reply(`${errorIcon} Không tìm thấy trận thách đấu với ID này.`);
 
@@ -40,6 +41,10 @@ module.exports = {
                     await addMoney(better.userId,better.amount,better.currency);                    
                 }
             }
+
+             //  Dọn dẹp dữ liệu trận đấu
+            pendingDuels.splice(duelIndex, 1);
+            await setKey(dbKey, pendingDuels);
 
             return message.reply(`${verifyIcon} Trận đấu đã bị hủy.\n<@${duel.player1.id}> và <@${duel.player2.id}> nhận ${duel.bet.toLocaleString()} ${getIcon(duel.currency)}\n${betMsg.join('\n')}`);
         }
