@@ -12,11 +12,9 @@ const { DEVELOPER_IDS } = require("../utils/constant.js");
 // Giá vé
 const TICKET_PRICE = 5000;
 // số lượng vé có thể mua
-const MAX_TICKETS_PER_USER = 40;
+const MAX_TICKETS_PER_USER = 30;
 // Thuế
 const TAX_RATE = 0.2;
-//mức tiền vượt quá thì sẽ có người trúng
-const OVER_MONEY = 1000000;
 const bankId = "1016709206780411924";
 const win_price = 2;
 
@@ -241,22 +239,16 @@ module.exports = {
             secondsLeft--;
           } else {
             clearInterval(animation);
-            // const random = Math.random();
-            //|| random < 0.5
+            const random = Math.random();
             let winNum;
-            // --- LOGIC CẬP NHẬT: KIỂM TRA HŨ > OVER_MONEY MORA ---
-            // if (currentJackpot > OVER_MONEY) {
-            //     // Lấy ngẫu nhiên một vé từ danh sách những người đã mua
-            //     const luckyTicket = allTickets[Math.floor(Math.random() * allTickets.length)];
-            //     winNum = luckyTicket.number;
-            // } else {
-            //     // Nếu hũ thấp hơn hoặc bằng 1 triệu, quay số ngẫu nhiên hoàn toàn (000-999)
-            //     const winNumRaw = Math.floor(Math.random() * 1000);
-            //     winNum = winNumRaw.toString().padStart(3, '0');
-            // }
-
-            const winNumRaw = Math.floor(Math.random() * 1000);
-            winNum = winNumRaw.toString().padStart(3, "0");
+            
+            if(random <= 0.6){
+              const winNumRaw = Math.floor(Math.random() * 1000);
+              winNum = winNumRaw.toString().padStart(3, "0");
+            }else{
+              const luckyTicket = allTickets[Math.floor(Math.random() * allTickets.length)];
+              winNum = luckyTicket.number;
+            }            
 
             const displayWin = winNum.split("").join(" | ");
             const winners = allTickets.filter((t) => t.number === winNum);
@@ -274,7 +266,7 @@ module.exports = {
                 .setDescription(
                   `🔢 Con số may mắn: **[ ${displayWin} ]**\n\n` +
                     `🎉 Chúc mừng những người sau đây đã trúng giải!\n${winnerMentions}\n` +
-                    `👉 Dùng \`.xoso thuong\` để phát thưởng ngay.`,
+                    `💰 Dùng \`.xoso thuong\` để phát thưởng ngay.`,
                 );
             } else {
               embed
@@ -282,7 +274,7 @@ module.exports = {
                 .setDescription(
                   `🔢 Con số may mắn: **[ ${displayWin} ]**\n\n` +
                     `❌ Rất tiếc, không có ai trúng đợt này.\n` +
-                    `💰 Jackpot tiếp tục được cộng dồn! Dùng \`.xoso thuong\` để bỏ vé cũ.`,
+                    `👉 Dùng \`.xoso thuong\` để bỏ vé cũ.`,
                 );
             }
 
