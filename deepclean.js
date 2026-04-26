@@ -43,23 +43,23 @@ async function startDeepClean() {
         const key = doc.ID;
         if (!key || typeof key !== 'string') continue;
 
-        // const isUserDataType = userDataTypes.some(type => key.includes(`nobody_bot_${type}_`));
+        const isUserDataType = userDataTypes.some(type => key.includes(`nobody_bot_${type}_`));
 
-        // if (isUserDataType) {
-        //     const userId = key.split('_').pop();
+        if (isUserDataType) {
+            const userId = key.split('_').pop();
 
-        //     // Nếu ID không nằm trong danh sách 208 người đang ở server
-        //     if (!safeIds.has(userId)) {
-        //         try {
-        //             process.stdout.write(`🗑️  Đang xóa: ${key}... `);
-        //             await deleteKey(key); // Xóa theo ID cụ thể (Không lỗi $where)
-        //             console.log("Xong!");
-        //             trashCount++;
-        //         } catch (e) {
-        //             console.log(`Lỗi: ${e.message}`);
-        //         }
-        //     }
-        // }
+            // Nếu ID không nằm trong danh sách 208 người đang ở server
+            if (!safeIds.has(userId)) {
+                try {
+                    process.stdout.write(`🗑️  Đang xóa: ${key}... `);
+                    await deleteKey(key); // Xóa theo ID cụ thể (Không lỗi $where)
+                    console.log("Xong!");
+                    trashCount++;
+                } catch (e) {
+                    console.log(`Lỗi: ${e.message}`);
+                }
+            }
+        }
 
         const userId = key.split('_').pop();
         if (!safeIds.has(userId)) {
