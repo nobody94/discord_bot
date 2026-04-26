@@ -1,18 +1,16 @@
 const {
-  viDictionary,
   enDictionary,
   saveWord,
-  removeWord, 
-} = require("../dictionary/dictionary");
+  removeWord,
+} = require("../dictionary/dictionary.js");
 const { DEVELOPER_IDS } = require("../utils/constant.js");
 const { PermissionsBitField } = require("discord.js");
 
 module.exports = {
   name: "word",
-  description: "Quản lý từ điển (Thêm/Xóa từ) - Cú pháp: .word <vi/en> <add/rm> <từ>",
+  description: "Quản lý từ điển Tiếng Anh (Thêm/Xóa từ) - Cú pháp: .word <add/rm> <từ>",
 
   async execute(message, args) {
-    // 1. Kiểm tra quyền: Phải là Dev hoặc Administrator
     const isDev = DEVELOPER_IDS.includes(message.author.id);
     const isAdmin = message.member.permissions.has(
       PermissionsBitField.Flags.Administrator
@@ -23,54 +21,59 @@ module.exports = {
     }
 
     // 2. Xác định ngôn ngữ, hành động và từ
-    // Cú pháp mới: .word <lang> <action> <word>
-    const lang = args[0]?.toLowerCase();
-    const action = args[1]?.toLowerCase();
-    const newWord = args.slice(2).join(" ").trim().toLowerCase();
+    const action = args[0]?.toLowerCase();
+    const input = args.slice(1).join(" ");
 
-    // Kiểm tra ngôn ngữ
-    if (!lang || !["vi", "en"].includes(lang)) {
-      return message.reply("⚠️ Vui lòng chọn ngôn ngữ: `.word vi ...` hoặc `.word en ...`.");
-    }
-
-    // Kiểm tra hành động
     if (!action || !["add", "rm"].includes(action)) {
-      return message.reply(`⚠️ Sai cú pháp! Sử dụng: \`.word ${lang} add <từ>\` hoặc \`.word ${lang} rm <từ>\``);
+      return message.reply(`⚠️ Sai cú pháp! Sử dụng: \`.word rm/add apple,egg\``);
     }
 
-    // Kiểm tra từ
-    if (!newWord) {
-      return message.reply(`⚠️ Vui lòng nhập từ muốn **${action === "add" ? "thêm" : "xóa"}**.`);
-    }
+    if (!input) { return message.reply("⚠️ Nhập các từ cách nhau bởi dấu phẩy. VD: `.word rm/add apple,egg`."); }
+
+    const words = input.split(",").map(w => w.trim().toLowerCase()).filter(w => w !== "");
 
     // 3. Xử lý logic
-    const dict = lang === "vi" ? viDictionary : enDictionary;
-
     try {
       if (action === "add") {
-        // Kiểm tra logic Tiếng Việt (phải là cụm 2 từ)
-        if (lang === "vi" && newWord.split(/\s+/).length !== 2) {
-          return message.reply("⚠️ Từ Tiếng Việt phải là cụm **2 từ**.");
-        }
-        
-        if (dict.includes(newWord)) {
-          return message.reply(`⭐ Từ \`${newWord}\` đã tồn tại trong từ điển ${lang.toUpperCase()}.`);
+        let successCount = 0;
+        let failWords = [];
+
+        for (const targetWord of words) {
+          if (!enDictionary.includes(targetWord)) {
+            if (typeof saveWord === "function") {
+              saveWord("en", targetWord);
+              successCount++;
+            }
+          } else {
+            failWords.push(targetWord);
+          }
         }
 
-        saveWord(lang, newWord);
-        return message.reply(`✅ Đã thêm từ \`${newWord}\` vào từ điển **${lang.toUpperCase()}** thành công!`);
+        let response = `📘 Đã thêm thành công **${successCount}** từ.`;
+        if (failWords.length > 0) {
+          response += `\n❌ Từ này đã có trong từ điển: \`${failWords.join("`, `")}\``;
+        }
 
+        return message.reply(response);
       } else if (action === "rm") {
-        if (!dict.includes(newWord)) {
-          return message.reply(`❌ Từ \`${newWord}\` không tồn tại trong từ điển ${lang.toUpperCase()} để xóa.`);
-        }
+        let successCount = 0;
+        let failWords = [];
 
-        if (typeof removeWord === "function") {
-          removeWord(lang, newWord);
-          return message.reply(`🗑️ Đã xóa từ \`${newWord}\` khỏi từ điển **${lang.toUpperCase()}**.`);
-        } else {
-          return message.reply("❌ Hệ thống chưa hỗ trợ hàm xóa từ tự động.");
+        for (const targetWord of words) {
+          if (enDictionary.includes(targetWord)) {
+            if (typeof removeWord === "function") {
+              removeWord("en", targetWord);
+              successCount++;
+            }
+          } else {
+            failWords.push(targetWord);
+          }
         }
+        let response = `🗑️ Đã xóa thành công **${successCount}** từ.`;
+        if (failWords.length > 0) {
+          response += `\n❌ Không tìm thấy: \`${failWords.join("`, `")}\``;
+        }
+        return message.reply(response);
       }
     } catch (err) {
       console.error(err);

@@ -1,6 +1,6 @@
 const fs = require('fs');
 // Import db và deleteKey từ file cấu hình của bạn
-const { db, deleteKey } = require("./utils/db");
+const { db, deleteKey,renderKey,getKey,setKey } = require("./utils/db");
 
 async function startDeepClean() {
     console.log("⏳ Đang kết nối tới MongoDB Atlas...");
@@ -74,7 +74,7 @@ async function startDeepClean() {
                 );
 
                 // 2. Lưu danh sách đã cập nhật lại vào DB
-                await setKey(coupleKey, updatedCouplesList);                
+                await setKey(coupleKey, updatedCouplesList);
                 console.log(`Đã xóa thông tin kết hôn của user ${userId}`);
             }
 
@@ -83,20 +83,22 @@ async function startDeepClean() {
             const bienban = (await getKey(bbKey)) || [];
             const userbb = bienban.find(c => c.userId === userId);
 
-            if(userbb){
+            if (userbb) {
                 const updatebb = bienban.filter(c =>
                     c.userId === userId
                 );
 
-                await setKey(bbKey, updatebb);                
+                await setKey(bbKey, updatebb);
                 console.log(`Đã xóa thông tin bb của user ${userId}`);
             }
 
             //sn
             const snKey = `birthday_${guildId}`;
             const snData = (await getKey(snKey)) || {};
-            if(snData[userId]){
-                
+            if (snData[userId]) {
+                const filterData = Object.fromEntries(Object.entries(snData).filter(([key, value]) => key !== userId));
+                await setKey(snKey, filterData);
+                console.log(`Đã xóa thông tin sn của user ${userId}`);
             }
         }
 

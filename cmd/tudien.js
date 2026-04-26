@@ -2,7 +2,7 @@ const {
   viDictionary,
   saveWord,
   removeWord,
-} = require("../dictionary/dictionary");
+} = require("../dictionary/dictionary.js");
 const { DEVELOPER_IDS } = require("../utils/constant.js");
 const { PermissionsBitField, EmbedBuilder } = require("discord.js");
 
@@ -23,7 +23,7 @@ module.exports = {
       let page = parseInt(args[1]);
       if (isNaN(page) || page < 1) page = 1;
 
-      const pageSize = 20; 
+      const pageSize = 20;
       const totalWords = viDictionary.length;
       const totalPages = Math.ceil(totalWords / pageSize);
 
@@ -40,36 +40,52 @@ module.exports = {
         .setFooter({ text: `Trang ${page}/${totalPages} | Tổng cộng: ${totalWords} từ` });
 
       return message.reply({ embeds: [embed] });
-    }
+    }    
 
     // --- XỬ LÝ LỆNH ADD (THÊM 1 TỪ) ---
     if (action === "add") {
-      const word = args.slice(1).join(" ").trim().toLowerCase();
-      if (!word) return message.reply("⚠️ Vui lòng nhập từ muốn thêm.");
-      
-      if (word.split(/\s+/).length !== 2) {
-        return message.reply("⚠️ Từ Tiếng Việt hợp lệ phải có chính xác **2 từ**.");
+      const input = args.slice(1).join(" ");
+      if (!input) return message.reply("⚠️ Nhập các từ cần xóa, cách nhau bởi dấu phẩy. VD: `.tudien add/rm con gà, con vịt`.");
+      const words = input.split(",").map(w => w.trim().toLowerCase()).filter(w => w !== "");
+
+      let successCount = 0;
+      let failWords = [];
+      let wordLength = 0;
+
+      for (const targetWord of words) {
+        if (!viDictionary.includes(targetWord)) {
+          if(targetWord.split(/\s+/).length !== 2){
+            wordLength++;
+          }else if (typeof saveWord === "function") {
+            saveWord("vi", targetWord);
+            successCount++;
+          }
+        } else {
+          failWords.push(targetWord);
+        }
       }
 
-      if (viDictionary.includes(word)) return message.reply(`⭐ Từ \`${word}\` đã có sẵn.`);
+      let response = `📘 Đã thêm thành công **${successCount}** từ.`;
+      if(wordLength > 0){
+        response += `\n❌ Có ${wordLength} từ không hợp lệ`;
+      }
+      if (failWords.length > 0) {
+        response += `\n❌ Không tìm thấy: \`${failWords.join("`, `")}\``;
+      }
 
-      saveWord("vi", word);
-      return message.reply(`✅ Đã lưu từ \`${word}\` vào cơ sở dữ liệu.`);
+      return message.reply(response);
     }
 
     // --- XỬ LÝ LỆNH RM (XÓA NHIỀU TỪ) ---
     if (action === "rm") {
-      // Lấy danh sách từ sau command, ngăn cách bởi dấu phẩy hoặc khoảng cách nếu bạn muốn
-      // Ở đây dùng cách split theo dấu phẩy để hỗ trợ từ ghép có khoảng trắng
       const input = args.slice(1).join(" ");
-      if (!input) return message.reply("⚠️ Nhập các từ cần xóa, cách nhau bởi dấu phẩy. VD: `.tudien rm con gà, con vịt`.");
+      if (!input) return message.reply("⚠️ Nhập các từ cần xóa, cách nhau bởi dấu phẩy. VD: `.tudien add/rm con gà, con vịt`.");
+      const words = input.split(",").map(w => w.trim().toLowerCase()).filter(w => w !== "");
 
-      const wordsToRemove = input.split(",").map(w => w.trim().toLowerCase()).filter(w => w !== "");
-      
       let successCount = 0;
       let failWords = [];
 
-      for (const targetWord of wordsToRemove) {
+      for (const targetWord of words) {
         if (viDictionary.includes(targetWord)) {
           if (typeof removeWord === "function") {
             removeWord("vi", targetWord);
@@ -84,7 +100,7 @@ module.exports = {
       if (failWords.length > 0) {
         response += `\n❌ Không tìm thấy: \`${failWords.join("`, `")}\``;
       }
-      
+
       return message.reply(response);
     }
 
