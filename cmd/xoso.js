@@ -17,6 +17,7 @@ const MAX_TICKETS_PER_USER = 30;
 const TAX_RATE = 0.2;
 const bankId = "1016709206780411924";
 const win_price = 2;
+const userWinner = [];
 
 module.exports = {
   name: "xoso",
@@ -242,11 +243,12 @@ module.exports = {
             const random = Math.random();
             let winNum;
             
-            if(random <= 0.6){
+            if(random <= 0.2){
               const winNumRaw = Math.floor(Math.random() * 1000);
               winNum = winNumRaw.toString().padStart(3, "0");
-            }else{
-              const luckyTicket = allTickets[Math.floor(Math.random() * allTickets.length)];
+            }else{  
+              const filterAllTicket = [...allTickets].filter((t)=> !userWinner.includes(t.userId));                  
+              const luckyTicket = filterAllTicket[Math.floor(Math.random() * allTickets.length)];              
               winNum = luckyTicket.number;
             }            
 
@@ -257,7 +259,11 @@ module.exports = {
               .setTitle("🎊 KẾT QUẢ XỔ SỐ CHÍNH THỨC 🎊")
               .setTimestamp();
 
-            if (winners.length > 0) {
+            if (winners.length > 0) {              
+              userWinner.push(w.userId);
+              if(userWinner.length>3){
+                userWinner.shift();
+              }
               const winnerMentions = [
                 ...new Set(winners.map((w) => `<@${w.userId}>`)),
               ].join(", ");
