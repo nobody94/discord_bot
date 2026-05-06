@@ -262,10 +262,11 @@ module.exports = {
               .setTitle("🎊 KẾT QUẢ XỔ SỐ CHÍNH THỨC 🎊")
               .setTimestamp();
 
-            if (winners.length > 0) {    
-             
+            if (winners.length > 0) { 
               for (const w of winners){
-                lastWinner.push(w.userId);
+                if(lastWinner.filter((l)=> l == w.userId).length == 0){
+                  lastWinner.push(w.userId);
+                }                
               } 
               lastWinner = lastWinner.slice(-3);
               const winnerMentions = [
