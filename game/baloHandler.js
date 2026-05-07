@@ -269,8 +269,8 @@ async function baloHandler(args, message, inventory, invKey, userId) {
 
     // Lọc danh sách đồ vàng
     const goldenItems = lootTable.filter(l => l.isGolden);
-    const charItems = goldenItems.filter(l => l.item.startsWith("char"));
-    const lechItems = goldenItems.filter(l => l.item.startsWith("lech"));
+    const charItems = itemId == 'ruong_hiem' ? goldenItems.filter(l => l.item.startsWith("char")) : goldenItems.filter(l => l.item.startsWith("pokemon"));
+    const lechItems = itemId == 'ruong_hiem' ? goldenItems.filter(l => l.item.startsWith("lech")) : goldenItems.filter(l => l.item.startsWith("kim_cuong"));
 
     for (let i = 0; i < amountToOpen; i++) {
       inventory.splice(inventory.indexOf(itemId), 1);
@@ -291,7 +291,9 @@ async function baloHandler(args, message, inventory, invKey, userId) {
           }
           random -= loot.weight;
         }
-        if (selectedLoot && selectedLoot.isGolden) triggerGold = true;
+        if (selectedLoot && selectedLoot.isGolden) {
+          triggerGold = true;
+        }
       }
 
       // 2. Xử lý logic nổ vàng (Bảo hiểm & 50/50)

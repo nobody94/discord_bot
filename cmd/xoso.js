@@ -17,7 +17,6 @@ const MAX_TICKETS_PER_USER = 30;
 const TAX_RATE = 0.2;
 const bankId = "1016709206780411924";
 const win_price = 2;
-const userWinner = [];
 
 module.exports = {
   name: "xoso",
@@ -31,6 +30,7 @@ module.exports = {
     const jackpotKey = renderKey("lottery_jackpot", guildId);
     const winNumKey = renderKey("last_win_num", guildId);
     const statusKey = renderKey("lottery_status", guildId);
+    const lastWinnerKey = renderKey("last_winner", guildId);
     const currencyType = "mora";
     const isDev = DEVELOPER_IDS.includes(message.author.id);
     const isAdmin = message.member.permissions.has("Administrator") || isDev;
@@ -211,9 +211,12 @@ module.exports = {
 
       // --- 4. QUAY SỐ (ADMIN/DEV - .xoso quay) ---
       else if (action === "quay") {
-        if (!isAdmin)
+        if (!isAdmin){
           return message.reply(`${errorIcon} | Bạn không có quyền quay số.`);
+        }
         const allTickets = (await getKey(lotteryKey)) || [];
+        const userWinner = (await getKey(lastWinnerKey)) || [];
+        let lastWinner = [...userWinner];
         if (allTickets.length === 0)
           return message.reply("⚠️ Chưa có vé nào để quay.");
 
@@ -259,7 +262,13 @@ module.exports = {
               .setTitle("🎊 KẾT QUẢ XỔ SỐ CHÍNH THỨC 🎊")
               .setTimestamp();
 
-            if (winners.length > 0) {
+            if (winners.length > 0) { 
+              for (const w of winners){
+                if(lastWinner.filter((l)=> l == w.userId).length == 0){
+                  lastWinner.push(w.userId);
+                }                
+              } 
+              lastWinner = lastWinner.slice(-3);
               const winnerMentions = [
                 ...new Set(winners.map((w) => `<@${w.userId}>`)),
               ].join(", ");
@@ -279,7 +288,8 @@ module.exports = {
                   `👉 Dùng \`.xoso thuong\` để bỏ vé cũ.`,
                 );
             }
-
+            
+            await setKey(lastWinnerKey,lastWinner);
             await setKey(winNumKey, winNum);
             await statusMsg
               .edit({
