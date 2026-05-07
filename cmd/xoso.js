@@ -233,24 +233,24 @@ module.exports = {
             await statusMsg
               .edit(
                 `🎰 Đang quay: **[ ${r1} | ${r2} | ${r3} ]** 🎰\n` +
-                  `⏱️ Kết quả sẽ có sau: **${secondsLeft}** giây...`,
+                `⏱️ Kết quả sẽ có sau: **${secondsLeft}** giây...`,
               )
-              .catch(() => {});
+              .catch(() => { });
 
             secondsLeft--;
           } else {
             clearInterval(animation);
             const random = Math.random();
             let winNum;
-            
-            if(random <= 0.2){
+
+            if (random <= 0.2) {
               const winNumRaw = Math.floor(Math.random() * 1000);
               winNum = winNumRaw.toString().padStart(3, "0");
-            }else{  
-              const filterAllTicket = [...allTickets].filter((t)=> !userWinner.includes(t.userId));                  
-              const luckyTicket = filterAllTicket[Math.floor(Math.random() * allTickets.length)];              
+            } else {
+              const filterAllTicket = [...allTickets].filter((t) => !userWinner.includes(t.userId));
+              const luckyTicket = filterAllTicket[Math.floor(Math.random() * allTickets.length)];
               winNum = luckyTicket.number;
-            }            
+            }
 
             const displayWin = winNum.split("").join(" | ");
             const winners = allTickets.filter((t) => t.number === winNum);
@@ -259,11 +259,7 @@ module.exports = {
               .setTitle("🎊 KẾT QUẢ XỔ SỐ CHÍNH THỨC 🎊")
               .setTimestamp();
 
-            if (winners.length > 0) {              
-              userWinner.push(w.userId);
-              if(userWinner.length>3){
-                userWinner.shift();
-              }
+            if (winners.length > 0) {
               const winnerMentions = [
                 ...new Set(winners.map((w) => `<@${w.userId}>`)),
               ].join(", ");
@@ -271,16 +267,16 @@ module.exports = {
                 .setColor(0x00ff00)
                 .setDescription(
                   `🔢 Con số may mắn: **[ ${displayWin} ]**\n\n` +
-                    `🎉 Chúc mừng những người sau đây đã trúng giải!\n${winnerMentions}\n` +
-                    `💰 Dùng \`.xoso thuong\` để phát thưởng ngay.`,
+                  `🎉 Chúc mừng những người sau đây đã trúng giải!\n${winnerMentions}\n` +
+                  `💰 Dùng \`.xoso thuong\` để phát thưởng ngay.`,
                 );
             } else {
               embed
                 .setColor(0xff0000)
                 .setDescription(
                   `🔢 Con số may mắn: **[ ${displayWin} ]**\n\n` +
-                    `❌ Rất tiếc, không có ai trúng đợt này.\n` +
-                    `👉 Dùng \`.xoso thuong\` để bỏ vé cũ.`,
+                  `❌ Rất tiếc, không có ai trúng đợt này.\n` +
+                  `👉 Dùng \`.xoso thuong\` để bỏ vé cũ.`,
                 );
             }
 
@@ -290,7 +286,7 @@ module.exports = {
                 content: "✅ **QUAY THƯỞNG HOÀN TẤT!**",
                 embeds: [embed],
               })
-              .catch(() => {});
+              .catch(() => { });
           }
         }, 1000);
 
@@ -330,7 +326,12 @@ module.exports = {
         const winnerMentions = winners.map((w) => `<@${w.userId}>`).join(", ");
 
         for (const w of winners) {
+          userWinner.push(w.userId);
           await addMoney(w.userId, prizePerPerson, currencyType);
+        }
+
+        if (userWinner.length > 3) {
+          userWinner.shift();
         }
 
         await addMoney(bankId, tax, currencyType);
@@ -340,10 +341,10 @@ module.exports = {
           .setColor(0x00ff00)
           .setDescription(
             `🔢 Số trúng: **[ ${winNum.split("").join(" | ")} ]**\n\n` +
-              `👤 **Người trúng:** ${winnerMentions}\n` +
-              `💵 **Tổng hũ:** ${totalWin.toLocaleString()}${getIcon(currencyType)}\n` +
-              `🧧 **Thuế (${TAX_RATE * 100}%):** Nhà cái <@${bankId}> nhận ${tax.toLocaleString()}${getIcon(currencyType)}\n` +
-              `💰 **Thực nhận:** **${prizePerPerson.toLocaleString()}**${getIcon(currencyType)} / người`,
+            `👤 **Người trúng:** ${winnerMentions}\n` +
+            `💵 **Tổng hũ:** ${totalWin.toLocaleString()}${getIcon(currencyType)}\n` +
+            `🧧 **Thuế (${TAX_RATE * 100}%):** Nhà cái <@${bankId}> nhận ${tax.toLocaleString()}${getIcon(currencyType)}\n` +
+            `💰 **Thực nhận:** **${prizePerPerson.toLocaleString()}**${getIcon(currencyType)} / người`,
           )
           .setFooter({ text: "Tiền thuế đã được nộp vào Ngân khố Server." });
 

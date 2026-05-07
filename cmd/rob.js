@@ -26,9 +26,11 @@ module.exports = {
     }
 
     const FINE_AMOUNT = 5000;
+    const maxAmount = 2000000;
+    const minAmount = 1000000;
     let participants = new Set();    
 
-    const bankVault = Math.floor(Math.random() * (1000000 - 500000 + 1)) + 500000;
+    const bankVault = Math.floor(Math.random() * (maxAmount - minAmount + 1)) + minAmount;
     const calculateChance = (count) => Math.min(5 + (count - 1) * 5, 70);
     const getMentions = () =>
       Array.from(participants)
