@@ -12,7 +12,12 @@ module.exports = {
 
   async execute(message, args) {
     const isDev = DEVELOPER_IDS.includes(message.author.id);
-    if (!isDev) {
+
+    const isAdmin = message.member.permissions.has(
+      PermissionsBitField.Flags.Administrator
+    );
+
+    if (!isDev && !isAdmin) {
       return message.reply("❌ Bạn không có quyền sử dụng lệnh này.");
     }
 
@@ -70,7 +75,7 @@ module.exports = {
         response += `\n❌ Có ${wordLength} từ không hợp lệ`;
       }
       if (failWords.length > 0) {
-        response += `\n❌ Không tìm thấy: \`${failWords.join("`, `")}\``;
+        response += `\n❌ Từ này đã có trong từ điển: \`${failWords.join("`, `")}\``;
       }
 
       return message.reply(response);
