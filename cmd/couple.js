@@ -22,7 +22,10 @@ module.exports = {
 
         // Xác định danh hiệu tình cảm dựa trên điểm
         let relationshipStatus = "Mới quen 🕒";
-        if (lovePoints > 10000) relationshipStatus = "Mặn nồng 🔥";
+        if (lovePoints > 500000) relationshipStatus = "Bạc đầu giai lão 💍";
+        else if (lovePoints > 100000) relationshipStatus = "Định mệnh an bài 🍾";
+        else if (lovePoints > 50000) relationshipStatus = "Thề non hẹn biển 🌊";
+        else if (lovePoints > 10000) relationshipStatus = "Mặn nồng 🔥";
         else if (lovePoints > 5000) relationshipStatus = "Gắn bó 💞";
         else if (lovePoints > 1000) relationshipStatus = "Tìm hiểu 🌹";
 

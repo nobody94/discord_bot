@@ -6,11 +6,9 @@ const {
 } = require("../utils/currency");
 const {maxAmount} = require('../utils/constant');
 const { errorIcon,slotsIcon } = require('../utils/icon.js')
+const { checkCooldown,getCountdown } = require('../utils/cooldown');
 
 const symbols = slotsIcon;
-
-// Tạo một Map để lưu trữ thời gian cooldown
-const cooldowns = new Map();
 
 const payouts = Object.fromEntries(symbols.map(x => [`${x}${x}${x}`, 3]));
 
@@ -27,49 +25,12 @@ module.exports = {
   aliases: ["slot", "sl"],
 
   async execute(message, args) {
-    const userId = message.author.id;
+    const userId = message.author.id;    
 
-    // --- KIỂM TRA COOLDOWN (10 GIÂY) ---
-    const now = Date.now();
-    const cooldownAmount = 10 * 1000; // 10 giây đổi ra miligiây
-
-    if (cooldowns.has(userId)) {
-      const expirationTime = cooldowns.get(userId) + cooldownAmount;
-
-      if (now < expirationTime) {
-        const timeLeft = ((expirationTime - now) / 1000).toFixed(1);
-        // Gửi tin nhắn cảnh báo ban đầu
-        const msg = await message.reply(
-          `⏳ | Bạn đang thao tác quá nhanh! Vui lòng chờ **${timeLeft}s** để tiếp tục quay.`
+    if (checkCooldown(userId,'slot',10)) {
+      return  msg = await message.reply(
+          `⏳ | Bạn đang thao tác quá nhanh! Vui lòng chờ **${getCountdown(userId,'slot',10)}s** để tiếp tục quay.`
         );
-
-        // Tạo bộ đếm ngược để cập nhật tin nhắn
-        const interval = setInterval(async () => {
-          const currentNow = Date.now();
-          const currentLeft = ((expirationTime - currentNow) / 1000).toFixed(1);
-
-          if (currentLeft <= 0) {
-            clearInterval(interval);
-            try {
-              await msg.delete(); // Xóa tin nhắn khi hết thời gian
-            } catch (err) {
-              console.log(
-                "Không thể xóa tin nhắn (có thể người dùng đã xóa trước)."
-              );
-            }
-          } else {
-            try {
-              await msg.edit(
-                `⏳ | Bạn đang thao tác quá nhanh! Vui lòng chờ **${currentLeft}s** để tiếp tục quay.`
-              );
-            } catch (err) {
-              clearInterval(interval); // Dừng cập nhật nếu tin nhắn bị xóa thủ công
-            }
-          }
-        }, 1000); // Cập nhật mỗi 1 giây
-
-        return;
-      }
     }
 
     let betAmount = parseInt(args[0]);
@@ -96,10 +57,7 @@ module.exports = {
       );
     }
 
-    // Thiết lập thời gian thực hiện lệnh cuối cùng cho người dùng
-    cooldowns.set(userId, now);
-
-    // --- BẮT ĐẦU XỬ LÝ GAME ---
+       // --- BẮT ĐẦU XỬ LÝ GAME ---
     await removeMoney(userId, betAmount);
 
     const spinningMsg = await message.reply(
@@ -141,8 +99,5 @@ module.exports = {
     }
 
     await spinningMsg.edit(resultMessage);
-
-    // Tùy chọn: Xóa cooldown sau khi hết hạn để tránh Map bị đầy (nhưng không bắt buộc vì logic trên đã ghi đè)
-    setTimeout(() => cooldowns.delete(userId), cooldownAmount);
   },
 };

@@ -7,7 +7,8 @@ const {
   TextInputStyle,
 } = require("discord.js");
 const Money = require("../utils/currency");
-const { errorIcon, verifyIcon } = require('../utils/icon.js')
+const { errorIcon, verifyIcon } = require('../utils/icon.js');
+const { checkCooldown } = require('../utils/cooldown');
 
 module.exports = {
   name: "anxin",
@@ -15,6 +16,11 @@ module.exports = {
 
   async execute(message) {
     const requester = message.author;
+
+     if (checkCooldown(message.author.id, 'anxin', 60)) {
+            return message.reply("⏳ | Bạn đang thao tác quá nhanh! Vui lòng đợi vài giây để tiếp tục xin tiền.")
+                .then(msg => setTimeout(() => msg.delete().catch(() => null), 5000));
+    }
 
     // 1. Tạo nút bấm ban đầu
     const button = new ButtonBuilder()

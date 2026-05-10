@@ -3,6 +3,7 @@ const { getKey, setKey, addKey, renderKey } = require("../utils/db");
 const { errorIcon } = require("../utils/icon.js");
 const { ELEMENTS_CONFIG } = require("../utils/rpg.js");
 const { rpgHandler } = require("../game/rpgHandler.js");
+const { checkCooldown } = require('../utils/cooldown');
 
 // --- CHỐNG SPAM ---
 const cooldowns = new Map();

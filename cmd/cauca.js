@@ -3,8 +3,7 @@ const { getKey, renderKey, setKey, updateLeaderboard } = require("../utils/db");
 const { FISH_LIST, FISH_SHOP_ITEMS } = require("../utils/fish");
 const { errorIcon, verifyIcon } = require('../utils/icon.js');
 const { getIcon } = require('../utils/currency.js');
-
-const cooldowns = new Collection();
+const { checkCooldown,getCountdown } = require('../utils/cooldown');
 
 module.exports = {
     name: "cauca",
@@ -63,17 +62,9 @@ module.exports = {
             return message.reply(`${errorIcon} | Bạn chỉ còn **${limitTime - userLimit.count}** lượt câu. Hãy thử số lượng nhỏ hơn.`);
         }
 
-        // 3. KIỂM TRA COOLDOWN (10s mặc định)
-        const cooldownAmount = 10000; // 10 giây
-
-        // --- KIỂM TRA COOLDOWN TRONG RAM ---
-        if (cooldowns.has(userId)) {
-            const expirationTime = cooldowns.get(userId) + cooldownAmount;
-
-            if (now < expirationTime) {
-                const timeLeft = Math.ceil((expirationTime - now) / 1000);
-                return message.reply(`${errorIcon} | Chờ **${timeLeft} giây** nữa để thả cần!`);
-            }
+        // --- KIỂM TRA COOLDOWN ---
+        if (checkCooldown(message.author.id, 'cauca', 10)) {
+            return message.reply(`${errorIcon} | Chờ **${getCountdown(message.author.id, this.name, 10)} giây** nữa để thả cần!`);
         }
 
         // 4. KIỂM TRA ĐỒ CÂU TRONG TÚI
@@ -159,10 +150,7 @@ module.exports = {
             setKey(fishInvKey, inventory),
             setKey(tankKey, tank),
             setKey(limitKey, allLimitData)            
-        ]);
-
-        cooldowns.set(userId, now);
-        setTimeout(() => cooldowns.delete(userId), cooldownAmount);
+        ]);       
 
         // 7. HIỂN THỊ KẾT QUẢ
         let timeLeft = 3;
