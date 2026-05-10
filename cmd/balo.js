@@ -27,7 +27,7 @@ module.exports = {
       return; // Dừng lại sau khi thực hiện lệnh phụ
     }
 
-    // 2. LOGIC HIỂN THỊ TÚI ĐỒ (FIX LỖI 4096 KÝ TỰ)
+    // 2. LOGIC HIỂN THỊ TÚI ĐỒ
     if (inventory.length === 0) {
       return message.reply({
         embeds: [new EmbedBuilder().setColor(0x3498db).setDescription(`${bagIcon} Túi đồ của **${username}** đang trống rỗng...`)]

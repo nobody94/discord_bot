@@ -1,22 +1,92 @@
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType } = require('discord.js');
-const { getIcon } = require('../utils/currency');
-const { SHOP_ITEMS, type } = require('../utils/weaponshop');
+const { SHOP_ITEMS, type } = require('../utils/blackmarket');
+const { errorIcon, verifyIcon } = require("../utils/icon.js");
+const { getBalance, removeMoney, getIcon, checkPay } = require("../utils/currency");
+const { renderKey, setKey, getKey } = require("../utils/db");
 
 module.exports = {
-    name: 'weaponshop',
-    aliases: ['wshop'],
+    name: 'blackmarket',
+    aliases: ['bmk', 'choden'],
     description: 'Xem danh sách vật phẩm theo trang.',
     async execute(message) {
+        if (args[0]?.toLowerCase() === 'buy') {
+            const userId = message.author.id;
+            const itemId = args[1]?.toLowerCase();
+            const amount = parseInt(args[2]) || 1;
+
+            if (!itemId) {
+                return message.reply(
+                    `${errorIcon} | Vui lòng nhập ID vật phẩm. Ví dụ: \`.bmk buy brick 2\``,
+                );
+            }
+
+            const item = SHOP_ITEMS[itemId];
+
+            if (!item || item.hideFromShop === true) {
+                return message.reply(
+                    `${errorIcon} | Vật phẩm này không tồn tại hoặc không bán trực tiếp!`,
+                );
+            }
+
+            if (amount <= 0) {
+                return message.reply(`${errorIcon} | Số lượng mua phải lớn hơn 0!`);
+            }
+
+            if (item.maxAmount && amount > item.maxAmount) {
+                return message.reply(`${errorIcon} | Số lượng mua không được quá ${item.maxAmount}!`);
+            }
+
+            const totalPrice = item.price * amount;
+            const userBalance = await getBalance(userId, item.currency);
+
+            if (userBalance < totalPrice) {
+                return message.reply(
+                    `💸 | Bạn cần **${totalPrice.toLocaleString()}** ${getIcon(item.currency)} để mua **${amount}x** ${item.icon} **${item.name}**.`,
+                );
+            }
+
+            const isBlocked = await checkPay(message, userId);
+            if (isBlocked) return;
+
+            try {
+                // 5. Thực hiện trừ tiền
+                const success = await removeMoney(userId, totalPrice, item.currency);
+
+                if (success) {
+                    const invKey = renderKey("trunk", userId);
+                    
+                    const currentInv = (await getKey(invKey)) || [];
+                    for (let i = 0; i < amount; i++) {
+                        currentInv.push(itemId);
+                    }
+                    await setKey(invKey, currentInv);
+
+                    return message.reply({
+                        content: `${verifyIcon} | Chúc mừng! Bạn đã mua thành công **${amount}x** ${item.icon} **${item.name}** với tổng giá **${totalPrice.toLocaleString()}** ${getIcon(item.currency)}.\n📦 Gõ \`.trunk\` để kiểm tra.`,
+                    });
+                } else {
+                    return message.reply(
+                        `${errorIcon} | Giao dịch thất bại do lỗi hệ thống.`,
+                    );
+                }
+            } catch (error) {
+                console.error("LỖI KHI MUA ĐỒ:", error);
+                return message.reply(
+                    `${errorIcon} | Hệ thống gặp lỗi khi xử lý giao dịch.`,
+                );
+            }
+        }
+
         const availableItems = Object.entries(SHOP_ITEMS).filter(([id, item]) => !item.hideFromShop);
-        const itemsPerPage = 5; // Số lượng đồ vật hiển thị trên 1 trang
+        const itemsPerPage = 5;
         const totalPages = Math.ceil(availableItems.length / itemsPerPage);
         let currentPage = 0;
 
         const createEmbed = (page) => {
             const embed = new EmbedBuilder()
                 .setTitle('🔫 Chợ đen')
-                .setColor(0x00FF99)
-                .setDescription('Sử dụng lệnh `.wshop buy <ID> <số lượng>` để mua đồ.')
+                .setColor(0x2E0854)
+                .setDescription('Sử dụng lệnh `.bmk buy <ID> <số lượng>` để mua đồ.')
                 .setFooter({ text: `Trang ${page + 1}/${totalPages}` });
 
             const start = page * itemsPerPage;
