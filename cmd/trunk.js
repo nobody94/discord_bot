@@ -41,8 +41,7 @@ module.exports = {
                 return { ...item, count, id };
             })
             .sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true }));
-
-        // Chia danh sách thành các trang (10 món mỗi trang)
+       
         const itemsPerPage = 20;
         const pages = [];
         for (let i = 0; i < itemList.length; i += itemsPerPage) {
