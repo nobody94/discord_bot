@@ -8,7 +8,7 @@ module.exports = {
     name: 'blackmarket',
     aliases: ['bmk', 'choden'],
     description: 'Xem danh sách vật phẩm theo trang.',
-    async execute(message) {
+    async execute(message,args) {
         if (args[0]?.toLowerCase() === 'buy') {
             const userId = message.author.id;
             const itemId = args[1]?.toLowerCase();
