@@ -173,6 +173,7 @@ async function trunkHandler(args, message, inventory, invKey, userId) {
     const guildId = message.guild.id;
     const battleKey = renderKey("battle", guildId);
     let lobby = (await getKey(battleKey)) || [];
+    const timeCountdown = 30;
 
     const target = message.mentions.users.first();
 
@@ -215,9 +216,9 @@ async function trunkHandler(args, message, inventory, invKey, userId) {
         }
     }
 
-    const personalRemaining = getRemaining(userId, "trunk_throw", 10);
+    const personalRemaining = getRemaining(userId, "trunk_throw", timeCountdown);
     if (personalRemaining > 0) {
-        const throwTag = getCountdown(userId, "trunk_throw", 10);
+        const throwTag = getCountdown(userId, "trunk_throw", timeCountdown);
         return message.reply(`⏳ | Bạn cần nghỉ ngơi một chút, quay lại sau ${throwTag}`)
             .then((msg) => setTimeout(() => msg.delete().catch(() => null), 3000));
     }
@@ -281,7 +282,7 @@ async function trunkHandler(args, message, inventory, invKey, userId) {
     });
     await setKey(invKey, inventory);
 
-    checkCooldown(userId, "trunk_throw", 10);
+    checkCooldown(userId, "trunk_throw", timeCountdown);
 
     // 3. Khởi tạo các biến thống kê
     let hitCount = 0;
@@ -388,6 +389,7 @@ async function trunkHandler(args, message, inventory, invKey, userId) {
     let lobby = (await getKey(battleKey)) || [];
     const targetMention = message.mentions.users.first();
     const target = targetMention || message.author;
+    const maxItem = 3;
 
     if (!lobby.includes(userId)) {
       return message.reply(
@@ -399,9 +401,9 @@ async function trunkHandler(args, message, inventory, invKey, userId) {
       return message.reply(
         `${errorIcon} | <@${target.id}> chưa tham gia trận đấu\` \n.battle invite để mời <@${target.id}> tham gia`,
       );
-    }
+    }   
 
-    if (checkCooldown(message.author.id, "trunk_use", 10)) {
+    if (checkCooldown(message.author.id, "trunk_use", 30)) {
       return message
         .reply(
           "⏳ | Bạn đang thao tác quá nhanh! Vui lòng đợi vài giây để tiếp tục sử dụng.",
@@ -420,7 +422,13 @@ async function trunkHandler(args, message, inventory, invKey, userId) {
 
     if (isNaN(amount) || amount <= 0) {
       return message.reply(
-        `${errorIcon} | Số lượng vật phẩm muốn ném không hợp lệ.`,
+        `${errorIcon} | Số lượng vật phẩm không hợp lệ.`,
+      );
+    }
+
+    if(amount > maxItem){
+        return message.reply(
+        `${errorIcon} | Số lượng vật phẩm không được quá ${maxItem}.`,
       );
     }
 
