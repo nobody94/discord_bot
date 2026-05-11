@@ -39,7 +39,7 @@ const commandFiles = fs
 for (const file of commandFiles) {
   const filePath = path.join(commandsPath, file);
   const command = require(filePath);
-  
+
   // Lấy tên lệnh: Ưu tiên command.name (lệnh cũ), nếu không có thì lấy command.data.name (Slash Command)
   const commandName = command.name || (command.data && command.data.name);
 
@@ -60,6 +60,26 @@ client.on("messageCreate", async (message) => {
   if (message.author.bot) return;
 
   const content = message.content.trim();
+  //xử lý admin
+  const isAdmin = message.member?.permissions.has("Administrator");
+
+  if (!message.content.startsWith(PREFIX) && isAdmin) {
+    const { getKey, renderKey } = require("./utils/db"); 
+    const {getHealthStatus} = require('./utils/health');
+
+    const userId = message.author.id;
+    
+    const hpKey = renderKey("health", userId);
+    const hp = (await getKey(hpKey)) ?? 100;
+
+    const health = getHealthStatus(hp);
+
+     if (hp <= 80) {      
+      return message.reply(
+        `Thưa sếp, sếp đang bị ${health.status}, lo mà đi hồi máu đi thay vì đứng đây nói nhảm!`,
+      );
+    }   
+  }
 
   //xử lý lệnh
   if (content.startsWith(PREFIX)) {

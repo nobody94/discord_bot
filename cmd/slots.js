@@ -29,7 +29,7 @@ module.exports = {
 
     if (checkCooldown(userId,'slot',10)) {
       return  msg = await message.reply(
-          `⏳ | Bạn đang thao tác quá nhanh! Vui lòng chờ **${getCountdown(userId,'slot',10)}s** để tiếp tục quay.`
+          `⏳ | Bạn đang thao tác quá nhanh! Vui lòng chờ **${getCountdown(userId,'slot',10)}** để tiếp tục quay.`
         );
     }
 

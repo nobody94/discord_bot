@@ -64,7 +64,7 @@ module.exports = {
 
         // --- KIỂM TRA COOLDOWN ---
         if (checkCooldown(message.author.id, 'cauca', 10)) {
-            return message.reply(`${errorIcon} | Chờ **${getCountdown(message.author.id, this.name, 10)} giây** nữa để thả cần!`);
+            return message.reply(`${errorIcon} | Chờ **${getCountdown(message.author.id, this.name, 10)}** để thả cần!`).then(msg => setTimeout(() => msg.delete().catch(() => null), 2000));;
         }
 
         // 4. KIỂM TRA ĐỒ CÂU TRONG TÚI

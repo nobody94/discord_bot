@@ -30,11 +30,7 @@ module.exports = {
 
             if (amount <= 0) {
                 return message.reply(`${errorIcon} | Số lượng mua phải lớn hơn 0!`);
-            }
-
-            if (item.maxAmount && amount > item.maxAmount) {
-                return message.reply(`${errorIcon} | Số lượng mua không được quá ${item.maxAmount}!`);
-            }
+            }            
 
             const totalPrice = item.price * amount;
             const userBalance = await getBalance(userId, item.currency);
@@ -78,7 +74,7 @@ module.exports = {
         }
 
         const availableItems = Object.entries(SHOP_ITEMS).filter(([id, item]) => !item.hideFromShop);
-        const itemsPerPage = 5;
+        const itemsPerPage = 10;
         const totalPages = Math.ceil(availableItems.length / itemsPerPage);
         let currentPage = 0;
 
