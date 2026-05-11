@@ -41,10 +41,10 @@ async function updateHP(message,userId, damage) {
 }
 
 function getHealthStatus(hp) {
-  if (hp <= 0) return { status: "💔 **GỤC NGÃ**", muteTime: 180000 }; // 3 phút
-  if (hp <= 20) return { status: "💘 **NGUY KỊCH**", muteTime: 120000 }; // 2 phút
-  if (hp <= 80) return { status: "❤️‍🩹 **CHẤN THƯƠNG**", muteTime: 60000 }; // 1 phút
-  return { status: "🏋️‍♂️ **Khỏe mạnh**", muteTime: 0 };
+  if (hp <= 0) return { status: "💔 **GỤC NGÃ**", muteTime: 180000,fee:100000 }; // 3 phút
+  if (hp <= 20) return { status: "💘 **NGUY KỊCH**", muteTime: 120000,fee:50000 }; // 2 phút
+  if (hp <= 80) return { status: "❤️‍🩹 **CHẤN THƯƠNG**", muteTime: 60000,fee:20000 }; // 1 phút
+  return { status: "🏋️‍♂️ **Khỏe mạnh**", muteTime: 0,fee:0 };
 }
 
 module.exports = {

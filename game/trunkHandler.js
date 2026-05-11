@@ -5,6 +5,7 @@ const { SHOP_ITEMS, type, gifImages } = require("../utils/blackmarket.js");
 const { errorIcon, verifyIcon } = require("../utils/icon.js");
 const { updateHP, getHealthStatus } = require("../utils/health.js");
 const { checkCooldown,getRemaining,getCountdown } = require("../utils/cooldown");
+const { handleTransaction } = require("../utils/transaction.js");
 
 async function trunkHandler(args, message, inventory, invKey, userId) {
   if (args[0] === "give") {
@@ -192,17 +193,33 @@ async function trunkHandler(args, message, inventory, invKey, userId) {
     }
 
     const currentHP = (await getKey(renderKey("health", target.id))) ?? 100;
-    const healthInfo = getHealthStatus(currentHP);
-    const dynamicCooldown =
-      healthInfo.muteTime > 0 ? (healthInfo.muteTime / 1000) + 30 : 10;
 
-    const remaining = getRemaining(userId, "trunk_throw", dynamicCooldown);
-    if (remaining > 0) {
-      const timeTag = getCountdown(userId, "trunk_throw", dynamicCooldown); 
-      const msg = dynamicCooldown > 10 ?`🛡️ | <@${target.id}> đang có khiên bảo vệ, quay lại sau ${timeTag}` :`⏳ | Bạn cần nghỉ ngơi, quay lại sau ${timeTag}`
-      return message
-        .reply(msg)
-        .then((msg) => setTimeout(() => msg.delete().catch(() => null), 3000));
+    if(currentHP<=0){
+        return message.reply(
+        `${errorIcon} | <@${target.id}> đang bị gục hãy đợi <@${target.id}> hồi phục rồi ném tiếp`,
+      );
+    }
+   
+    const healthInfo = getHealthStatus(currentHP);
+
+        // Nếu đối phương đang bị chấn thương (muteTime > 0), họ có "khiên" bảo vệ
+    if (healthInfo.muteTime > 0) {       
+        const shieldCooldown = (healthInfo.muteTime / 1000) + 60;
+        const shieldRemaining = getRemaining(target.id, "trunk_shield", shieldCooldown); 
+        // Lưu ý: Bạn nên dùng một key riêng như "trunk_shield" gắn với target.id
+
+        if (shieldRemaining > 0) {
+            const shieldTag = getCountdown(target.id, "trunk_shield", shieldCooldown);
+            return message.reply(`🛡️ | <@${target.id}> đang trong trạng thái hồi phục (có khiên bảo vệ), quay lại sau ${shieldTag}`)
+                .then((msg) => setTimeout(() => msg.delete().catch(() => null), 3000));
+        }
+    }
+
+    const personalRemaining = getRemaining(userId, "trunk_throw", 10);
+    if (personalRemaining > 0) {
+        const throwTag = getCountdown(userId, "trunk_throw", 10);
+        return message.reply(`⏳ | Bạn cần nghỉ ngơi một chút, quay lại sau ${throwTag}`)
+            .then((msg) => setTimeout(() => msg.delete().catch(() => null), 3000));
     }
 
     const itemId = args[2];
@@ -264,7 +281,7 @@ async function trunkHandler(args, message, inventory, invKey, userId) {
     });
     await setKey(invKey, inventory);
 
-    checkCooldown(userId, "trunk_throw", dynamicCooldown);
+    checkCooldown(userId, "trunk_throw", 10);
 
     // 3. Khởi tạo các biến thống kê
     let hitCount = 0;
@@ -303,6 +320,12 @@ async function trunkHandler(args, message, inventory, invKey, userId) {
 
     if (totalDamageToTarget > 0) {
       finalTargetHP = await updateHP(message, target.id, totalDamageToTarget);
+        const newHealthInfo = getHealthStatus(finalTargetHP);
+        if (newHealthInfo.muteTime > 0) {
+            const newShieldTime = (newHealthInfo.muteTime / 1000) + 30;
+            // Kích hoạt khiên cho người bị ném
+            checkCooldown(target.id, "trunk_shield", newShieldTime); 
+        }
     }
 
     if (totalDamageToSelf > 0) {

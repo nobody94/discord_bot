@@ -8,6 +8,7 @@ const {
 const { getKey, setKey, renderKey } = require("../utils/db");
 const { errorIcon, verifyIcon } = require("../utils/icon.js");
 const { getBalance, removeMoney, getIcon } = require("../utils/currency");
+const {getHealthStatus} = require('../utils/health.js');
 
 module.exports = {
   name: "battle",
@@ -18,6 +19,7 @@ module.exports = {
     const userId = message.author.id;
     const currencyType = "mora";
     const fee = 10000;
+    let totalFee = fee;
 
     const battleKey = renderKey("battle", guildId);
     let lobby = (await getKey(battleKey)) || [];
@@ -54,22 +56,38 @@ module.exports = {
       if (!lobby.includes(userId)) {
         return message.reply("Bạn chưa tham gia trận đấu này.");
       }
+      const healhKey = renderKey("health", userId);
+      const currentHP = (await getKey(healhKey)) ?? 100;
+      const status = getHealthStatus(currentHP);
+
+      let hpMsg = '';
+      let feeMsg = '';
+
+      if(status.fee > 0){        
+        totalFee += status.fee;
+        hpMsg += ` và mất thêm ${status.fee.toLocaleString}${getIcon(currencyType)} để hồi phục cho khỏe`;   
+        feeMsg += ` và phí hồi phục sức khỏe:${status.fee.toLocaleString}${getIcon(currencyType)}`     
+      }
 
       const userBalance = await getBalance(userId, currencyType);
-
-      if (userBalance < fee) {
+      
+      if (userBalance < totalFee) {
         return message.reply(
-          `Bạn không đủ ${fee.toLocaleString()}${getIcon(currencyType)} để rời trận đấu.`,
+          `Bạn không đủ ${fee.toLocaleString()}${getIcon(currencyType)}${feeMsg} để rời trận đấu.`,
         );
       }
 
-      const success = await removeMoney(userId, fee, currencyType);
+      if(status.fee > 0){
+        await setKey(healhKey, 100);
+      }
+
+      const success = await removeMoney(userId, totalFee, currencyType);
 
       if (success) {
         lobby = lobby.filter((id) => id !== userId);
         await setKey(battleKey, lobby);
         return message.reply(
-          `🏃 | **${message.author.username}** đã rời khỏi trận đấu.`,
+          `🏃 | **${message.author.username}** đã rời khỏi trận đấu.\nBạn mất ${fee.toLocaleString()}${getIcon(currencyType)}${hpMsg}`,
         );
       } else {
         return message.reply(
