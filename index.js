@@ -5,6 +5,7 @@ const {
   GatewayIntentBits,
   InteractionType,
   Events,
+  EmbedBuilder
 } = require("discord.js");
 const fs = require("fs");
 const path = require("path");
@@ -73,11 +74,20 @@ client.on("messageCreate", async (message) => {
     const hp = (await getKey(hpKey)) ?? 100;
 
     const health = getHealthStatus(hp);
+    const images = [
+      "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3MzdiZnNreWZmenZzaW5sNTByYjd6ZmkxMzd5anRodXVrMDNvM2p2bCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/GzpfQyP0Et07u1b9nJ/giphy.gif",
+      'https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3MzdiZnNreWZmenZzaW5sNTByYjd6ZmkxMzd5anRodXVrMDNvM2p2bCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/LluBvfACrV1BQNukWm/giphy.gif'
+    ]
+    const gifUrl = images[Math.floor(Math.random() * images.length)];
+    const embed = new EmbedBuilder().setTitle(
+        `${message.author.name} đã bị tổn thương`,
+      )
+      .setColor(0xe74c3c)
+      .setDescription(`Thưa sếp, sếp đang bị ${health.status}, lo mà đi hồi máu đi thay vì đứng đây nói nhảm!`)
+      .setImage(gifUrl);
 
      if (hp <= 80) {      
-      return message.reply(
-        `Thưa sếp, sếp đang bị ${health.status}, lo mà đi hồi máu đi thay vì đứng đây nói nhảm!`,
-      );
+      return message.reply({ embeds: [embed] });
     }   
   }
 
