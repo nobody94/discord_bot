@@ -6,7 +6,7 @@ const { renderKey, setKey, getKey } = require("../utils/db");
 
 module.exports = {
     name: 'blackmarket',
-    aliases: ['bmk', 'choden'],
+    aliases: ['bmk', 'choden','cd'],
     description: 'Xem danh sách vật phẩm theo trang.',
     async execute(message,args) {
         if (args[0]?.toLowerCase() === 'buy') {

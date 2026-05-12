@@ -12,6 +12,7 @@ const { trunkHandler } = require("../game/trunkHandler.js");
 
 module.exports = {
   name: "trunk",
+  aliases: ['kho'],
   description: "Xem các vật phẩm bạn đang sở hữu với tính năng phân trang.",
   async execute(message, args) {
     const targetUser = message.mentions.users.first() || message.author;
@@ -22,7 +23,7 @@ module.exports = {
 
     if (
       args[0] &&
-      ["sell", "give", "throw", "use"].includes(args[0].toLowerCase())
+      ["sell", "give", "throw","nem", "use"].includes(args[0].toLowerCase())
     ) {
       const authorId = message.author.id;
       const authorBaloKey = renderKey("trunk", authorId);

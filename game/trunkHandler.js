@@ -1,10 +1,14 @@
 const { EmbedBuilder } = require("discord.js");
 const { getKey, renderKey, setKey } = require("../utils/db");
-const { getIcon, addMoney, checkPay } = require("../utils/currency.js");
+const { getIcon, addMoney,removeMoney, checkPay } = require("../utils/currency.js");
 const { SHOP_ITEMS, type, gifImages } = require("../utils/blackmarket.js");
 const { errorIcon, verifyIcon } = require("../utils/icon.js");
 const { updateHP, getHealthStatus } = require("../utils/health.js");
-const { checkCooldown,getRemaining,getCountdown } = require("../utils/cooldown");
+const {
+  checkCooldown,
+  getRemaining,
+  getCountdown,
+} = require("../utils/cooldown");
 const { handleTransaction } = require("../utils/transaction.js");
 
 async function trunkHandler(args, message, inventory, invKey, userId) {
@@ -169,11 +173,13 @@ async function trunkHandler(args, message, inventory, invKey, userId) {
   }
 
   // --- LOGIC NÉM ĐỒ (THROW) ---
-  if (args[0] === "throw") {
+  if (args[0] === "throw" || args[0] === "nem") {
     const guildId = message.guild.id;
     const battleKey = renderKey("battle", guildId);
     let lobby = (await getKey(battleKey)) || [];
     const timeCountdown = 30;
+    const rareId = "cuc";
+    const rareItem = SHOP_ITEMS[rareId] || { name: "Cức", icon: "💩" };
 
     const target = message.mentions.users.first();
 
@@ -193,34 +199,49 @@ async function trunkHandler(args, message, inventory, invKey, userId) {
       );
     }
 
-    const currentHP = (await getKey(renderKey("health", target.id))) ?? 100;
+    const currentTargetgHP =
+      (await getKey(renderKey("health", target.id))) ?? 100;
+    const currentHP = (await getKey(renderKey("health", userId))) ?? 100;
 
-    if(currentHP<=0){
-        return message.reply(
+    if (currentHP <= 0) {
+      return message.reply(
+        `${errorIcon} |  Bạn đang bị gục hãy đợi đồng đội tới cứu rồi ném tiếp`,
+      );
+    }
+
+    if (currentTargetgHP <= 0) {
+      return message.reply(
         `${errorIcon} | <@${target.id}> đang bị gục hãy đợi <@${target.id}> hồi phục rồi ném tiếp`,
       );
     }
-   
-    const healthInfo = getHealthStatus(currentHP);
 
-        // Nếu đối phương đang bị chấn thương (muteTime > 0), họ có "khiên" bảo vệ
-    if (healthInfo.muteTime > 0) {       
-        const shieldCooldown = (healthInfo.muteTime / 1000) + 60;
-        const shieldRemaining = getRemaining(target.id, "trunk_shield", shieldCooldown); 
-        // Lưu ý: Bạn nên dùng một key riêng như "trunk_shield" gắn với target.id
+    //khiên
+    const shieldCooldown = 60;
+    const shieldRemaining = getRemaining(
+      target.id,
+      "trunk_shield",
+      shieldCooldown,
+    );
 
-        if (shieldRemaining > 0) {
-            const shieldTag = getCountdown(target.id, "trunk_shield", shieldCooldown);
-            return message.reply(`🛡️ | <@${target.id}> đang trong trạng thái hồi phục (có khiên bảo vệ), quay lại sau ${shieldTag}`)
-                .then((msg) => setTimeout(() => msg.delete().catch(() => null), 3000));
-        }
+    if (shieldRemaining > 0) {
+      const shieldTag = getCountdown(target.id, "trunk_shield", shieldCooldown);
+      return message
+        .reply(
+          `🛡️ | <@${target.id}> đang trong trạng thái hồi phục (có khiên bảo vệ), quay lại sau ${shieldTag}`,
+        )
+        .then((msg) => setTimeout(() => msg.delete().catch(() => null), 3000));
     }
 
-    const personalRemaining = getRemaining(userId, "trunk_throw", timeCountdown);
+    const personalRemaining = getRemaining(
+      userId,
+      "trunk_throw",
+      timeCountdown,
+    );
     if (personalRemaining > 0) {
-        const throwTag = getCountdown(userId, "trunk_throw", timeCountdown);
-        return message.reply(`⏳ | Bạn cần nghỉ ngơi một chút, quay lại sau ${throwTag}`)
-            .then((msg) => setTimeout(() => msg.delete().catch(() => null), 3000));
+      const throwTag = getCountdown(userId, "trunk_throw", timeCountdown);
+      return message
+        .reply(`⏳ | Bạn cần nghỉ ngơi một chút, quay lại sau ${throwTag}`)
+        .then((msg) => setTimeout(() => msg.delete().catch(() => null), 3000));
     }
 
     const itemId = args[2];
@@ -293,6 +314,8 @@ async function trunkHandler(args, message, inventory, invKey, userId) {
 
     const missRate = 0.15; // 15% né
     const reflectRate = 0.1; // 10% phản đòn
+    let totalRareReceived = 0; // Biến đánh dấu nếu nhận được đồ hiếm
+    const rareChance = 0.05; // 5% tỉ lệ nhận được
 
     // 4. Vòng lặp tính toán cho TỪNG vật phẩm
     for (let i = 0; i < amount; i++) {
@@ -300,7 +323,6 @@ async function trunkHandler(args, message, inventory, invKey, userId) {
       const damage =
         Math.floor(Math.random() * (item.maxDmg - item.minDmg + 1)) +
         item.minDmg;
-
       if (roll < missRate) {
         // Hụt
         missCount++;
@@ -310,9 +332,27 @@ async function trunkHandler(args, message, inventory, invKey, userId) {
         totalDamageToSelf += damage;
       } else {
         // Trúng
+        if (Math.random() < rareChance) {
+          // Nếu trúng 5%, random tiếp số lượng từ 1 đến 3
+          const randomAmount = Math.floor(Math.random() * 3) + 1;
+          totalRareReceived += randomAmount;
+        }
         hitCount++;
         totalDamageToTarget += damage;
       }
+    }
+
+    // --- LOGIC TRAO VẬT PHẨM HIẾM ---
+    if (totalRareReceived > 0) {
+      const targetInvKey = renderKey("trunk", target.id);
+      let targetInventory = (await getKey(targetInvKey)) || [];
+
+      // Thêm số lượng vật phẩm tương ứng vào kho đồ
+      for (let i = 0; i < totalRareReceived; i++) {
+        targetInventory.push(rareId);
+      }
+
+      await setKey(targetInvKey, targetInventory);
     }
 
     // 5. Cập nhật HP cho cả hai (nếu có sát thương)
@@ -321,12 +361,33 @@ async function trunkHandler(args, message, inventory, invKey, userId) {
 
     if (totalDamageToTarget > 0) {
       finalTargetHP = await updateHP(message, target.id, totalDamageToTarget);
-        const newHealthInfo = getHealthStatus(finalTargetHP);
-        if (newHealthInfo.muteTime > 0) {
-            const newShieldTime = (newHealthInfo.muteTime / 1000) + 30;
-            // Kích hoạt khiên cho người bị ném
-            checkCooldown(target.id, "trunk_shield", newShieldTime); 
-        }
+      const newHealthInfo = getHealthStatus(finalTargetHP);
+      const newShieldTime =
+        newHealthInfo.muteTime > 0
+          ? newHealthInfo.muteTime / 1000 + shieldCooldown
+          : 10;
+      checkCooldown(target.id, "trunk_shield", newShieldTime, true);
+
+      // Thiết lập bộ hẹn giờ tự động hồi sinh
+      if (finalTargetHP <= 0 && newHealthInfo.muteTime > 0) {
+        const revivalFee = 50000;
+        const revivalHP = 10;
+
+        setTimeout(async () => {
+          // Kiểm tra lại HP lần cuối trước khi hành động
+          const currentHP = await getKey(renderKey("health", target.id));
+
+          if (currentHP <= 0) {
+            // Thực hiện trừ tiền và set HP về 10
+            await removeMoney(target.id, -revivalFee, "mora");
+            await setKey(renderKey("health", target.id), revivalHP);
+
+            message.channel.send(
+              `🏥 **Bệnh viện:** <@${target.id}> đã hết thời gian hôn mê và trở nên tỉnh táp.\n💰 Phí cấp cứu: **${revivalFee.toLocaleString()}** ${getIcon("mora")} | ❤️ HP: **${revivalHP}**`,
+            );
+          }
+        }, newHealthInfo.muteTime);
+      }
     }
 
     if (totalDamageToSelf > 0) {
@@ -343,13 +404,19 @@ async function trunkHandler(args, message, inventory, invKey, userId) {
     let resultMsg = `— **<@${target.id}>**: ${finalTargetHP}/100 [${targetInfo.status}]\n`;
 
     if (targetInfo.muteTime > 0) {
-      resultMsg += `> *Đối phương đã bị choáng và không thể chat trong ${targetInfo.muteTime / 60000} phút.*\n`;
+      // resultMsg += `> *Đối phương đã bị choáng và không thể chat trong ${targetInfo.muteTime / 60000} phút.*\n`;
+      resultMsg += `> *Đối phương đã bị choáng và không thể chat trong ${targetInfo.muteTime / 1000} s.*\n`;
+    }
+
+    if (totalRareReceived > 0) {
+      resultMsg += `>  <@${target.id}> đã nhận được **${totalRareReceived}x ${rareItem.icon} ${rareItem.name}**!\n`;
     }
 
     if (totalDamageToSelf > 0) {
       resultMsg += `— **Bản thân**: ${finalSelfHP}/100 [${selfInfo.status}]\n`;
       if (selfInfo.muteTime > 0) {
-        resultMsg += `> *Bạn cũng bị chấn thương và bị cấm chat trong ${selfInfo.muteTime / 60000} phút!*`;
+        // resultMsg += `> *Bạn cũng bị chấn thương và bị cấm chat trong ${selfInfo.muteTime / 60000} phút!*`;
+        resultMsg += `> *Bạn cũng bị chấn thương và bị cấm chat trong ${selfInfo.muteTime / 1000} s!*`;
       }
     }
 
@@ -371,9 +438,17 @@ async function trunkHandler(args, message, inventory, invKey, userId) {
       )
       .setColor(0xe74c3c)
       .addFields(
-        { name: "✅ Trúng", value: `${hitCount}`, inline: true },
+        {
+          name: "✅ Trúng",
+          value: `${hitCount}${totalDamageToTarget > 0 ? ` -${totalDamageToTarget}HP` : ""}`,
+          inline: true,
+        },
         { name: "💨 Trượt", value: `${missCount}`, inline: true },
-        { name: "💥 Phản dmg", value: `${reflectCount}`, inline: true },
+        {
+          name: "💥 Phản dmg",
+          value: `${reflectCount}${totalDamageToSelf > 0 ? ` -${totalDamageToSelf}HP` : ""}`,
+          inline: true,
+        },
         { name: "📊 Kết quả", value: `${resultMsg}`, inline: true },
       )
       .setImage(gifUrl)
@@ -389,7 +464,7 @@ async function trunkHandler(args, message, inventory, invKey, userId) {
     let lobby = (await getKey(battleKey)) || [];
     const targetMention = message.mentions.users.first();
     const target = targetMention || message.author;
-    const maxItem = 3;
+    let maxItem = 3;
 
     if (!lobby.includes(userId)) {
       return message.reply(
@@ -401,14 +476,6 @@ async function trunkHandler(args, message, inventory, invKey, userId) {
       return message.reply(
         `${errorIcon} | <@${target.id}> chưa tham gia trận đấu\` \n.battle invite để mời <@${target.id}> tham gia`,
       );
-    }   
-
-    if (checkCooldown(message.author.id, "trunk_use", 30)) {
-      return message
-        .reply(
-          "⏳ | Bạn đang thao tác quá nhanh! Vui lòng đợi vài giây để tiếp tục sử dụng.",
-        )
-        .then((msg) => setTimeout(() => msg.delete().catch(() => null), 2000));
     }
 
     const itemId = targetMention ? args[2] : args[1];
@@ -421,21 +488,23 @@ async function trunkHandler(args, message, inventory, invKey, userId) {
     }
 
     if (isNaN(amount) || amount <= 0) {
-      return message.reply(
-        `${errorIcon} | Số lượng vật phẩm không hợp lệ.`,
-      );
-    }
-
-    if(amount > maxItem){
-        return message.reply(
-        `${errorIcon} | Số lượng vật phẩm không được quá ${maxItem}.`,
-      );
+      return message.reply(`${errorIcon} | Số lượng vật phẩm không hợp lệ.`);
     }
 
     const item = SHOP_ITEMS[itemId];
 
     if (!item) {
       return message.reply(`${errorIcon} | Vật phẩm này không tồn tại.`);
+    }
+
+    if (item.type == type.revive) {
+      maxItem = 1;
+    }
+
+    if (amount > maxItem) {
+      return message.reply(
+        `${errorIcon} | Số lượng vật phẩm không được quá ${maxItem}.`,
+      );
     }
 
     if (item.type != type.healing && item.type != type.revive) {
@@ -456,6 +525,26 @@ async function trunkHandler(args, message, inventory, invKey, userId) {
       return message.reply(
         `${errorIcon} | Bạn không thể tự hồi sinh chính mình`,
       );
+    }
+    const hpKey = renderKey("health", target.id);
+    let checkHP = (await getKey(hpKey)) ?? 100;
+
+    if (isSelf && hpKey <= 0) {
+      return message.reply(`${errorIcon} | Bạn không thể tự hồi phục`);
+    }
+
+    if (!isSelf && hpKey <= 0 && item.type != type.revive) {
+      return message.reply(
+        `${errorIcon} | <@${target.id}> đang gục ngã cần được hồi sinh trước`,
+      );
+    }
+
+    if (checkCooldown(message.author.id, "trunk_use", 30)) {
+      return message
+        .reply(
+          "⏳ | Bạn đang thao tác quá nhanh! Vui lòng đợi vài giây để tiếp tục sử dụng.",
+        )
+        .then((msg) => setTimeout(() => msg.delete().catch(() => null), 2000));
     }
 
     const targetHPKey = renderKey("health", target.id);
@@ -499,7 +588,7 @@ async function trunkHandler(args, message, inventory, invKey, userId) {
     let muteNotice = "";
     const healthInfo = getHealthStatus(targetHP);
 
-    if (targetHP > 80) {
+    if (item.type === type.revive || targetHP > 80) {
       try {
         const member = await message.guild.members.fetch(target.id);
         if (member && member.communicationDisabledUntilTimestamp > Date.now()) {

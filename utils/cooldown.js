@@ -1,11 +1,11 @@
 const cooldowns = new Map();
 
 module.exports = {
-  checkCooldown: (userId, commandName, seconds) => {
+  checkCooldown: (userId, commandName, seconds, force = false) => {
     const key = `${userId}-${commandName}`;
 
     // Nếu key đã tồn tại trong Map, nghĩa là đang bị cooldown
-    if (cooldowns.has(key)) {
+    if (cooldowns.has(key) && !force) {
       return true;
     }
 
