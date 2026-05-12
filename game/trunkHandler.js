@@ -364,7 +364,7 @@ async function trunkHandler(args, message, inventory, invKey, userId) {
       const newHealthInfo = getHealthStatus(finalTargetHP);
       const newShieldTime =
         newHealthInfo.muteTime > 0
-          ? newHealthInfo.muteTime / 1000 + shieldCooldown
+          ? (newHealthInfo.muteTime / 1000) + shieldCooldown
           : 10;
       checkCooldown(target.id, "trunk_shield", newShieldTime, true);
 
@@ -404,8 +404,7 @@ async function trunkHandler(args, message, inventory, invKey, userId) {
     let resultMsg = `— **<@${target.id}>**: ${finalTargetHP}/100 [${targetInfo.status}]\n`;
 
     if (targetInfo.muteTime > 0) {
-      // resultMsg += `> *Đối phương đã bị choáng và không thể chat trong ${targetInfo.muteTime / 60000} phút.*\n`;
-      resultMsg += `> *Đối phương đã bị choáng và không thể chat trong ${targetInfo.muteTime / 1000} s.*\n`;
+      resultMsg += `> *Đối phương đã bị choáng và không thể chat trong ${targetInfo.muteTime / 60000} phút.*\n`;
     }
 
     if (totalRareReceived > 0) {
@@ -415,8 +414,7 @@ async function trunkHandler(args, message, inventory, invKey, userId) {
     if (totalDamageToSelf > 0) {
       resultMsg += `— **Bản thân**: ${finalSelfHP}/100 [${selfInfo.status}]\n`;
       if (selfInfo.muteTime > 0) {
-        // resultMsg += `> *Bạn cũng bị chấn thương và bị cấm chat trong ${selfInfo.muteTime / 60000} phút!*`;
-        resultMsg += `> *Bạn cũng bị chấn thương và bị cấm chat trong ${selfInfo.muteTime / 1000} s!*`;
+        resultMsg += `> *Bạn cũng bị chấn thương và bị cấm chat trong ${selfInfo.muteTime / 60000} phút!*`;
       }
     }
 

@@ -65,8 +65,8 @@ module.exports = {
 
       if(status.fee > 0){        
         totalFee += status.fee;
-        hpMsg += ` và mất thêm ${status.fee.toLocaleString}${getIcon(currencyType)} để hồi phục cho khỏe`;   
-        feeMsg += ` và phí hồi phục sức khỏe:${status.fee.toLocaleString}${getIcon(currencyType)}`     
+        hpMsg += ` và mất thêm ${status.fee.toLocaleString()}${getIcon(currencyType)} để hồi phục cho khỏe`;   
+        feeMsg += ` và phí hồi phục sức khỏe:${status.fee.toLocaleString()}${getIcon(currencyType)}`     
       }
 
       const userBalance = await getBalance(userId, currencyType);
