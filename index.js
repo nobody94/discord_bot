@@ -76,13 +76,14 @@ client.on("messageCreate", async (message) => {
     const health = getHealthStatus(hp);
     const images = [
       "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3MzdiZnNreWZmenZzaW5sNTByYjd6ZmkxMzd5anRodXVrMDNvM2p2bCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/GzpfQyP0Et07u1b9nJ/giphy.gif",
-      'https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3MzdiZnNreWZmenZzaW5sNTByYjd6ZmkxMzd5anRodXVrMDNvM2p2bCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/LluBvfACrV1BQNukWm/giphy.gif'
+      'https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3MzdiZnNreWZmenZzaW5sNTByYjd6ZmkxMzd5anRodXVrMDNvM2p2bCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/LluBvfACrV1BQNukWm/giphy.gif',
+      "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3czR3ZG1qNGg3cXprbGljbDMxajJ1OGlrYnk2ejk0c2JsaHlyZjZ2eiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/o0jmYOBG4KMfnXPlJX/giphy.gif"
     ]
     const gifUrl = images[Math.floor(Math.random() * images.length)];
     const embed = new EmbedBuilder().setTitle(
-        `${message.author.name} đã bị tổn thương`,
+        `${message.author.username} đã bị tổn thương`,
       )
-      .setColor(0xe74c3c)
+      .setColor('#8B8000')
       .setDescription(`Thưa sếp, sếp đang bị ${health.status}, lo mà đi hồi máu đi thay vì đứng đây nói nhảm!`)
       .setImage(gifUrl);
 
