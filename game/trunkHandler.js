@@ -1,6 +1,6 @@
 const { EmbedBuilder } = require("discord.js");
 const { getKey, renderKey, setKey } = require("../utils/db");
-const { getIcon, addMoney,removeMoney, checkPay } = require("../utils/currency.js");
+const { getIcon, addMoney, removeMoney, checkPay } = require("../utils/currency.js");
 const { SHOP_ITEMS, type, gifImages } = require("../utils/blackmarket.js");
 const { errorIcon, verifyIcon } = require("../utils/icon.js");
 const { updateHP, getHealthStatus } = require("../utils/health.js");
@@ -215,21 +215,16 @@ async function trunkHandler(args, message, inventory, invKey, userId) {
       );
     }
 
-    //khiên
-    const shieldCooldown = 60;
-    const shieldRemaining = getRemaining(
-      target.id,
-      "trunk_shield",
-      shieldCooldown,
-    );
+    const shieldKey = renderKey("shield", target.id);
+    const shieldExpiry = await getKey(shieldKey) || 0;
+    const currentTime = Date.now();
 
-    if (shieldRemaining > 0) {
-      const shieldTag = getCountdown(target.id, "trunk_shield", shieldCooldown);
-      return message
-        .reply(
-          `🛡️ | <@${target.id}> đang trong trạng thái hồi phục (có khiên bảo vệ), quay lại sau ${shieldTag}`,
-        )
-        .then((msg) => setTimeout(() => msg.delete().catch(() => null), 3000));
+    //khiên
+    if (shieldExpiry > currentTime) {
+      const remainingSeconds = Math.ceil((shieldExpiry - currentTime) / 1000);
+      return message.reply(
+        `🛡️ | <@${target.id}> đang có khiên bảo vệ, quay lại sau **${remainingSeconds}s**`
+      ).then((msg) => setTimeout(() => msg.delete().catch(() => null), 3000));
     }
 
     const personalRemaining = getRemaining(
@@ -303,7 +298,7 @@ async function trunkHandler(args, message, inventory, invKey, userId) {
     });
     await setKey(invKey, inventory);
 
-    checkCooldown(userId, "trunk_throw", timeCountdown);
+    // checkCooldown(userId, "trunk_throw", timeCountdown);
 
     // 3. Khởi tạo các biến thống kê
     let hitCount = 0;
@@ -361,12 +356,17 @@ async function trunkHandler(args, message, inventory, invKey, userId) {
 
     if (totalDamageToTarget > 0) {
       finalTargetHP = await updateHP(message, target.id, totalDamageToTarget);
+
       const newHealthInfo = getHealthStatus(finalTargetHP);
-      const newShieldTime =
-        newHealthInfo.muteTime > 0
-          ? (newHealthInfo.muteTime / 1000) + shieldCooldown
-          : 10;
-      checkCooldown(target.id, "trunk_shield", newShieldTime, true);
+      const shieldCooldown = 60;
+      let shieldDuration = shieldCooldown * 1000;
+
+      if (finalTargetHP <= 0) {
+        shieldDuration = (newHealthInfo.muteTime) + (shieldCooldown * 1000);
+      }
+
+      // LƯU KHIÊN VÀO DB
+      await setKey(renderKey("shield", target.id), Date.now() + shieldDuration);
 
       // Thiết lập bộ hẹn giờ tự động hồi sinh
       if (finalTargetHP <= 0 && newHealthInfo.muteTime > 0) {
@@ -586,6 +586,23 @@ async function trunkHandler(args, message, inventory, invKey, userId) {
     let muteNotice = "";
     const healthInfo = getHealthStatus(targetHP);
 
+    if (item.type === type.revive || targetHP > 0) {
+      try {
+        const member = await message.guild.members.fetch(target.id);
+        // Xóa trạng thái timeout trên Discord
+        if (member && member.communicationDisabledUntilTimestamp > Date.now()) {
+          await member.timeout(null);
+          muteNotice = `\n✨ **<@${target.id}>** đã tỉnh táo lại và có thể chat!`;
+        }
+        const shieldCooldown = 60;
+        let shieldDuration = shieldCooldown * 1000;
+        await setKey(renderKey("shield", target.id), Date.now() + shieldDuration);
+        muteNotice += `\n🛡️ **Hệ thống:** Kích hoạt khiên bảo vệ tạm thời (60s).`;
+      } catch (e) {
+        console.error("Không thể gỡ timeout:", e);
+      }
+    }
+
     if (item.type === type.revive || targetHP > 80) {
       try {
         const member = await message.guild.members.fetch(target.id);
@@ -593,14 +610,14 @@ async function trunkHandler(args, message, inventory, invKey, userId) {
           await member.timeout(null);
           muteNotice = `\n✨ **<@${target.id}>** đã tỉnh táo lại và có thể chat!`;
         }
-      } catch (e) {}
+      } catch (e) { }
     }
 
     const targetName = isSelf ? "bản thân" : `**<@${target.id}>**`;
     message.reply(
       `💉 Bạn đã sử dụng **${amount}x ${item.icon} ${item.name}** cho ${targetName}.\n` +
-        `💖 Tổng hồi phục: **+${actualHeal} HP**\n` +
-        `🩺 Trạng thái: ${healthInfo.status}${muteNotice}`,
+      `💖 Tổng hồi phục: **+${actualHeal} HP**\n` +
+      `🩺 Trạng thái: ${healthInfo.status}${muteNotice}`,
     );
 
     return true;
