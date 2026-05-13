@@ -298,7 +298,7 @@ async function trunkHandler(args, message, inventory, invKey, userId) {
     });
     await setKey(invKey, inventory);
 
-    // checkCooldown(userId, "trunk_throw", timeCountdown);
+    checkCooldown(userId, "trunk_throw", timeCountdown);
 
     // 3. Khởi tạo các biến thống kê
     let hitCount = 0;
@@ -358,15 +358,13 @@ async function trunkHandler(args, message, inventory, invKey, userId) {
       finalTargetHP = await updateHP(message, target.id, totalDamageToTarget);
 
       const newHealthInfo = getHealthStatus(finalTargetHP);
-      const shieldCooldown = 60;
-      let shieldDuration = shieldCooldown * 1000;
 
-      if (finalTargetHP <= 0) {
+      if (newHealthInfo.muteTime > 0) {
+        const shieldCooldown = 90;
+        let shieldDuration = shieldCooldown * 1000;
         shieldDuration = (newHealthInfo.muteTime) + (shieldCooldown * 1000);
+        await setKey(renderKey("shield", target.id), Date.now() + shieldDuration);
       }
-
-      // LƯU KHIÊN VÀO DB
-      await setKey(renderKey("shield", target.id), Date.now() + shieldDuration);
 
       // Thiết lập bộ hẹn giờ tự động hồi sinh
       if (finalTargetHP <= 0 && newHealthInfo.muteTime > 0) {
@@ -586,7 +584,7 @@ async function trunkHandler(args, message, inventory, invKey, userId) {
     let muteNotice = "";
     const healthInfo = getHealthStatus(targetHP);
 
-    if (item.type === type.revive || targetHP > 0) {
+    if (item.type === type.revive && targetHP > 0) {
       try {
         const member = await message.guild.members.fetch(target.id);
         // Xóa trạng thái timeout trên Discord
@@ -597,7 +595,7 @@ async function trunkHandler(args, message, inventory, invKey, userId) {
         const shieldCooldown = 60;
         let shieldDuration = shieldCooldown * 1000;
         await setKey(renderKey("shield", target.id), Date.now() + shieldDuration);
-        muteNotice += `\n🛡️ **Hệ thống:** Kích hoạt khiên bảo vệ tạm thời (60s).`;
+        muteNotice += `\n🛡️ **Hệ thống:** Kích hoạt khiên bảo vệ tạm thời.`;
       } catch (e) {
         console.error("Không thể gỡ timeout:", e);
       }
