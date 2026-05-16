@@ -458,7 +458,7 @@ const GenshinItem = {
   lech_1: {
     name: "Sự hồi sinh lạnh lẽo",
     price: 100,
-    sellPrice: 0,
+    sellPrice: 100,
     currency: primo,
     description: desc.legendary,
     icon: "<:qiqi:1492099086575472722>",
@@ -468,7 +468,7 @@ const GenshinItem = {
   lech_2: {
     name: "Nhà thực vật học",
     price: 100,
-    sellPrice: 0,
+    sellPrice: 100,
     currency: primo,
     description: desc.legendary,
     icon: "<:tighnari:1492099094779400233>",
@@ -478,7 +478,7 @@ const GenshinItem = {
   lech_3: {
     name: "Nhà chiêm tinh học",
     price: 100,
-    sellPrice: 0,
+    sellPrice: 100,
     currency: primo,
     description: desc.legendary,
     icon: "<:mona:1492099078618742894>",
@@ -488,7 +488,7 @@ const GenshinItem = {
   lech_4: {
     name: "Người mơ mộng thuần khiết",
     price: 100,
-    sellPrice: 0,
+    sellPrice: 100,
     currency: primo,
     description: desc.legendary,
     icon: "<:mizuki:1492099069953183836>",
@@ -498,7 +498,7 @@ const GenshinItem = {
   lech_5: {
     name: "Tia chớp sấm sét",
     price: 100,
-    sellPrice: 0,
+    sellPrice: 100,
     currency: primo,
     description: desc.legendary,
     icon: "<:keqing:1492099061384216626>",
@@ -508,7 +508,7 @@ const GenshinItem = {
   lech_6: {
     name: "Người bảo vệ của gió",
     price: 100,
-    sellPrice: 0,
+    sellPrice: 100,
     currency: primo,
     description: desc.legendary,
     icon: "<:jean:1492099053675090021>",
@@ -518,7 +518,7 @@ const GenshinItem = {
   lech_7: {
     name: "Sư tử lửa",
     price: 100,
-    sellPrice: 0,
+    sellPrice: 100,
     currency: primo,
     description: desc.legendary,
     icon: "<:dehya:1492099044221386832>",
@@ -528,7 +528,7 @@ const GenshinItem = {
   lech_8: {
     name: "Đại gia vườn nho",
     price: 100,
-    sellPrice: 0,
+    sellPrice: 100,
     currency: primo,
     description: desc.legendary,
     icon: "<:diluc:1492167088138354688>",
