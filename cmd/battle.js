@@ -100,10 +100,90 @@ module.exports = {
       if (lobby.length === 0) {
         return message.reply("🏟️ Trận chiến ném đồ đang chưa có ai tham gia.");
       }
-      const list = lobby.map((id, i) => `**${i + 1}.** <@${id}>`).join("\n");
-      return message.reply(
-        `🏟️ **Danh sách người đang tham gia trận chiến ném đồ:**\n${list}`,
-      );
+
+      const itemsPerPage = 10; 
+      const totalPages = Math.ceil(lobby.length / itemsPerPage);
+      let currentPage = 0;
+
+      // Hàm tạo Embed danh sách dựa trên số trang hiện tại
+      const generateEmbed = (page) => {
+        const start = page * itemsPerPage;
+        const end = start + itemsPerPage;
+        const pageItems = lobby.slice(start, end);
+
+        const listContent = pageItems
+          .map((id, index) => `**${start + index + 1}.** <@${id}>`)
+          .join("\n");
+
+        return new EmbedBuilder()
+          .setTitle("🏟️ DANH SÁCH THÀNH VIÊN THAM CHIẾN")
+          .setDescription(`Dưới đây là danh sách những người đang ở trong trận đấu:\n\n${listContent}`)
+          .setColor(0x3498db)
+          .setFooter({ text: `Trang ${page + 1}/${totalPages} • Tổng số: ${lobby.length} người` })
+          .setTimestamp();
+      };
+
+      // Hàm tạo các nút điều hướng Trang
+      const generateButtons = (page) => {
+        return new ActionRowBuilder().addComponents(
+          new ButtonBuilder()
+            .setCustomId("prev_page")
+            .setLabel("Trang trước")
+            .setStyle(ButtonStyle.Primary)
+            .setEmoji("⬅️")
+            .setDisabled(page === 0), // Vô hiệu hóa nếu ở trang đầu
+          new ButtonBuilder()
+            .setCustomId("next_page")
+            .setLabel("Trang sau")
+            .setStyle(ButtonStyle.Primary)
+            .setEmoji("➡️")
+            .setDisabled(page === totalPages - 1) // Vô hiệu hóa nếu ở trang cuối
+        );
+      };
+
+      // Gửi tin nhắn danh sách trang đầu tiên
+      const listMessage = await message.reply({
+        embeds: [generateEmbed(currentPage)],
+        components: totalPages > 1 ? [generateButtons(currentPage)] : [], // Chỉ hiện nút nếu tổng trang > 1
+      });
+
+      if (totalPages <= 1) return; // Nếu chỉ có 1 trang thì không cần tạo bộ lắng nghe nút bấm
+
+      // Tạo bộ thu thập nút bấm (Collector)
+      const collector = listMessage.createMessageComponentCollector({
+        componentType: ComponentType.Button,
+        time: 120000, // Bộ nút tồn tại hoạt động trong 2 phút
+      });
+
+      collector.on("collect", async (i) => {
+        // Tùy chọn bảo mật: Chỉ cho phép người gõ lệnh chuyển trang, tránh người khác bấm phá
+        if (i.user.id !== message.author.id) {
+          return i.reply({ content: "❌ Chỉ người dùng lệnh mới có quyền chuyển trang!", ephemeral: true });
+        }
+
+        if (i.customId === "prev_page" && currentPage > 0) {
+          currentPage--;
+        } else if (i.customId === "next_page" && currentPage < totalPages - 1) {
+          currentPage++;
+        }
+
+        // Cập nhật lại giao diện trang mới
+        await i.update({
+          embeds: [generateEmbed(currentPage)],
+          components: [generateButtons(currentPage)],
+        });
+      });
+
+      // Xử lý khi hết thời gian 2 phút (Khóa nút để tiết kiệm tài nguyên bot)
+      collector.on("end", async () => {
+        const disabledRow = new ActionRowBuilder().addComponents(
+          new ButtonBuilder().setCustomId("prev").setLabel("Trang trước").setStyle(ButtonStyle.Secondary).setDisabled(true),
+          new ButtonBuilder().setCustomId("next").setLabel("Trang sau").setStyle(ButtonStyle.Secondary).setDisabled(true)
+        );
+        await listMessage.edit({ components: [disabledRow] }).catch(() => {});
+      });
+
+      return;
     }
 
     if (subCommand === "invite") {
