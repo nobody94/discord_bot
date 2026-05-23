@@ -373,15 +373,19 @@ async function trunkHandler(args, message, inventory, invKey, userId) {
 
         setTimeout(async () => {
           // Kiểm tra lại HP lần cuối trước khi hành động
-          const currentHP = await getKey(renderKey("health", target.id));
+          const currentHP = await getKey(renderKey("health", target.id));          
 
           if (currentHP <= 0) {
+            const userBalance = await getBalance(target.id, "mora");
+            if (userBalance < revivalFee){
+              return message.channel.send(`🏥 **Bệnh viện:** <@${target.id}> đã hết thời gian hôn mê nhưng không có đủ **${revivalFee.toLocaleString()}** ${getIcon("mora")} để chi trả viện phí. \n> 💀 Người chơi này vẫn tiếp tục ở trạng thái gục ngã cho đến khi có người hồi sinh!`)
+            }
             // Thực hiện trừ tiền và set HP về 10
-            await removeMoney(target.id, -revivalFee, "mora");
+            await removeMoney(target.id, revivalFee, "mora");
             await setKey(renderKey("health", target.id), revivalHP);
 
             message.channel.send(
-              `🏥 **Bệnh viện:** <@${target.id}> đã hết thời gian hôn mê và trở nên tỉnh táp.\n💰 Phí cấp cứu: **${revivalFee.toLocaleString()}** ${getIcon("mora")} | ❤️ HP: **${revivalHP}**`,
+              `🏥 **Bệnh viện:** <@${target.id}> đã hết thời gian hôn mê và trở nên tỉnh táo.\n💰 Phí cấp cứu: **${revivalFee.toLocaleString()}** ${getIcon("mora")} | ❤️ HP: **${revivalHP}**`,
             );
           }
         }, newHealthInfo.muteTime);
