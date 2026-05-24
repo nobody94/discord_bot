@@ -529,15 +529,15 @@ async function trunkHandler(args, message, inventory, invKey, userId) {
     const hpKey = renderKey("health", target.id);
     let checkHP = (await getKey(hpKey)) ?? 100;
 
-    if (isSelf && hpKey <= 0) {
+    if (isSelf && checkHP <= 0) {
       return message.reply(`${errorIcon} | Bạn không thể tự hồi phục`);
     }
 
-    if (!isSelf && hpKey <= 0 && item.type != type.revive) {
+    if (!isSelf && checkHP <= 0 && item.type != type.revive) {
       return message.reply(
         `${errorIcon} | <@${target.id}> đang gục ngã cần được hồi sinh trước`,
       );
-    }
+    }    
 
     if (checkCooldown(message.author.id, "trunk_use", 30)) {
       return message

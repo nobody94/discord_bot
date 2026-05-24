@@ -109,7 +109,6 @@ const interactions = {
         images: [
             "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExc3h3dzhna2pveXdnZmM3OW1nemE5MjV1NWoweDRvOXhxOWcxb3JzMSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/MQVpBqASxSlFu/giphy.gif",
             "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExc3h3dzhna2pveXdnZmM3OW1nemE5MjV1NWoweDRvOXhxOWcxb3JzMSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/11rWoZNpAKw8w/giphy.gif",
-            "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExc3h3dzhna2pveXdnZmM3OW1nemE5MjV1NWoweDRvOXhxOWcxb3JzMSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/zkppEMFvRX5FC/giphy.gif",
             "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExc3h3dzhna2pveXdnZmM3OW1nemE5MjV1NWoweDRvOXhxOWcxb3JzMSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/QGc8RgRvMonFm/giphy.gif",
             "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExc3h3dzhna2pveXdnZmM3OW1nemE5MjV1NWoweDRvOXhxOWcxb3JzMSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/jR22gdcPiOLaE/giphy.gif",
             "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExc3h3dzhna2pveXdnZmM3OW1nemE5MjV1NWoweDRvOXhxOWcxb3JzMSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/FqBTvSNjNzeZG/giphy.gif",
