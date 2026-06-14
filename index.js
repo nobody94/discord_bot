@@ -14,6 +14,7 @@ const { db } = require("./utils/db");
 
 const { wordleProcess } = require("./game/wordleHandler");
 const { wordchainHandler } = require("./game/wordchainHandler");
+const { chatRankHandle } = require('./game/chatRankHandle');
 const { errorIcon } = require("./utils/icon");
 
 // const Token = process.env.BOT_TOKEN;
@@ -61,7 +62,7 @@ client.on("messageCreate", async (message) => {
   if (message.author.bot) return;
 
   const content = message.content.trim();
-  //xử lý admin
+  //xử lý admin game nem do
   const isAdmin = message.member?.permissions.has("Administrator");
 
   if (!message.content.startsWith(PREFIX) && isAdmin) {
@@ -128,6 +129,7 @@ client.on("messageCreate", async (message) => {
   //xử lý game
   await wordleProcess(message);
   await wordchainHandler(message);
+  await chatRankHandle(message);
 });
 
 // 🖱️ Xử lý Tương tác (Button, Modal, Select Menu, v.v.)

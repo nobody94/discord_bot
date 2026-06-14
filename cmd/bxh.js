@@ -10,8 +10,8 @@ module.exports = {
     async execute(message, args) {
         // 1. Kiểm tra Cooldown
         const cooldownTime = 60;
-        if (checkCooldown(message.author.id, this.name, cooldownTime)) {
-            const timeString = getCountdown(message.author.id, this.name, cooldownTime);
+        if (checkCooldown(message.author.id,'bxh' , cooldownTime)) {
+            const timeString = getCountdown(message.author.id, 'bxh', cooldownTime);
             return message.reply(`⏳ | Bạn đang thao tác quá nhanh! Thử lại sau **${timeString}**.`)
                 .then(msg => setTimeout(() => msg.delete().catch(() => null), 5000));
         }
