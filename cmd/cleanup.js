@@ -39,7 +39,7 @@ module.exports = {
         const currentMemberIds = new Set(members.keys());
 
         let deletedCount = 0;
-        const userDataTypes = ["inventory", "fishtank", "fish_inv", "daily", "rpg_user","mora",'primo'];
+        const userDataTypes = ["inventory", "fishtank", "fish_inv", "daily", "rpg_user","mora",'primo','trunk'];
 
         let newSavedUserIds = [];
         for (const userId of allSavedUserIds) {
@@ -82,6 +82,12 @@ module.exports = {
               const filterData = Object.fromEntries(Object.entries(snData).filter(([key,value])=> key !== userId));
               await setKey(snKey, filterData); 
             }
+
+            //rank
+            const xpKey = `xp_${guildId}_${userId}`;
+            const rankKey = `current_rank_${guildId}_${userId}`;
+            await deleteKey(xpKey);
+            await deleteKey(rankKey);
 
             deletedCount++;
           } else {
