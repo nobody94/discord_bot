@@ -212,15 +212,15 @@ module.exports = {
       // --- 4. QUAY SỐ (ADMIN/DEV - .xoso quay) ---
       else if (action === "quay") {
         if (!isAdmin){
-          return message.reply(`${errorIcon} | Bạn không có quyền quay số.`);
+          return message.reply(`${errorIcon} | Bạn không có quyền sử dụng lệnh này.`);
         }
         const allTickets = (await getKey(lotteryKey)) || [];
-        const userWinner = (await getKey(lastWinnerKey)) || [];
-        let lastWinner = [...userWinner];
-        if (allTickets.length === 0)
-          return message.reply("⚠️ Chưa có vé nào để quay.");
-
-        const currentJackpot = (await getKey(jackpotKey)) || 0; // Lấy số tiền hũ hiện tại
+        const lastWinner = (await getKey(lastWinnerKey)) || []; // Thay đổi: Dùng trực tiếp lastWinner
+        
+        if (allTickets.length === 0){
+           return message.reply("⚠️ Chưa có vé nào để quay.");
+        }
+         
         const statusMsg = await message.channel.send(
           "🎰 **CHUẨN BỊ QUAY THƯỞNG...** 🎰",
         );
@@ -250,8 +250,11 @@ module.exports = {
               const winNumRaw = Math.floor(Math.random() * 1000);
               winNum = winNumRaw.toString().padStart(3, "0");
             } else {
-              const filterAllTicket = [...allTickets].filter((t) => !userWinner.includes(t.userId));
-              const luckyTicket = filterAllTicket[Math.floor(Math.random() * allTickets.length)];
+              // Sửa lỗi: Đã đổi userWinner thành lastWinner chuẩn xác
+              const filterAllTicket = [...allTickets].filter((t) => !lastWinner.includes(t.userId));
+              // Trường hợp nếu tất cả người mua đều đã từng thắng trước đó, tránh filter ra mảng rỗng gây lỗi
+              const finalPool = filterAllTicket.length > 0 ? filterAllTicket : allTickets;
+              const luckyTicket = finalPool[Math.floor(Math.random() * finalPool.length)];
               winNum = luckyTicket.number;
             }
 
@@ -262,16 +265,20 @@ module.exports = {
               .setTitle("🎊 KẾT QUẢ XỔ SỐ CHÍNH THỨC 🎊")
               .setTimestamp();
 
+            let updatedLastWinner = [...lastWinner]; // Tạo mảng mới để update
+
             if (winners.length > 0) { 
               for (const w of winners){
-                if(lastWinner.filter((l)=> l == w.userId).length == 0){
-                  lastWinner.push(w.userId);
+                if(!updatedLastWinner.includes(w.userId)){
+                  updatedLastWinner.push(w.userId);
                 }                
               } 
-              lastWinner = lastWinner.slice(-3);
+              updatedLastWinner = updatedLastWinner.slice(-3); // Giữ tối đa 3 người gần nhất
+              
               const winnerMentions = [
                 ...new Set(winners.map((w) => `<@${w.userId}>`)),
               ].join(", ");
+              
               embed
                 .setColor(0x00ff00)
                 .setDescription(
@@ -289,7 +296,7 @@ module.exports = {
                 );
             }
             
-            await setKey(lastWinnerKey,lastWinner);
+            await setKey(lastWinnerKey, updatedLastWinner);
             await setKey(winNumKey, winNum);
             await statusMsg
               .edit({
