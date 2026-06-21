@@ -317,10 +317,12 @@ module.exports = {
 
         const allTickets = (await getKey(lotteryKey)) || [];
         const jackpot = (await getKey(jackpotKey)) || 0;
-        const winNum = await getKey(winNumKey);
+        const winNum = await getKey(winNumKey);        
 
-        if (!winNum)
+        if (!winNum){
           return message.reply("⚠️ Hãy quay số trước bằng lệnh `.xoso quay`.");
+        }
+          
 
         const winners = allTickets.filter((t) => t.number === winNum);
         if (winners.length === 0) {
@@ -342,14 +344,9 @@ module.exports = {
 
         const winnerMentions = winners.map((w) => `<@${w.userId}>`).join(", ");
 
-        for (const w of winners) {
-          userWinner.push(w.userId);
+        for (const w of winners) {          
           await addMoney(w.userId, prizePerPerson, currencyType);
-        }
-
-        if (userWinner.length > 3) {
-          userWinner.shift();
-        }
+        }       
 
         await addMoney(bankId, tax, currencyType);
 
