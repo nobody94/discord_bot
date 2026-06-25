@@ -16,12 +16,12 @@ async function wordchainProcess(message, wordchain) {
 
   // 2. Kiểm tra người chơi lặp lại
   // Phải kiểm tra cái này TRƯỚC khi gọi gameProcess để chặn đứng Race Condition
-  if (await wordchain.isRepeatPlayer(guildId, userId)) {
-    return message.reply({
-      content: "⚠️ Bạn vừa mới trả lời rồi, hãy đợi người khác nối tiếp nhé!",
-      allowedMentions: { repliedUser: false },
-    });
-  }
+  // if (await wordchain.isRepeatPlayer(guildId, userId)) {
+  //   return message.reply({
+  //     content: "⚠️ Bạn vừa mới trả lời rồi, hãy đợi người khác nối tiếp nhé!",
+  //     allowedMentions: { repliedUser: false },
+  //   });
+  // }
 
   // 3. BÂY GIỜ MỚI KHAI BÁO 'result'
   const result = await wordchain.gameProcess(guildId, content);
