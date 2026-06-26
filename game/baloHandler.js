@@ -388,53 +388,7 @@ async function baloHandler(args, message, inventory, invKey, userId) {
       content: response,
       allowedMentions: { repliedUser: false },
     });
-  }
-
-  // --- LOGIC CẤT ĐỒ VÀO TỦ (CAT) ---
-  if (args[0] === "cat") {
-    const subAction = args[1];
-    const tudoKey = renderKey("tudo", userId);
-    let tudoInv = (await getKey(tudoKey)) || [];
-
-    if (subAction === "all") {
-      const key = args[2];
-      if (!key)
-        return message.reply(
-          `${errorIcon} | Nhập tiền tố ID (VD: \`.balo cat all char\`)`,
-        );
-      const itemsToMove = inventory.filter((id) => id.startsWith(key));
-      if (itemsToMove.length === 0)
-        return message.reply(
-          `${errorIcon} | Không tìm thấy vật phẩm nào bắt đầu bằng **${key}**.`,
-        );
-
-      itemsToMove.forEach((itemId) => {
-        inventory.splice(inventory.indexOf(itemId), 1);
-        tudoInv.push(itemId);
-      });
-      await setKey(invKey, inventory);
-      await setKey(tudoKey, tudoInv);
-      return message.reply(
-        `${verifyIcon} | Đã cất **${itemsToMove.length}** món vào tủ đồ.`,
-      );
-    } else {
-      const itemId = subAction;
-      const amount = parseInt(args[2]) || 1;
-      const count = inventory.filter((id) => id === itemId).length;
-      if (count < amount)
-        return message.reply(`${errorIcon} | Bạn không đủ vật phẩm.`);
-
-      for (let i = 0; i < amount; i++) {
-        inventory.splice(inventory.indexOf(itemId), 1);
-        tudoInv.push(itemId);
-      }
-      await setKey(invKey, inventory);
-      await setKey(tudoKey, tudoInv);
-      return message.reply(
-        `${verifyIcon} | Đã cất **${amount}x ${itemId}** vào tủ đồ.`,
-      );
-    }
-  }
+  }  
 }
 
 module.exports = { baloHandler };

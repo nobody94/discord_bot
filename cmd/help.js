@@ -19,14 +19,7 @@ module.exports = {
         color: "#FF5733", // Màu cam đỏ (Action/Combat)
         commands:
           "• slots, slot, sl: Máy đánh bạc\n• taixiu, tx: Chơi tài xỉu\n• baucua, bc: Chơi bầu cua \n• caoveso, scratch,sc: cào vé số\n• duathu, race: đua thú\n• hint, wc, ws: Dùng để search từ trong kênh nối từ Tiếng Việt/Tiếng Anh(Mỗi ngày được 5 lượt)\n• restart: restart game kênh nối từ\n• fishshop, fs: cửa hàng bán đồ câu cá\n• tuica, inv: xem đồ nghề câu cá\n• cauca, fish, cc: câu cá\n• beca, tank: xem bể cá\n• suacan, repair: sửa cần câu",
-      },
-      nemdo: {
-        label: "Ném đồ",
-        emoji: "⚔️",
-        color: "#717D7E", // Màu cam đỏ (Action/Combat)
-        commands:
-          "• choden, cd, bmk, blackmarket: Nơi bán vật phẩm gây sát thương và hồi máu\n• bmk buy:mua đồ\n• battle join: tham gia\n• battle out: rời khỏi\n• battle list: xem danh sách\n• battle invite: mời tham gia\n• health,sk,hp: check trạng thái sức khỏe\n• trunk,kho: xem vật phẩm trong kho\n• trunk give:tặng đồ\n• trunk sell: bán đồ\n• trunk throw, trunk nem: ném đồ\n• trunk use: sử dụng vật phẩm hồi máu hoặc hồi sinh đồng đội",
-      },
+      },     
       currency: {
         label: "Tiền tệ",
         emoji: "💵",
@@ -53,7 +46,7 @@ module.exports = {
         emoji: "⚙️",
         color: "#d4558a",
         commands:
-          "• setwordchain vi/en: Cài đặt nối chữ\n• setwordle: Cài đặt Vua Tiếng Việt\n• setbirthday, setsinhnhat: lưu sinh nhật của user\n• checkbirthday, xemsinhnhat, birthdaylist: xem danh sách sinh nhật trong tháng hoặc của user\n• hpbd, sinhnhat: gửi lời chúc sinh nhật\n• lixi, phatloc: lì xì cho toàn bộ thành viên trong server\n• salary: phát lương cho qtv hoặc theo role\n• reward: phát thưởng voice/ chat tuần\n• money add/remove/rm: thêm, trừ tiền\n• lp/lovepoint add/remove/rm: thêm trừ điểm cặp đôi\n• checkvay all: kiểm tra tất cả các khoản vay trong sv\n• eptra: bắt trả nợ",
+          "• wordchain vi/en: Cài đặt nối chữ\n• setwordle: Cài đặt Vua Tiếng Việt\n• birthday set: lưu sinh nhật của user\n• birthday check: xem danh sách sinh nhật trong tháng hoặc của user\n• hpbd, sinhnhat: gửi lời chúc sinh nhật\n• lixi, phatloc: lì xì cho toàn bộ thành viên trong server\n• salary: phát lương cho qtv hoặc theo role\n• reward: phát thưởng voice/ chat tuần\n• money add/remove/rm: thêm, trừ tiền\n• lp/lovepoint add/remove/rm: thêm trừ điểm cặp đôi\n• checkvay all: kiểm tra tất cả các khoản vay trong sv\n• eptra: bắt trả nợ",
       },
     };
 

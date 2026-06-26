@@ -4,7 +4,7 @@ const { checkCooldown } = require('../utils/cooldown');
 const { EmbedBuilder } = require('discord.js');
 const { RANKS,getRankByXp } = require('../utils/rank.js');
 
-const LEVEL_UP_CHANNEL_ID = "1449207210503835771";
+const LEVEL_UP_CHANNEL_ID = "1519752538033754122";
 
 async function chatRankHandle(message) {
     if (!message.guild || message.author.bot) return;

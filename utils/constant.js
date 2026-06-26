@@ -6,7 +6,7 @@ const MAX_LOVE_POINTS_PER_DAY = 500;
 //số tiền đổi từ primo ra mora
 const exchangeRate = 10000;
 //id kênh báo cáo
-const ADMIN_CHANNEL_ID = '1447195483637420165';
+const ADMIN_CHANNEL_ID = '1519704857752109137';
 
 function getCustomDate() {
    const vnTime = new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Ho_Chi_Minh"}));
