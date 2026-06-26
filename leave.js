@@ -7,7 +7,7 @@ const client = new Client({
 });
 
 
-const TOKEN = process.env.BOT_TOKEN; 
+const TOKEN = process.env.BOT_TEST_TOKEN; 
 
 client.once('ready', async () => {
     console.log(`🤖 Đã đăng nhập dưới tên: ${client.user.tag}`);
@@ -30,8 +30,10 @@ client.once('ready', async () => {
             try {
                 // Fetch chi tiết server để lấy tên chính xác
                 const guild = await oauth2Guild.fetch();
-                await guild.leave();
-                console.log(`✅ Đã rời khỏi server: ${guild.name} (${id})`);
+                if(guild.id != '1448210753793294340'){
+                    await guild.leave();
+                    console.log(`✅ Đã rời khỏi server: ${guild.name} (${id})`);
+                }                
             } catch (err) {
                 console.error(`❌ Không thể rời server ID ${id}:`, err.message);
             }

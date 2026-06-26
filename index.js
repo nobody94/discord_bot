@@ -61,37 +61,7 @@ client.on("messageCreate", async (message) => {
   if (!message) return;
   if (message.author.bot) return;
 
-  const content = message.content.trim();
-  //xử lý admin game nem do
-  const isAdmin = message.member?.permissions.has("Administrator");
-
-  if (!message.content.startsWith(PREFIX) && isAdmin) {
-    const { getKey, renderKey } = require("./utils/db");
-    const { getHealthStatus } = require("./utils/health");
-
-    const userId = message.author.id;
-
-    const hpKey = renderKey("health", userId);
-    const hp = (await getKey(hpKey)) ?? 100;
-
-    if (hp <= 80) {
-      const health = getHealthStatus(hp);
-      const images = [
-        "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3MzdiZnNreWZmenZzaW5sNTByYjd6ZmkxMzd5anRodXVrMDNvM2p2bCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/GzpfQyP0Et07u1b9nJ/giphy.gif",
-        "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3MzdiZnNreWZmenZzaW5sNTByYjd6ZmkxMzd5anRodXVrMDNvM2p2bCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/LluBvfACrV1BQNukWm/giphy.gif",
-        "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3czR3ZG1qNGg3cXprbGljbDMxajJ1OGlrYnk2ejk0c2JsaHlyZjZ2eiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/o0jmYOBG4KMfnXPlJX/giphy.gif",
-      ];
-      const gifUrl = images[Math.floor(Math.random() * images.length)];
-      const embed = new EmbedBuilder()
-        .setTitle(`${message.author.username} đã bị tổn thương`)
-        .setColor("#8B8000")
-        .setDescription(
-          `Thưa sếp, sếp đang bị ${health.status}, lo mà đi hồi máu đi thay vì đứng đây nói nhảm!`,
-        )
-        .setImage(gifUrl);
-      return message.reply({ embeds: [embed] });
-    }
-  }
+  const content = message.content.trim(); 
 
   //xử lý lệnh
   if (content.startsWith(PREFIX)) {
