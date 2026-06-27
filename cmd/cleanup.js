@@ -17,7 +17,7 @@ module.exports = {
       const msg = await message.reply("🔄 Đang quét thành viên hiện tại để tạo danh sách an toàn...");
       try {
         const members = await message.guild.members.fetch();
-        const currentIds = Array.from(members.keys());
+        const currentIds = Array.from(members.filter(member => !member.user.bot).keys());
 
         await setKey("all_users", currentIds);
         return msg.edit(`✅ Đã lưu **${currentIds.length}** ID vào danh sách \`all_users\`. Từ nay bạn có thể dùng \`.cleanup run\`.`);
