@@ -36,7 +36,8 @@ async function startDeepClean() {
     console.log(`🔍 Đang đối chiếu ${allDocs.length} bản ghi với ${safeIds.size} người dùng an toàn...`);
 
     let trashCount = 0;
-    const userDataTypes = ["mora", "inventory", "fishtank", "fish_inv", "daily", "rpg_user", 'primo'];
+    const userDataTypes = ["inventory", "fishtank", "fish_inv", "daily", "rpg_user","mora",'primo','trunk'];
+    // const guildKey = ['birthday','couple','bienban'];    
 
     // 3. Duyệt và xóa rác trực tiếp trên Atlas
     for (const doc of allDocs) {
@@ -60,6 +61,18 @@ async function startDeepClean() {
                 }
             }
         }
+
+        // const isGuildData = guildKey.some(type => key.includes(`nobody_bot_${type}_${guildId}`));
+        
+        // if(isGuildData){
+        //     try {
+        //         process.stdout.write(`🗑️  Đang xóa: ${key}... `);
+        //         await deleteKey(key); 
+        //         console.log("Xong!");
+        //     } catch (e) {
+        //         console.log(`Lỗi: ${e.message}`);
+        //     }
+        // }
 
         const userId = key.split('_').pop();
         if (!safeIds.has(userId)) {
@@ -101,8 +114,6 @@ async function startDeepClean() {
                 console.log(`Đã xóa thông tin sn của user ${userId}`);
             }
         }
-
-
     }
 
     console.log(`\n✨ TỔNG KẾT: Đã dọn sạch ${trashCount} bản ghi rác cũ.`);
