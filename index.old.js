@@ -14,9 +14,13 @@ const { db } = require("./utils/db");
 
 const { wordleProcess } = require("./game/wordleHandler");
 const { wordchainHandler } = require("./game/wordchainHandler");
+const { chatRankHandle } = require('./game/chatRankHandle');
 const { errorIcon } = require("./utils/icon");
 
-const Token = process.env.BOT_TOKEN;
+// const Token = process.env.BOT_TOKEN;
+const Token = process.env.BOT_TEST_TOKEN;
+//node version 20.19.0
+//npm version 11.8.0
 
 const PREFIX = ".";
 const client = new Client({
@@ -125,6 +129,7 @@ client.on("messageCreate", async (message) => {
   //xử lý game
   await wordleProcess(message);
   await wordchainHandler(message);
+  // await chatRankHandle(message);
 });
 
 // 🖱️ Xử lý Tương tác (Button, Modal, Select Menu, v.v.)
