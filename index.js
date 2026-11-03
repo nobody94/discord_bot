@@ -99,7 +99,7 @@ client.on("messageCreate", async (message) => {
   //xử lý game
   await wordleProcess(message);
   await wordchainHandler(message);
-  await chatRankHandle(message);
+  //await chatRankHandle(message);
 });
 
 // 🖱️ Xử lý Tương tác (Button, Modal, Select Menu, v.v.)

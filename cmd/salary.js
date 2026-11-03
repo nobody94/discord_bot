@@ -65,7 +65,7 @@ module.exports = {
     
     // 3. THỰC HIỆN PHÁT LƯƠNG
     let resultMessage = `## 💸 BẢNG LƯƠNG HỆ THỐNG 💸\n\n`;
-    const statusMsg = await message.channel.send("🔄 Đang xử lý giao dịch...");
+    statusMsg = await message.channel.send("🔄 Đang xử lý giao dịch...");
 
     for (const item of listToPay) {
       try {
